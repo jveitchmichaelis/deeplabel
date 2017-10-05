@@ -1,0 +1,1 @@
+Deeplabel is a tool for bounding box annotation. It is specifically aimed at pain-free labelling of images with many instances per image.
