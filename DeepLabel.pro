@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -22,15 +22,26 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-INCLUDEPATH += "$$_PRO_FILE_PWD_/3rd_party/opencv/include"
-LIBS += -L"$$_PRO_FILE_PWD_/3rd_party/opencv/lib"
+win32{
+    INCLUDEPATH += "$$_PRO_FILE_PWD_/3rd_party/opencv/include"
+    LIBS += -L"$$_PRO_FILE_PWD_/3rd_party/opencv/lib"
+}
+
+mac|unix{
+    CONFIG += link_pkgconfig
+    PKGCONFIG += opencv
+}
 
 CONFIG(debug, debug|release) {
     message("Debug mode")
-    LIBS += -lopencv_ximgproc310d -lopencv_core310d -lopencv_highgui310d -lopencv_calib3d310d -lopencv_videoio310d -lopencv_imgproc310d -lopencv_imgcodecs310d -lopencv_cudastereo310d -lopencv_cudawarping310d
+    win32{
+    LIBS += -lopencv_ximgproc310d -lopencv_core310d -lopencv_highgui310d -lopencv_calib3d310d -lopencv_imgproc310d -lopencv_imgcodecs310d
+    }
 }else {
     message("Release mode")
-    LIBS += -lopencv_ximgproc310 -lopencv_core310 -lopencv_highgui310 -lopencv_calib3d310 -lopencv_videoio310 -lopencv_imgproc310 -lopencv_imgcodecs310 -lopencv_cudastereo310 -lopencv_cudawarping310
+    win32{
+    LIBS += -lopencv_ximgproc310 -lopencv_core310 -lopencv_highgui310 -lopencv_calib3d310 -lopencv_imgproc310 -lopencv_imgcodecs310
+    }
 }
 
 # For building in a single folder
@@ -44,18 +55,22 @@ CONFIG(debug, debug|release) {
     MOC_DIR     = .moc
 }
 
+INCLUDEPATH += "$$_PRO_FILE_PWD_/src"
 VPATH = "$$_PRO_FILE_PWD_/src"
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    src/labelproject.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    src/labelproject.h
 
 FORMS += \
         mainwindow.ui
 
+# Deploy apps in OS X and Windows
 isEmpty(TARGET_EXT) {
     win32 {
         TARGET_CUSTOM_EXT = .exe
@@ -86,4 +101,4 @@ CONFIG( debug, debug|release ) {
 #  warning($${DEPLOY_COMMAND} $${DEPLOY_TARGET})
 
 # Use += instead of = if you use multiple QMAKE_POST_LINKs
-QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET}
+#QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET}

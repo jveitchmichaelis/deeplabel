@@ -2,6 +2,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QFileDialog>
+#include <QStandardPaths>
+#include <labelproject.h>
 
 namespace Ui {
 class MainWindow;
@@ -17,6 +20,11 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    LabelProject *project;
+
+private slots:
+    void openProject(void);
+    void newProject(void);
 };
 
 #endif // MAINWINDOW_H
