@@ -24,8 +24,12 @@ bool LabelProject::loadDatabase(QString fileName)
                         "Click Cancel to exit."), QMessageBox::Cancel);
         return false;
     }
+    else if ( QDir(fileName).exists() ){
+        return checkDatabase();
+    }else{
+        return true;
+    }
 
-    return checkDatabase();
 }
 
 bool LabelProject::checkDatabase(){
@@ -57,7 +61,7 @@ bool LabelProject::checkDatabase(){
     if(!class_record.contains("class_id")) return false;
     if(!class_record.contains("class_name")) return false;
 
-    return false;
+    return true;
 }
 
 bool LabelProject::createDatabase(QString fileName)

@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::openProject()
 {
-    QString openDir = QStandardPaths::displayName(QStandardPaths::DesktopLocation);
+    QString openDir = QDir::homePath();
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Project"),
                                                     openDir,
                                                     tr("Label database (*.lbldb)"));
@@ -29,7 +29,7 @@ void MainWindow::openProject()
 
 void MainWindow::newProject()
 {
-    QString openDir = QStandardPaths::displayName(QStandardPaths::DesktopLocation);
+    QString openDir = QDir::homePath();
     QString fileName = QFileDialog::getSaveFileName(this, tr("New Project"),
                                                     openDir,
                                                     tr("Label database (*.lbldb)"));

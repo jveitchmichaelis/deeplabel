@@ -207,7 +207,6 @@ DIST          = /Users/Josh/Qt/5.9/clang_64/mkspecs/features/spec_pre.prf \
 		/Users/Josh/Qt/5.9/clang_64/mkspecs/features/qt_config.prf \
 		/Users/Josh/Qt/5.9/clang_64/mkspecs/macx-clang/qmake.conf \
 		/Users/Josh/Qt/5.9/clang_64/mkspecs/features/spec_post.prf \
-		../../../.qmake.stash \
 		/Users/Josh/Qt/5.9/clang_64/mkspecs/features/exclusive_builds.prf \
 		/Users/Josh/Qt/5.9/clang_64/mkspecs/features/mac/sdk.prf \
 		/Users/Josh/Qt/5.9/clang_64/mkspecs/features/toolchain.prf \
@@ -403,7 +402,6 @@ Makefile: ../../DeepLabel.pro /Users/Josh/Qt/5.9/clang_64/mkspecs/macx-clang/qma
 		/Users/Josh/Qt/5.9/clang_64/mkspecs/features/qt_config.prf \
 		/Users/Josh/Qt/5.9/clang_64/mkspecs/macx-clang/qmake.conf \
 		/Users/Josh/Qt/5.9/clang_64/mkspecs/features/spec_post.prf \
-		../.qmake.stash \
 		/Users/Josh/Qt/5.9/clang_64/mkspecs/features/exclusive_builds.prf \
 		/Users/Josh/Qt/5.9/clang_64/mkspecs/features/mac/sdk.prf \
 		/Users/Josh/Qt/5.9/clang_64/mkspecs/features/toolchain.prf \
@@ -584,7 +582,6 @@ Makefile: ../../DeepLabel.pro /Users/Josh/Qt/5.9/clang_64/mkspecs/macx-clang/qma
 /Users/Josh/Qt/5.9/clang_64/mkspecs/features/qt_config.prf:
 /Users/Josh/Qt/5.9/clang_64/mkspecs/macx-clang/qmake.conf:
 /Users/Josh/Qt/5.9/clang_64/mkspecs/features/spec_post.prf:
-../.qmake.stash:
 /Users/Josh/Qt/5.9/clang_64/mkspecs/features/exclusive_builds.prf:
 /Users/Josh/Qt/5.9/clang_64/mkspecs/features/mac/sdk.prf:
 /Users/Josh/Qt/5.9/clang_64/mkspecs/features/toolchain.prf:
@@ -694,23 +691,39 @@ compiler_moc_header_clean:
 		/Users/Josh/Qt/5.9/clang_64/lib/QtCore.framework/Headers/qobject.h \
 		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/QSqlDatabase \
 		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/qsqldatabase.h \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/QSqlQuery \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/qsqlquery.h \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/QSqlRecord \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/qsqlrecord.h \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/QSqlError \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/qsqlerror.h \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtCore.framework/Headers/QDebug \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtCore.framework/Headers/qdebug.h \
 		/Users/Josh/Qt/5.9/clang_64/lib/QtWidgets.framework/Headers/QMessageBox \
 		/Users/Josh/Qt/5.9/clang_64/lib/QtWidgets.framework/Headers/qmessagebox.h \
 		../../src/mainwindow.h \
 		.moc_debug/moc_predefs.h \
 		/Users/Josh/Qt/5.9/clang_64/bin/moc
-	/Users/Josh/Qt/5.9/clang_64/bin/moc $(DEFINES) --include .moc_debug/moc_predefs.h -I/Users/Josh/Qt/5.9/clang_64/mkspecs/macx-clang -I/Users/Josh/Dropbox/Code/deeplabel -I/Users/Josh/Dropbox/Code/deeplabel/src -I/usr/local/Cellar/opencv/3.3.0_3/include/opencv -I/usr/local/Cellar/opencv/3.3.0_3/include -I/Users/Josh/Qt/5.9/clang_64/lib/QtWidgets.framework/Headers -I/Users/Josh/Qt/5.9/clang_64/lib/QtGui.framework/Headers -I/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers -I/Users/Josh/Qt/5.9/clang_64/lib/QtCore.framework/Headers -I. -I'C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\INCLUDE' -I'C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\ATLMFC\INCLUDE' -I'C:\Program Files (x86)\Windows Kits\10\include\10.0.15063.0\ucrt' -I'C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\include\um' -I'C:\Program Files (x86)\Windows Kits\10\include\10.0.15063.0\shared' -I'C:\Program Files (x86)\Windows Kits\10\include\10.0.15063.0\um' -I'C:\Program Files (x86)\Windows Kits\10\include\10.0.15063.0\winrt' -F/Users/Josh/Qt/5.9/clang_64/lib ../../src/mainwindow.h -o .moc_debug/moc_mainwindow.cpp
+	/Users/Josh/Qt/5.9/clang_64/bin/moc $(DEFINES) --include .moc_debug/moc_predefs.h -I/Users/Josh/Qt/5.9/clang_64/mkspecs/macx-clang -I/Users/Josh/Dropbox/Code/deeplabel -I/Users/Josh/Dropbox/Code/deeplabel/src -I/usr/local/Cellar/opencv/3.3.0_3/include/opencv -I/usr/local/Cellar/opencv/3.3.0_3/include -I/Users/Josh/Qt/5.9/clang_64/lib/QtWidgets.framework/Headers -I/Users/Josh/Qt/5.9/clang_64/lib/QtGui.framework/Headers -I/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers -I/Users/Josh/Qt/5.9/clang_64/lib/QtCore.framework/Headers -I. -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.0.0/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/usr/include -F/Users/Josh/Qt/5.9/clang_64/lib ../../src/mainwindow.h -o .moc_debug/moc_mainwindow.cpp
 
 .moc_debug/moc_labelproject.cpp: /Users/Josh/Qt/5.9/clang_64/lib/QtCore.framework/Headers/QObject \
 		/Users/Josh/Qt/5.9/clang_64/lib/QtCore.framework/Headers/qobject.h \
 		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/QSqlDatabase \
 		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/qsqldatabase.h \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/QSqlQuery \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/qsqlquery.h \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/QSqlRecord \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/qsqlrecord.h \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/QSqlError \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/qsqlerror.h \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtCore.framework/Headers/QDebug \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtCore.framework/Headers/qdebug.h \
 		/Users/Josh/Qt/5.9/clang_64/lib/QtWidgets.framework/Headers/QMessageBox \
 		/Users/Josh/Qt/5.9/clang_64/lib/QtWidgets.framework/Headers/qmessagebox.h \
 		../../src/labelproject.h \
 		.moc_debug/moc_predefs.h \
 		/Users/Josh/Qt/5.9/clang_64/bin/moc
-	/Users/Josh/Qt/5.9/clang_64/bin/moc $(DEFINES) --include .moc_debug/moc_predefs.h -I/Users/Josh/Qt/5.9/clang_64/mkspecs/macx-clang -I/Users/Josh/Dropbox/Code/deeplabel -I/Users/Josh/Dropbox/Code/deeplabel/src -I/usr/local/Cellar/opencv/3.3.0_3/include/opencv -I/usr/local/Cellar/opencv/3.3.0_3/include -I/Users/Josh/Qt/5.9/clang_64/lib/QtWidgets.framework/Headers -I/Users/Josh/Qt/5.9/clang_64/lib/QtGui.framework/Headers -I/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers -I/Users/Josh/Qt/5.9/clang_64/lib/QtCore.framework/Headers -I. -I'C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\INCLUDE' -I'C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\ATLMFC\INCLUDE' -I'C:\Program Files (x86)\Windows Kits\10\include\10.0.15063.0\ucrt' -I'C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\include\um' -I'C:\Program Files (x86)\Windows Kits\10\include\10.0.15063.0\shared' -I'C:\Program Files (x86)\Windows Kits\10\include\10.0.15063.0\um' -I'C:\Program Files (x86)\Windows Kits\10\include\10.0.15063.0\winrt' -F/Users/Josh/Qt/5.9/clang_64/lib ../../src/labelproject.h -o .moc_debug/moc_labelproject.cpp
+	/Users/Josh/Qt/5.9/clang_64/bin/moc $(DEFINES) --include .moc_debug/moc_predefs.h -I/Users/Josh/Qt/5.9/clang_64/mkspecs/macx-clang -I/Users/Josh/Dropbox/Code/deeplabel -I/Users/Josh/Dropbox/Code/deeplabel/src -I/usr/local/Cellar/opencv/3.3.0_3/include/opencv -I/usr/local/Cellar/opencv/3.3.0_3/include -I/Users/Josh/Qt/5.9/clang_64/lib/QtWidgets.framework/Headers -I/Users/Josh/Qt/5.9/clang_64/lib/QtGui.framework/Headers -I/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers -I/Users/Josh/Qt/5.9/clang_64/lib/QtCore.framework/Headers -I. -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.0.0/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/usr/include -F/Users/Josh/Qt/5.9/clang_64/lib ../../src/labelproject.h -o .moc_debug/moc_labelproject.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
@@ -745,6 +758,14 @@ compiler_clean: compiler_moc_predefs_clean compiler_moc_header_clean compiler_ui
 		/Users/Josh/Qt/5.9/clang_64/lib/QtCore.framework/Headers/qobject.h \
 		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/QSqlDatabase \
 		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/qsqldatabase.h \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/QSqlQuery \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/qsqlquery.h \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/QSqlRecord \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/qsqlrecord.h \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/QSqlError \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/qsqlerror.h \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtCore.framework/Headers/QDebug \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtCore.framework/Headers/qdebug.h \
 		/Users/Josh/Qt/5.9/clang_64/lib/QtWidgets.framework/Headers/QMessageBox \
 		/Users/Josh/Qt/5.9/clang_64/lib/QtWidgets.framework/Headers/qmessagebox.h \
 		/Users/Josh/Qt/5.9/clang_64/lib/QtWidgets.framework/Headers/QApplication \
@@ -763,6 +784,14 @@ compiler_clean: compiler_moc_predefs_clean compiler_moc_header_clean compiler_ui
 		/Users/Josh/Qt/5.9/clang_64/lib/QtCore.framework/Headers/qobject.h \
 		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/QSqlDatabase \
 		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/qsqldatabase.h \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/QSqlQuery \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/qsqlquery.h \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/QSqlRecord \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/qsqlrecord.h \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/QSqlError \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/qsqlerror.h \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtCore.framework/Headers/QDebug \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtCore.framework/Headers/qdebug.h \
 		/Users/Josh/Qt/5.9/clang_64/lib/QtWidgets.framework/Headers/QMessageBox \
 		/Users/Josh/Qt/5.9/clang_64/lib/QtWidgets.framework/Headers/qmessagebox.h \
 		ui_mainwindow.h
@@ -773,6 +802,14 @@ compiler_clean: compiler_moc_predefs_clean compiler_moc_header_clean compiler_ui
 		/Users/Josh/Qt/5.9/clang_64/lib/QtCore.framework/Headers/qobject.h \
 		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/QSqlDatabase \
 		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/qsqldatabase.h \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/QSqlQuery \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/qsqlquery.h \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/QSqlRecord \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/qsqlrecord.h \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/QSqlError \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtSql.framework/Headers/qsqlerror.h \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtCore.framework/Headers/QDebug \
+		/Users/Josh/Qt/5.9/clang_64/lib/QtCore.framework/Headers/qdebug.h \
 		/Users/Josh/Qt/5.9/clang_64/lib/QtWidgets.framework/Headers/QMessageBox \
 		/Users/Josh/Qt/5.9/clang_64/lib/QtWidgets.framework/Headers/qmessagebox.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o .obj_debug/labelproject.o ../../src/labelproject.cpp

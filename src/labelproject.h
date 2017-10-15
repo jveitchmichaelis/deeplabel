@@ -2,6 +2,7 @@
 #define LABELPROJECT_H
 
 #include <QObject>
+#include <QDir>
 
 #include <QSqlDatabase>
 #include <QSqlQuery>
