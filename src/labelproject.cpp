@@ -247,19 +247,20 @@ bool LabelProject::removeLabel(QString fileName, BoundingBox bbox){
     int image_id = getImageId(fileName);
     int class_id = getClassId(bbox.classname);
 
-    bool res;
+    bool res = false;
 
     if(image_id > 0 && class_id > 0){
         QSqlQuery query(db);
 
-        query.prepare("DELETE FROM labels WHERE (image_id = ?, class_id = ?"
-                      "x = ?, y = ?, width = ?, height = ?)");
-        query.bindValue(0, image_id);
-        query.bindValue(0, class_id);
-        query.bindValue(0, bbox.rect.x());
-        query.bindValue(0, bbox.rect.y());
-        query.bindValue(0, bbox.rect.width());
-        query.bindValue(0, bbox.rect.height());
+        query.prepare("DELETE FROM labels WHERE (image_id = :image_id AND class_id = :class_id"
+                      " AND x = :x AND y = :y AND width = :width AND height = :height)");
+        query.bindValue(":image_id", image_id);
+        query.bindValue(":class_id", class_id);
+        query.bindValue(":x", bbox.rect.x());
+        query.bindValue(":y", bbox.rect.y());
+        query.bindValue(":width", bbox.rect.width());
+        query.bindValue(":height", bbox.rect.height());
+
         res = query.exec();
 
         if(!res){

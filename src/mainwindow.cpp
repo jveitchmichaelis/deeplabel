@@ -24,8 +24,24 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->scrollAreaWidgetContents->layout()->addWidget(currentImage);
     connect(this, SIGNAL(selectedClass(QString)), currentImage, SLOT(setClassname(QString)));
     connect(currentImage, SIGNAL(newLabel(BoundingBox)), this, SLOT(addLabel(BoundingBox)));
+    connect(currentImage, SIGNAL(removeLabel(BoundingBox)), this, SLOT(removeLabel(BoundingBox)));
+
+    connect(ui->actionDraw_Tool, SIGNAL(triggered(bool)), currentImage, SLOT(setDrawMode()));
+    connect(ui->actionSelect_Tool, SIGNAL(triggered(bool)), currentImage, SLOT(setSelectMode()));
+    connect(ui->actionDraw_Tool, SIGNAL(triggered(bool)), this, SLOT(setDrawMode()));
+    connect(ui->actionSelect_Tool, SIGNAL(triggered(bool)), this, SLOT(setSelectMode()));
 
     project = new LabelProject(this);
+}
+
+void MainWindow::setDrawMode(){
+    ui->actionDraw_Tool->setChecked(true);
+    ui->actionSelect_Tool->setChecked(false);
+}
+
+void MainWindow::setSelectMode(){
+    ui->actionDraw_Tool->setChecked(false);
+    ui->actionSelect_Tool->setChecked(true);
 }
 
 void MainWindow::openProject()
@@ -73,6 +89,14 @@ void MainWindow::addClass(){
 
 void MainWindow::addLabel(BoundingBox bbox){
     project->addLabel(current_imagepath, bbox);
+}
+
+void MainWindow::removeLabel(BoundingBox bbox){
+    project->removeLabel(current_imagepath, bbox);
+
+    QList<BoundingBox> bboxes;
+    project->getLabels(current_imagepath, bboxes);
+    currentImage->setBoundingBoxes(bboxes);
 }
 
 void MainWindow::initDisplay(){

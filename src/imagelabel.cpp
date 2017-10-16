@@ -14,13 +14,23 @@ ImageLabel::ImageLabel(QWidget *parent) :
 
 }
 
+void ImageLabel::setDrawMode(){
+    current_mode = MODE_DRAW;
+    rubberBand->setGeometry(QRect(bbox_origin, QSize()));
+    rubberBand->show();
+}
+
+void ImageLabel::setSelectMode(){
+    current_mode = MODE_SELECT;
+    rubberBand->hide();
+}
+
 void ImageLabel::setPixmap ( const QPixmap & p)
 {
     bboxes.clear();
-
     base_pixmap = p;
-    pix = base_pixmap;
-    QLabel::setPixmap(scaledPixmap());
+
+    drawBoundingBoxes();
 }
 
 int ImageLabel::heightForWidth( int width ) const
@@ -36,31 +46,41 @@ QSize ImageLabel::sizeHint() const
 
 QPixmap ImageLabel::scaledPixmap()
 {
+    scaled_pixmap = pix.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
-    auto rescaled = pix.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-
-    scaled_width = (int) rescaled.width();
-    scaled_height = (int) rescaled.height();
+    scaled_width = (int) scaled_pixmap.width();
+    scaled_height = (int) scaled_pixmap.height();
 
     scale_x = (float) scaled_height/pix.height();
     scale_y = (float) scaled_width/pix.width();
 
-    return rescaled;
+    return scaled_pixmap;
 }
 
 void ImageLabel::resizeEvent(QResizeEvent * e)
 {
-    if(!pix.isNull())
-        QLabel::setPixmap(scaledPixmap());
+    if(!pix.isNull()){
+        drawBoundingBoxes();
+    }else{
+        e->ignore();
+    }
 }
 
 void ImageLabel::mousePressEvent(QMouseEvent *ev){
 
     if(pix.isNull()) return;
 
-    if(ev->button() == Qt::RightButton){
+    if(current_mode == MODE_SELECT && ev->button() == Qt::LeftButton){
 
-    }else if(ev->button() == Qt::LeftButton){
+        QPoint image_location = ev->pos();
+
+        image_location.setX(image_location.x() / scale_x);
+        image_location.setY(image_location.y() / scale_y);
+
+        drawBoundingBoxes(image_location);
+    }
+
+    if(current_mode == MODE_DRAW && ev->button() == Qt::LeftButton){
         if(bbox_state == WAIT_START){
 
             bbox_origin = ev->pos();
@@ -80,7 +100,7 @@ void ImageLabel::mouseMoveEvent(QMouseEvent *ev){
 
     if(pix.isNull()) return;
 
-    if(bbox_state == DRAWING_BBOX){
+    if(bbox_state == DRAWING_BBOX && current_mode == MODE_DRAW){
 
         QRect bbox = QRect(bbox_origin, ev->pos()).normalized();
 
@@ -93,26 +113,27 @@ void ImageLabel::mouseMoveEvent(QMouseEvent *ev){
         }
 
         rubberBand->setGeometry(bbox);
-    }else{
-        BoundingBox bbox;
-        foreach(bbox, bboxes){
-            if(bbox.rect.contains(ev->pos())){
-
-            }
-        }
     }
 }
 
-void ImageLabel::drawBoundingBox(BoundingBox bbox){
+void ImageLabel::drawBoundingBox(BoundingBox bbox, QColor colour){
     QPainter painter;
-    painter.begin(&pix);
-    QPen pen(Qt::red, 4);
+    painter.begin(&scaled_pixmap);
+    QPen pen(colour, 2);
     painter.setPen(pen);
-    painter.drawRect(bbox.rect);
+
+    auto scaled_bbox = bbox.rect;
+
+    scaled_bbox.setRight(scaled_bbox.right() * scale_x);
+    scaled_bbox.setLeft(scaled_bbox.left() * scale_x);
+    scaled_bbox.setTop(scaled_bbox.top() * scale_y);
+    scaled_bbox.setBottom(scaled_bbox.bottom() * scale_y);
+
+    painter.drawRect(scaled_bbox);
 
     if(bbox.classname != ""){
-        painter.setFont(QFont("Helvetica", 40));
-        painter.drawText(bbox.rect.bottomLeft(), bbox.classname);
+        painter.setFont(QFont("Helvetica", 10));
+        painter.drawText(scaled_bbox.bottomLeft(), bbox.classname);
     }
 
     painter.end();
@@ -124,21 +145,34 @@ void ImageLabel::setBoundingBoxes(QList<BoundingBox> input_bboxes){
     drawBoundingBoxes();
 }
 
-void ImageLabel::drawBoundingBoxes(){
+void ImageLabel::drawBoundingBoxes(QPoint location){
     pix = base_pixmap;
+    scaledPixmap();
 
     BoundingBox bbox;
     foreach(bbox, bboxes){
-        drawBoundingBox(bbox);
+        if(bbox.rect.contains(location)){
+            drawBoundingBox(bbox, Qt::green);
+            selected_bbox = bbox;
+        }else{
+            drawBoundingBox(bbox, Qt::red);
+        }
     }
 
-    QLabel::setPixmap(scaledPixmap());
+    QLabel::setPixmap(scaled_pixmap);
 
 }
 
 void ImageLabel::keyPressEvent(QKeyEvent *event)
 {
-    if(event->key() == Qt::Key_Space){
+
+    if(event->key() == Qt::Key_Backspace || event->key() == Qt::Key_Delete){
+        emit removeLabel(selected_bbox);
+    }else if(event->key() == Qt::Key_Escape){
+        rubberBand->setGeometry(QRect(bbox_origin, QSize()));
+        bbox_state = WAIT_START;
+
+    }else if(event->key() == Qt::Key_Space){
         if(rubberBand->width() > 0 and rubberBand->height() > 0){
 
             auto new_rect = QRect(bbox_origin, bbox_final).normalized();

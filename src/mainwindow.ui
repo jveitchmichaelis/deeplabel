@@ -56,7 +56,7 @@
        <item row="0" column="0" colspan="2">
         <widget class="QLabel" name="label_7">
          <property name="text">
-          <string>Current class</string>
+          <string>Current label class</string>
          </property>
         </widget>
        </item>
@@ -71,6 +71,30 @@
         </widget>
        </item>
       </layout>
+     </widget>
+    </item>
+    <item row="0" column="0" rowspan="4">
+     <widget class="QScrollArea" name="imageScrollArea">
+      <property name="styleSheet">
+       <string notr="true">background:black</string>
+      </property>
+      <property name="widgetResizable">
+       <bool>true</bool>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <widget class="QWidget" name="scrollAreaWidgetContents">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>557</width>
+         <height>524</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2"/>
+      </widget>
      </widget>
     </item>
     <item row="2" column="1">
@@ -95,20 +119,6 @@
         <widget class="QLabel" name="label_2">
          <property name="text">
           <string>Dimensions:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="0">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Size on disk: </string>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="0">
-        <widget class="QLabel" name="label_6">
-         <property name="text">
-          <string>Instances labelled:</string>
          </property>
         </widget>
        </item>
@@ -139,6 +149,55 @@
          </property>
         </widget>
        </item>
+       <item row="2" column="1">
+        <widget class="QLabel" name="dimensionsLabel">
+         <property name="text">
+          <string>-</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Filetype: </string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLabel" name="filetypeLabel">
+         <property name="text">
+          <string>-</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Size on disk: </string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLabel" name="sizeLabel">
+         <property name="text">
+          <string>-</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>Instances labelled:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QLabel" name="instanceCountLabel">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
        <item row="7" column="0" colspan="2">
         <widget class="QTableWidget" name="tableWidget">
          <column>
@@ -153,66 +212,7 @@
          </column>
         </widget>
        </item>
-       <item row="2" column="1">
-        <widget class="QLabel" name="dimensionsLabel">
-         <property name="text">
-          <string>-</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QLabel" name="filetypeLabel">
-         <property name="text">
-          <string>-</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="1">
-        <widget class="QLabel" name="sizeLabel">
-         <property name="text">
-          <string>-</string>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="1">
-        <widget class="QLabel" name="instanceCountLabel">
-         <property name="text">
-          <string>0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>Filetype: </string>
-         </property>
-        </widget>
-       </item>
       </layout>
-     </widget>
-    </item>
-    <item row="0" column="0" rowspan="3">
-     <widget class="QScrollArea" name="imageScrollArea">
-      <property name="styleSheet">
-       <string notr="true">background:black</string>
-      </property>
-      <property name="widgetResizable">
-       <bool>true</bool>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-      <widget class="QWidget" name="scrollAreaWidgetContents">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>557</width>
-         <height>524</height>
-        </rect>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_2"/>
-      </widget>
      </widget>
     </item>
    </layout>
@@ -265,6 +265,8 @@
    </attribute>
    <addaction name="actionPreviousImage"/>
    <addaction name="actionNextImage"/>
+   <addaction name="actionDraw_Tool"/>
+   <addaction name="actionSelect_Tool"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionPreviousImage">
@@ -293,10 +295,16 @@
    <property name="text">
     <string>New Project</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
   </action>
   <action name="actionOpen_Project">
    <property name="text">
     <string>Open Project</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
   </action>
   <action name="actionAdd_image">
@@ -314,8 +322,38 @@
     <string>Add class</string>
    </property>
   </action>
+  <action name="actionDraw_Tool">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Draw</string>
+   </property>
+   <property name="toolTip">
+    <string>Create rectangular labels</string>
+   </property>
+  </action>
+  <action name="actionSelect_Tool">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Select</string>
+   </property>
+   <property name="toolTip">
+    <string>Select labels for viewing/deletion</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>imageScrollArea</tabstop>
+  <tabstop>classComboBox</tabstop>
+  <tabstop>lineEdit</tabstop>
+  <tabstop>addClassButton</tabstop>
+  <tabstop>tableWidget</tabstop>
+  <tabstop>newClassText</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

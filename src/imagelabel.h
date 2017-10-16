@@ -16,6 +16,11 @@ enum drawState{
     DRAWING_BBOX,
 };
 
+enum interactionState{
+    MODE_DRAW,
+    MODE_SELECT,
+};
+
 class ImageLabel : public QLabel
 {
     Q_OBJECT
@@ -27,11 +32,15 @@ public:
 
 signals:
     void newLabel(BoundingBox);
+    void removeLabel(BoundingBox);
 
 public slots:
     void setPixmap ( const QPixmap & );
     void setBoundingBoxes(QList<BoundingBox> input_bboxes);
     void setClassname(QString classname){current_classname = classname;}
+
+    void setDrawMode();
+    void setSelectMode();
 
     void resizeEvent(QResizeEvent *);
 
@@ -42,15 +51,18 @@ public slots:
 private:
     QPixmap pix;
     QPixmap base_pixmap;
+    QPixmap scaled_pixmap;
     QString current_classname;
 
     QList<BoundingBox> bboxes;
-    void drawBoundingBox(BoundingBox);
-    void drawBoundingBoxes();
+    BoundingBox selected_bbox;
+    void drawBoundingBox(BoundingBox bbox, QColor colour=Qt::red);
+    void drawBoundingBoxes(QPoint location = QPoint());
 
     QPainter* painter;
 
     drawState bbox_state = WAIT_START;
+    interactionState current_mode = MODE_DRAW;
 
     QPoint bbox_origin, bbox_final;
     QRubberBand* rubberBand;

@@ -25,7 +25,7 @@ private:
     ImageLabel *currentImage;
 
     bool wrap_index;
-    int current_index;
+    unsigned int current_index;
 
     void initDisplay();
 
@@ -48,6 +48,9 @@ private slots:
     void previousImage(void);
     void display(QString fileName);
     void addLabel(BoundingBox bbox);
+    void removeLabel(BoundingBox bbox);
+    void setDrawMode(void);
+    void setSelectMode(void);
 
 signals:
     void selectedClass(QString);
