@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql
+QT       += core gui sql testlib
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -61,11 +61,14 @@ VPATH = "$$_PRO_FILE_PWD_/src"
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    src/labelproject.cpp
+    src/labelproject.cpp \
+    src/imagelabel.cpp
 
 HEADERS += \
         mainwindow.h \
-    src/labelproject.h
+    src/labelproject.h \
+    src/imagelabel.h \
+    src/boundingbox.h
 
 FORMS += \
         mainwindow.ui

@@ -12,6 +12,8 @@
 #include <QDebug>
 #include <QMessageBox>
 
+#include <boundingbox.h>
+
 class LabelProject : public QObject
 {
     Q_OBJECT
@@ -21,15 +23,20 @@ public:
     bool loadDatabase(QString fileName);
     bool createDatabase(QString fileName);
 
-    //bool getImageList(std::vector<int> &images);
-    //bool getClassList(std::vector<int> &classes);
+    bool getImageList(QList<QString> &images);
+    bool getClassList(QList<QString> &classes);
 
-    //int addImage(QString fileName);
-    //int addClass(QString fileName);
-    //int addLabel(int imageId, int classId, BoundingBox bbox);
+    int addImageFolder(QString path);
+    bool addImage(QString fileName);
+    bool addClass(QString className);
+    bool addLabel(QString fileName, BoundingBox bbox);
+
+    bool getLabels(QString fileName, QList<BoundingBox> &bboxes);
+    bool removeLabel(QString fileName, BoundingBox bbox);
 
     //QString getClassName(int classId);
-    //QString getImagePath(int imageId);
+    int getImageId(QString fileName);
+    int getClassId(QString className);
 
 signals:
 

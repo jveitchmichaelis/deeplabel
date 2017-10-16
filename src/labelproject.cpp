@@ -15,6 +15,8 @@ bool LabelProject::loadDatabase(QString fileName)
     db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName(fileName);
 
+    QFileInfo check_file(fileName);
+
     if (!db.open()) {
         QMessageBox::critical(nullptr, QObject::tr("Cannot open database"),
             QObject::tr("Unable to establish a database connection.\n"
@@ -24,7 +26,7 @@ bool LabelProject::loadDatabase(QString fileName)
                         "Click Cancel to exit."), QMessageBox::Cancel);
         return false;
     }
-    else if ( QDir(fileName).exists() ){
+    else if ( check_file.exists() && check_file.isFile() ){
         return checkDatabase();
     }else{
         return true;
@@ -48,7 +50,7 @@ bool LabelProject::checkDatabase(){
     if(class_record.isEmpty()) return false;
 
     if(!image_record.contains("image_id")) return false;
-    if(!image_record.contains("input_image_path")) return false;
+    if(!image_record.contains("path")) return false;
 
     if(!label_record.contains("image_id")) return false;
     if(!label_record.contains("label_id")) return false;
@@ -59,7 +61,9 @@ bool LabelProject::checkDatabase(){
     if(!label_record.contains("height")) return false;
 
     if(!class_record.contains("class_id")) return false;
-    if(!class_record.contains("class_name")) return false;
+    if(!class_record.contains("name")) return false;
+
+    qDebug() << "Database structure looks good";
 
     return true;
 }
@@ -71,31 +75,277 @@ bool LabelProject::createDatabase(QString fileName)
      * was created successfully.
      */
 
-    bool res = loadDatabase(fileName);
+    bool res;
 
-    if(res){
+    loadDatabase(fileName);
+
+    QSqlQuery query(db);
+
+    /*
+     * The label database is a simple relational db - image locations, classes
+     * and label bounding boxes.
+     */
+
+    res = query.exec("CREATE table images (image_id INTEGER PRIMARY KEY ASC, "
+               "path varchar(256))");
+    res &= query.exec("CREATE table classes (class_id INTEGER PRIMARY KEY ASC, "
+               "name varchar(32))");
+    res &= query.exec("CREATE table labels (label_id INTEGER PRIMARY KEY ASC, "
+               "image_id int, class_id int, x int, y int, width int, height int)");
+
+    if(!res){
+        qDebug() << query.lastError();
+    }
+
+    return checkDatabase();
+}
+
+bool LabelProject::getImageList(QList<QString> &images)
+{
+    bool res = false;
+
+    QSqlQuery query(db);
+    res = query.exec("SELECT path FROM images");
+
+    if(!res){
+        qDebug() << query.lastError();
+    }else{
+
+        images.clear();
+
+        while (query.next()) {
+            QString path = query.value(0).toString();
+            images.push_back(path);
+        }
+    }
+
+    return res;
+}
+
+bool LabelProject::getClassList(QList<QString> &classes)
+{
+    bool res = false;
+
+    QSqlQuery query(db);
+    res = query.exec("SELECT name FROM classes");
+
+    if(!res){
+        qDebug() << query.lastError();
+    }else{
+
+        classes.clear();
+
+        while (query.next()) {
+            QString name = query.value(0).toString();
+            classes.push_back(name);
+        }
+    }
+
+    return res;
+}
+
+bool LabelProject::addImage(QString fileName)
+{
+    bool res = false;
+
+    QFileInfo check_file(fileName);
+
+    if (  check_file.exists() && check_file.isFile() ){
+        QSqlQuery query(db);
+        query.prepare("INSERT INTO images (path)"
+                      "VALUES (:path)");
+        query.bindValue(":path", fileName);
+        res = query.exec();
+
+        if(!res){
+            qDebug() << query.lastError();
+        }
+    }
+
+    return res;
+}
+
+int LabelProject::getImageId(QString fileName){
+
+    int id = -1;
+
+    QSqlQuery query(db);
+    query.prepare("SELECT image_id FROM images WHERE path = ?");
+    query.bindValue(0, fileName);
+    bool res = query.exec();
+
+    if(!res){
+        qDebug() << query.lastError();
+    }else{
+        if(query.next()){
+            id = query.value(0).toInt();
+        }
+    }
+
+    return id;
+}
+
+int LabelProject::getClassId(QString className){
+
+    int id = -1;
+
+    QSqlQuery query(db);
+    query.prepare("SELECT class_id FROM classes WHERE name = ?");
+    query.bindValue(0, className);
+    bool res = query.exec();
+
+    if(!res){
+        qDebug() << query.lastError();
+    }else{
+        if(query.next()){
+            id = query.value(0).toInt();
+        }
+    }
+
+    return id;
+}
+
+bool LabelProject::getLabels(QString fileName, QList<BoundingBox> &bboxes){
+
+    bool res = false;
+    bboxes.clear();
+    int image_id = getImageId(fileName);
+
+    if(image_id > 0){
         QSqlQuery query(db);
 
-        /*
-         * The label database is a simple relational db - image locations, classes
-         * and label bounding boxes.
-         */
-
-        res = query.exec("create table images (image_id int primary key, "
-                   "input_image_path varchar(256))");
-        res &= query.exec("create table classes (class_id int primary key, "
-                   "class_name varchar(32))");
-        res &= query.exec("create table labels (label_id int primary key, "
-                   "image_id int, class_id int, x int, y int, width int, height int)");
+        query.prepare("SELECT name, x, y, width, height FROM labels"
+                      " INNER JOIN classes ON labels.class_id = classes.class_id"
+                      " WHERE image_id = ?");
+        query.addBindValue(image_id);
+        res = query.exec();
 
         if(!res){
             qDebug() << query.lastError();
         }
 
-        return checkDatabase();
+        while(query.next()){
+            BoundingBox new_bbox;
+            auto rec = query.record();
+
+            new_bbox.classname = rec.value(rec.indexOf("name")).toString();
+
+            new_bbox.rect.setX(rec.value(rec.indexOf("x")).toInt());
+            new_bbox.rect.setY(rec.value(rec.indexOf("y")).toInt());
+            new_bbox.rect.setWidth(rec.value(rec.indexOf("width")).toInt());
+            new_bbox.rect.setHeight(rec.value(rec.indexOf("height")).toInt());
+
+            bboxes.append(new_bbox);
+        }
     }
 
-    return false;
+    return res;
+}
+
+bool LabelProject::removeLabel(QString fileName, BoundingBox bbox){
+
+    int image_id = getImageId(fileName);
+    int class_id = getClassId(bbox.classname);
+
+    bool res;
+
+    if(image_id > 0 && class_id > 0){
+        QSqlQuery query(db);
+
+        query.prepare("DELETE FROM labels WHERE (image_id = ?, class_id = ?"
+                      "x = ?, y = ?, width = ?, height = ?)");
+        query.bindValue(0, image_id);
+        query.bindValue(0, class_id);
+        query.bindValue(0, bbox.rect.x());
+        query.bindValue(0, bbox.rect.y());
+        query.bindValue(0, bbox.rect.width());
+        query.bindValue(0, bbox.rect.height());
+        res = query.exec();
+
+        if(!res){
+            qDebug() << query.lastError();
+        }
+
+    }
+
+    return res;
+}
+
+bool LabelProject::addLabel(QString fileName, BoundingBox bbox)
+{
+    bool res = false;
+
+    int image_id = getImageId(fileName);
+    int class_id = getClassId(bbox.classname);
+
+    if(image_id > 0 && class_id > 0){
+        QSqlQuery query(db);
+
+        query.prepare("INSERT INTO labels (image_id, class_id, x, y, width, height)"
+                      "VALUES (:image_id, :class_id, :x, :y, :width, :height)");
+        query.bindValue(":image_id", image_id);
+        query.bindValue(":class_id", class_id);
+        query.bindValue(":x", bbox.rect.x());
+        query.bindValue(":y", bbox.rect.y());
+        query.bindValue(":width", bbox.rect.width());
+        query.bindValue(":height", bbox.rect.height());
+        res = query.exec();
+
+        if(!res){
+            qDebug() << query.lastError();
+        }
+
+    }
+
+    return res;
+}
+
+
+int LabelProject::addImageFolder(QString path){
+
+    QDir dir(path);
+    int number_added = 0;
+
+    if(dir.exists()){
+        QStringList filters;
+        filters << "*.png" << "*.jpg" << "*.jpeg" << "*.bmp" << "*.tiff";
+        auto image_list = dir.entryInfoList(filters, QDir::Files|QDir::NoDotAndDotDot);
+
+        QFileInfo image_info;
+
+        foreach(image_info, image_list){
+
+            QString image_path = image_info.absoluteFilePath();
+            bool res = addImage(image_path);
+
+            if(res){
+                number_added++;
+                qDebug() << "Added image: " << image_path;
+            }else{
+                qDebug() << "Failed to add image: " << image_path;
+            }
+        }
+    }
+
+    return number_added;
+
+}
+
+bool LabelProject::addClass(QString className)
+{
+    bool res = false;
+
+    QSqlQuery query(db);
+    query.prepare("INSERT INTO classes (name)"
+                  "VALUES (:name)");
+    query.bindValue(":name", className);
+    res = query.exec();
+
+    if(!res){
+        qDebug() << query.lastError();
+    }
+
+    return res;
 }
 
 LabelProject::~LabelProject()
