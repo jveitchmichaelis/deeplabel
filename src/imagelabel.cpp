@@ -8,7 +8,7 @@ ImageLabel::ImageLabel(QWidget *parent) :
     setAlignment(Qt::AlignVCenter);
     setMouseTracking(true);
     setScaledContents(false);
-    setFocusPolicy( Qt::StrongFocus );
+    setFocusPolicy(Qt::StrongFocus);
 
     rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
 
@@ -16,6 +16,12 @@ ImageLabel::ImageLabel(QWidget *parent) :
 
 void ImageLabel::setDrawMode(){
     current_mode = MODE_DRAW;
+    rubberBand->setGeometry(QRect(bbox_origin, QSize()));
+    rubberBand->show();
+}
+
+void ImageLabel::setDrawDragMode(){
+    current_mode = MODE_DRAW_DRAG;
     rubberBand->setGeometry(QRect(bbox_origin, QSize()));
     rubberBand->show();
 }
@@ -78,9 +84,8 @@ void ImageLabel::mousePressEvent(QMouseEvent *ev){
         image_location.setY(image_location.y() / scale_y);
 
         drawBoundingBoxes(image_location);
-    }
 
-    if(current_mode == MODE_DRAW && ev->button() == Qt::LeftButton){
+    }else if(current_mode == MODE_DRAW && ev->button() == Qt::LeftButton){
         if(bbox_state == WAIT_START){
 
             bbox_origin = ev->pos();
@@ -90,10 +95,49 @@ void ImageLabel::mousePressEvent(QMouseEvent *ev){
 
             bbox_state = DRAWING_BBOX;
         }else if(bbox_state == DRAWING_BBOX){
+
             bbox_final = ev->pos();
+
+            QRect bbox(bbox_origin, bbox_final);
+            rubberBand->setGeometry(clip(bbox.normalized()));
+
             bbox_state = WAIT_START;
         }
     }
+}
+
+QRect ImageLabel::clip(QRect bbox){
+    if(bbox.right() > scaled_width){
+        bbox.setRight(scaled_width);
+    }
+
+    if(bbox.bottom() > scaled_height){
+        bbox.setRight(scaled_height);
+    }
+
+    if(bbox.left() < 0){
+        bbox.setLeft(0);
+    }
+
+    if(bbox.top() < 0){
+        bbox.setTop(0);
+    }
+
+    return bbox;
+}
+
+void ImageLabel::mouseReleaseEvent(QMouseEvent *ev){
+    /*if(current_mode == MODE_DRAW_DRAG){
+        bbox_final = ev->pos();
+
+        QRect bbox(bbox_origin, bbox_final);
+        rubberBand->setGeometry(clip(bbox.normalized()));
+
+        bbox_state = WAIT_START;
+    }else{
+        ev->ignore();
+    }*/
+    ev->ignore();
 }
 
 void ImageLabel::mouseMoveEvent(QMouseEvent *ev){
@@ -101,17 +145,7 @@ void ImageLabel::mouseMoveEvent(QMouseEvent *ev){
     if(pix.isNull()) return;
 
     if(bbox_state == DRAWING_BBOX && current_mode == MODE_DRAW){
-
         QRect bbox = QRect(bbox_origin, ev->pos()).normalized();
-
-        if(bbox.right() > scaled_width){
-            bbox.setRight(scaled_width);
-        }
-
-        if(bbox.bottom() > scaled_height){
-            bbox.setRight(scaled_height);
-        }
-
         rubberBand->setGeometry(bbox);
     }
 }
@@ -129,12 +163,16 @@ void ImageLabel::drawBoundingBox(BoundingBox bbox, QColor colour){
     scaled_bbox.setTop(scaled_bbox.top() * scale_y);
     scaled_bbox.setBottom(scaled_bbox.bottom() * scale_y);
 
-    painter.drawRect(scaled_bbox);
-
     if(bbox.classname != ""){
+
+        painter.fillRect(QRect(scaled_bbox.bottomLeft(), scaled_bbox.bottomRight()+QPoint(0,-10)).normalized(), QBrush(Qt::white));
+
         painter.setFont(QFont("Helvetica", 10));
         painter.drawText(scaled_bbox.bottomLeft(), bbox.classname);
+
     }
+
+    painter.drawRect(scaled_bbox);
 
     painter.end();
 

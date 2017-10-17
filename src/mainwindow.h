@@ -37,6 +37,7 @@ private:
     unsigned int number_images;
     void updateImageList();
     void updateClassList();
+    void updateLabels();
 
 private slots:
     void openProject(void);
@@ -49,6 +50,8 @@ private slots:
     void display(QString fileName);
     void addLabel(BoundingBox bbox);
     void removeLabel(BoundingBox bbox);
+    void removeClass(void);
+    void removeImage(void);
     void setDrawMode(void);
     void setSelectMode(void);
 

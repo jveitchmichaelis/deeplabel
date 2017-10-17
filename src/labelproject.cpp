@@ -115,7 +115,8 @@ bool LabelProject::getImageList(QList<QString> &images)
 
         while (query.next()) {
             QString path = query.value(0).toString();
-            images.push_back(path);
+            // Push absolute file path
+            images.push_back(QDir::cleanPath(QDir(db.databaseName()).path() + QDir::separator() + path));
         }
     }
 
@@ -154,7 +155,8 @@ bool LabelProject::addImage(QString fileName)
         QSqlQuery query(db);
         query.prepare("INSERT INTO images (path)"
                       "VALUES (:path)");
-        query.bindValue(":path", fileName);
+
+        query.bindValue(":path", QDir(db.databaseName()).relativeFilePath(fileName));
         res = query.exec();
 
         if(!res){
@@ -171,7 +173,9 @@ int LabelProject::getImageId(QString fileName){
 
     QSqlQuery query(db);
     query.prepare("SELECT image_id FROM images WHERE path = ?");
-    query.bindValue(0, fileName);
+
+    //Important - we need the relative image path again
+    query.bindValue(0, QDir(db.databaseName()).relativeFilePath(fileName));
     bool res = query.exec();
 
     if(!res){
@@ -260,6 +264,74 @@ bool LabelProject::removeLabel(QString fileName, BoundingBox bbox){
         query.bindValue(":y", bbox.rect.y());
         query.bindValue(":width", bbox.rect.width());
         query.bindValue(":height", bbox.rect.height());
+
+        res = query.exec();
+
+        if(!res){
+            qDebug() << query.lastError();
+        }
+
+    }
+
+    return res;
+}
+
+bool LabelProject::removeClass(QString classname){
+
+    int class_id = getClassId(classname);
+
+    bool res = false;
+
+    if(class_id > 0){
+        QSqlQuery query(db);
+
+        // Delete all labels with this class
+        query.prepare("DELETE FROM labels WHERE (class_id = :class_id)");
+        query.bindValue(":class_id", class_id);
+
+        res = query.exec();
+
+        if(!res){
+            qDebug() << query.lastError();
+        }
+
+        // Delete the class itself
+        query.prepare("DELETE FROM classes WHERE (class_id = :class_id)");
+        query.bindValue(":class_id", class_id);
+
+        res = query.exec();
+
+        if(!res){
+            qDebug() << query.lastError();
+        }
+
+    }
+
+    return res;
+}
+
+bool LabelProject::removeImage(QString fileName){
+
+    int image_id = getImageId(fileName);
+
+    bool res = false;
+
+    if(image_id > 0){
+        QSqlQuery query(db);
+
+        // Delete all labels for this image
+        query.prepare("DELETE FROM labels WHERE (image_id = :image_id)");
+        query.bindValue(":image_id", image_id);
+
+        res = query.exec();
+
+        if(!res){
+            qDebug() << query.lastError();
+        }
+
+        // Delete the image itself
+        query.prepare("DELETE FROM images WHERE (image_id = :image_id)");
+        query.bindValue(":image_id", image_id);
 
         res = query.exec();
 

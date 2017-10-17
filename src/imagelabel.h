@@ -18,6 +18,7 @@ enum drawState{
 
 enum interactionState{
     MODE_DRAW,
+    MODE_DRAW_DRAG,
     MODE_SELECT,
 };
 
@@ -40,11 +41,13 @@ public slots:
     void setClassname(QString classname){current_classname = classname;}
 
     void setDrawMode();
+    void setDrawDragMode();
     void setSelectMode();
 
     void resizeEvent(QResizeEvent *);
 
     void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void keyPressEvent(QKeyEvent *event);
 
@@ -58,6 +61,8 @@ private:
     BoundingBox selected_bbox;
     void drawBoundingBox(BoundingBox bbox, QColor colour=Qt::red);
     void drawBoundingBoxes(QPoint location = QPoint());
+
+    QRect clip(QRect bbox);
 
     QPainter* painter;
 

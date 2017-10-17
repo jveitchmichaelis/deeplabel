@@ -22,14 +22,19 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->scrollAreaWidgetContents->layout()->setAlignment(Qt::AlignHCenter);
     ui->scrollAreaWidgetContents->layout()->setAlignment(Qt::AlignVCenter);
     ui->scrollAreaWidgetContents->layout()->addWidget(currentImage);
+
     connect(this, SIGNAL(selectedClass(QString)), currentImage, SLOT(setClassname(QString)));
     connect(currentImage, SIGNAL(newLabel(BoundingBox)), this, SLOT(addLabel(BoundingBox)));
     connect(currentImage, SIGNAL(removeLabel(BoundingBox)), this, SLOT(removeLabel(BoundingBox)));
 
-    connect(ui->actionDraw_Tool, SIGNAL(triggered(bool)), currentImage, SLOT(setDrawMode()));
-    connect(ui->actionSelect_Tool, SIGNAL(triggered(bool)), currentImage, SLOT(setSelectMode()));
+    connect(ui->removeClassButton, SIGNAL(clicked(bool)), this, SLOT(removeClass()));
+    connect(ui->removeImageButton, SIGNAL(clicked(bool)), this, SLOT(removeImage()));
+
+    ui->actionDraw_Tool->setChecked(true);
     connect(ui->actionDraw_Tool, SIGNAL(triggered(bool)), this, SLOT(setDrawMode()));
     connect(ui->actionSelect_Tool, SIGNAL(triggered(bool)), this, SLOT(setSelectMode()));
+
+    connect(ui->classComboBox, SIGNAL(currentIndexChanged(QString)), currentImage, SLOT(setClassname(QString)));
 
     project = new LabelProject(this);
 }
@@ -37,11 +42,13 @@ MainWindow::MainWindow(QWidget *parent) :
 void MainWindow::setDrawMode(){
     ui->actionDraw_Tool->setChecked(true);
     ui->actionSelect_Tool->setChecked(false);
+    currentImage->setDrawMode();
 }
 
 void MainWindow::setSelectMode(){
     ui->actionDraw_Tool->setChecked(false);
     ui->actionSelect_Tool->setChecked(true);
+    currentImage->setSelectMode();
 }
 
 void MainWindow::openProject()
@@ -52,20 +59,36 @@ void MainWindow::openProject()
                                                     tr("Label database (*.lbldb)"));
 
     if(fileName != ""){
-        project->loadDatabase(fileName);
-        initDisplay();
+        if(project->loadDatabase(fileName)){
+            initDisplay();
+            ui->imageGroupBox->setEnabled(true);
+            ui->labelGroupBox->setEnabled(true);
+        }else{
+            QMessageBox::warning(this,tr("Remove Image"), tr("Failed to open project."));
+        }
+
     }
 
     return;
 }
 
+void MainWindow::updateLabels(){
+    QList<BoundingBox> bboxes;
+    project->getLabels(current_imagepath, bboxes);
+    ui->instanceCountLabel->setNum(bboxes.size());
+    currentImage->setBoundingBoxes(bboxes);
+}
+
 void MainWindow::updateImageList(){
     project->getImageList(images);
     number_images = images.size();
+    ui->imageProgressBar->setMaximum(number_images-1);
 }
 
 void MainWindow::updateClassList(){
     project->getClassList(classes);
+
+    ui->classComboBox->clear();
 
     QString classname;
     foreach(classname, classes){
@@ -93,10 +116,26 @@ void MainWindow::addLabel(BoundingBox bbox){
 
 void MainWindow::removeLabel(BoundingBox bbox){
     project->removeLabel(current_imagepath, bbox);
+    updateLabels();
+}
 
-    QList<BoundingBox> bboxes;
-    project->getLabels(current_imagepath, bboxes);
-    currentImage->setBoundingBoxes(bboxes);
+void MainWindow::removeImage(){
+    if (QMessageBox::Yes == QMessageBox::question(this,
+                                                  tr("Remove Image"),
+                                                  tr("Really delete image and associated labels?"))){
+        project->removeImage(current_imagepath);
+        updateImageList();
+    }
+
+}
+
+void MainWindow::removeClass(){
+    if (QMessageBox::Yes == QMessageBox::question(this,
+                                                  tr("Remove Image"),
+                                                  tr("Really delete class and associated labels?"))){
+        project->removeClass(current_class);
+        updateClassList();
+    }
 }
 
 void MainWindow::initDisplay(){
@@ -115,7 +154,7 @@ void MainWindow::nextImage(){
 
     if(images.empty()) return;
 
-    if(current_index == number_images){
+    if(current_index == (number_images-1)){
         if(wrap_index){
             current_index = 0;
         }else{
@@ -155,10 +194,9 @@ void MainWindow::display(QString fileName){
         qDebug() << "Null pixmap?";
     }else{
 
+        ui->imageProgressBar->setValue(current_index);
         currentImage->setPixmap(pixmap);
-        QList<BoundingBox> bboxes;
-        project->getLabels(fileName, bboxes);
-        currentImage->setBoundingBoxes(bboxes);
+        updateLabels();
 
         auto image_info = QFileInfo(fileName);
         ui->filenameLabel->setText(image_info.fileName());
@@ -198,7 +236,8 @@ void MainWindow::addImages(void){
     }
 
     updateImageList();
-    if(number_images == 0){
+
+    if(number_images > 0){
         initDisplay();
     }
 
