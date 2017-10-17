@@ -39,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->imageNumberSpinbox, SIGNAL(editingFinished()), this, SLOT(changeImage()));
 
     connect(ui->actionWrap_images, SIGNAL(triggered(bool)), this, SLOT(enableWrap(bool)));
+    connect(ui->actionExport, SIGNAL(triggered(bool)), this, SLOT(exportData()));
 
     auto prev_shortcut = ui->actionPreviousImage->shortcuts();
     prev_shortcut.append(QKeySequence("Left"));
@@ -289,6 +290,21 @@ void MainWindow::addImageFolder(void){
     }
 
     return;
+}
+
+void MainWindow::exportData(){
+
+    QString openDir = QDir::homePath();
+    QString path = QFileDialog::getExistingDirectory(this, tr("Select output folder"),
+                                                    openDir);
+
+    if(path != ""){
+        KittiExporter exporter(project, this);
+        exporter.setOutputFolder(path);
+        exporter.splitData();
+        exporter.process();
+    }
+
 }
 
 MainWindow::~MainWindow()

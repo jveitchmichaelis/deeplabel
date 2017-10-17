@@ -5,6 +5,7 @@
 #include <QFileDialog>
 #include <imagelabel.h>
 #include <labelproject.h>
+#include <kittiexporter.h>
 
 namespace Ui {
 class MainWindow;
@@ -56,6 +57,7 @@ private slots:
     void setSelectMode(void);
     void changeImage(void);
     void enableWrap(bool enable);
+    void exportData();
 
 signals:
     void selectedClass(QString);

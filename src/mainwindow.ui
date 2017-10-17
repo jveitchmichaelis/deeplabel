@@ -346,6 +346,7 @@
    <addaction name="actionNextImage"/>
    <addaction name="actionDraw_Tool"/>
    <addaction name="actionSelect_Tool"/>
+   <addaction name="actionExport"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionPreviousImage">
@@ -445,6 +446,14 @@
    </property>
    <property name="text">
     <string>Wrap images</string>
+   </property>
+  </action>
+  <action name="actionExport">
+   <property name="text">
+    <string>Export</string>
+   </property>
+   <property name="toolTip">
+    <string>Export Data</string>
    </property>
   </action>
  </widget>
