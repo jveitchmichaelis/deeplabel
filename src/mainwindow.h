@@ -55,6 +55,7 @@ private slots:
     void setDrawMode(void);
     void setSelectMode(void);
     void changeImage(void);
+    void enableWrap(bool enable);
 
 signals:
     void selectedClass(QString);

@@ -38,8 +38,28 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->changeImageButton, SIGNAL(clicked(bool)), this, SLOT(changeImage()));
     connect(ui->imageNumberSpinbox, SIGNAL(editingFinished()), this, SLOT(changeImage()));
 
+    connect(ui->actionWrap_images, SIGNAL(triggered(bool)), this, SLOT(enableWrap(bool)));
+
+    auto prev_shortcut = ui->actionPreviousImage->shortcuts();
+    prev_shortcut.append(QKeySequence("Left"));
+    ui->actionPreviousImage->setShortcuts(prev_shortcut);
+
+    auto next_shortcut = ui->actionNextImage->shortcuts();
+    next_shortcut.append(QKeySequence("Right"));
+    ui->actionNextImage->setShortcuts(next_shortcut);
+
+    // Override progress bar animation on Windows
+#ifdef WIN32
+    ui->imageProgressBar->setStyleSheet("QProgressBar::chunk {background-color: #3add36; width: 1px;}");
+#endif
+
     project = new LabelProject(this);
 }
+
+void MainWindow::enableWrap(bool enable){
+    wrap_index = enable;
+}
+
 
 void MainWindow::changeImage(){
     current_index = ui->imageNumberSpinbox->value();
@@ -200,11 +220,12 @@ void MainWindow::display(){
         qDebug() << "Null pixmap?";
     }else{
 
+        currentImage->setPixmap(pixmap);
+        updateLabels();
+
         ui->imageProgressBar->setValue(current_index);
         ui->imageNumberSpinbox->setValue(current_index);
         ui->imageIndexLabel->setText(QString("%1/%2").arg(current_index).arg(number_images));
-        currentImage->setPixmap(pixmap);
-        updateLabels();
 
         auto image_info = QFileInfo(current_imagepath);
         ui->filenameLabel->setText(image_info.fileName());
