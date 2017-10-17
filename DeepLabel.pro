@@ -40,13 +40,15 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     src/labelproject.cpp \
-    src/imagelabel.cpp
+    src/imagelabel.cpp \
+    src/kittiexporter.cpp
 
 HEADERS += \
         mainwindow.h \
     src/labelproject.h \
     src/imagelabel.h \
-    src/boundingbox.h
+    src/boundingbox.h \
+    src/kittiexporter.h
 
 FORMS += \
         mainwindow.ui
