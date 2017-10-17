@@ -12,6 +12,10 @@ bool LabelProject::loadDatabase(QString fileName)
      * if an error occured returns false.
      */
 
+    if(db.isOpen()){
+        db.close();
+    }
+
     db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName(fileName);
 
@@ -71,7 +75,7 @@ bool LabelProject::checkDatabase(){
 bool LabelProject::createDatabase(QString fileName)
 {
     /*!
-     * Create a new labelling database at the given location. Returns true if the database
+     * Create a new labelling database at the given absolute location (\a fileName). Returns true if the database
      * was created successfully.
      */
 
@@ -102,6 +106,9 @@ bool LabelProject::createDatabase(QString fileName)
 
 bool LabelProject::getImageList(QList<QString> &images)
 {
+    /*!
+     * Get a list of all images in the database with absolute paths, which is cleared prior to retrieval. Returns false if the database query failed.
+     */
     bool res = false;
 
     QSqlQuery query(db);
@@ -125,6 +132,9 @@ bool LabelProject::getImageList(QList<QString> &images)
 
 bool LabelProject::getClassList(QList<QString> &classes)
 {
+    /*!
+     * Get a list of all class names in the database and puts them in (\a classes), which is cleared prior to retrieval. Returns false if the database query failed.
+     */
     bool res = false;
 
     QSqlQuery query(db);
@@ -147,6 +157,9 @@ bool LabelProject::getClassList(QList<QString> &classes)
 
 bool LabelProject::addImage(QString fileName)
 {
+    /*!
+     * Add an image to the database, given an absolute path to the image (\a fileName). Returns false if the file doesn't exist or if the query failed.
+     */
     bool res = false;
 
     QFileInfo check_file(fileName);
@@ -168,7 +181,9 @@ bool LabelProject::addImage(QString fileName)
 }
 
 int LabelProject::getImageId(QString fileName){
-
+    /*!
+     * Get the image ID for an image at an absolute path (\a fileName), returns -1 if not found
+     */
     int id = -1;
 
     QSqlQuery query(db);
@@ -190,7 +205,9 @@ int LabelProject::getImageId(QString fileName){
 }
 
 int LabelProject::getClassId(QString className){
-
+    /*!
+     * Get the class ID for an class name, (\a className), returns -1 if not found
+     */
     int id = -1;
 
     QSqlQuery query(db);
@@ -210,7 +227,10 @@ int LabelProject::getClassId(QString className){
 }
 
 bool LabelProject::getLabels(QString fileName, QList<BoundingBox> &bboxes){
-
+    /*!
+     * Get the labels for a given image  (at absolute path \a fileName) and puts them in the provided list: \a bboxes. Note \a bboxes will be emptied.
+     * Returns false if the query failed.
+     */
     bool res = false;
     bboxes.clear();
     int image_id = getImageId(fileName);
@@ -247,7 +267,10 @@ bool LabelProject::getLabels(QString fileName, QList<BoundingBox> &bboxes){
 }
 
 bool LabelProject::removeLabel(QString fileName, BoundingBox bbox){
-
+    /*!
+     * Remove a label given an absolute path  (\a fileName) and the bounding box  (\a bbox). Returns false
+     * if the query failed.
+     */
     int image_id = getImageId(fileName);
     int class_id = getClassId(bbox.classname);
 
@@ -276,9 +299,12 @@ bool LabelProject::removeLabel(QString fileName, BoundingBox bbox){
     return res;
 }
 
-bool LabelProject::removeClass(QString classname){
-
-    int class_id = getClassId(classname);
+bool LabelProject::removeClass(QString className){
+    /*!
+     * Remove a class given a class name (\a className). Also removes all labels with that class. Returns false
+     * if the query failed.
+     */
+    int class_id = getClassId(className);
 
     bool res = false;
 
@@ -312,6 +338,10 @@ bool LabelProject::removeClass(QString classname){
 
 bool LabelProject::removeImage(QString fileName){
 
+    /*!
+     * Remove an image given an absolute path (\a fileName). Also removes all labels for that image. Returns false
+     * if the query failed.
+     */
     int image_id = getImageId(fileName);
 
     bool res = false;
@@ -346,6 +376,10 @@ bool LabelProject::removeImage(QString fileName){
 
 bool LabelProject::addLabel(QString fileName, BoundingBox bbox)
 {
+    /*!
+     * Add a label given an absolute path (\a fileName) and the bounding box (\a bbox). Returns false
+     * if the query failed.
+     */
     bool res = false;
 
     int image_id = getImageId(fileName);
@@ -375,7 +409,9 @@ bool LabelProject::addLabel(QString fileName, BoundingBox bbox)
 
 
 int LabelProject::addImageFolder(QString path){
-
+    /*!
+     * Add all images in a folder given an absolute \a path to the directory. Returns the number of images successfully added.
+     */
     QDir dir(path);
     int number_added = 0;
 
@@ -406,6 +442,10 @@ int LabelProject::addImageFolder(QString path){
 
 bool LabelProject::addClass(QString className)
 {
+    /*!
+     * Add a class with name \a className. Returns false
+     * if the query failed.
+     */
     bool res = false;
 
     QSqlQuery query(db);
@@ -427,7 +467,7 @@ LabelProject::~LabelProject()
      * Destructor, closes the database if it's open.
      */
 
-    if(db.open()){
+    if(db.isOpen()){
         db.close();
     }
 }
