@@ -1,4 +1,4 @@
-#DeepLabel
+# DeepLabel
 
 DeepLabel is a cross-platform tool for annotating images with labelled bounding boxes. A typical use-case for the program is labelling ground truth data for object-detection machine learning applications.
 
