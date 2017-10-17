@@ -210,8 +210,8 @@ void ImageLabel::keyPressEvent(QKeyEvent *event)
         rubberBand->setGeometry(QRect(bbox_origin, QSize()));
         bbox_state = WAIT_START;
 
-    }else if(event->key() == Qt::Key_Space){
-        if(rubberBand->width() > 0 and rubberBand->height() > 0){
+    }else if(event->key() == Qt::Key_Space && bbox_state == DRAWING_BBOX){
+        if(rubberBand->width() > 0 && rubberBand->height() > 0){
 
             auto new_rect = QRect(bbox_origin, bbox_final).normalized();
 

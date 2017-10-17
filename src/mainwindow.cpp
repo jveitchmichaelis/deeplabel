@@ -35,8 +35,15 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionSelect_Tool, SIGNAL(triggered(bool)), this, SLOT(setSelectMode()));
 
     connect(ui->classComboBox, SIGNAL(currentIndexChanged(QString)), currentImage, SLOT(setClassname(QString)));
+    connect(ui->changeImageButton, SIGNAL(clicked(bool)), this, SLOT(changeImage()));
+    connect(ui->imageNumberSpinbox, SIGNAL(editingFinished()), this, SLOT(changeImage()));
 
     project = new LabelProject(this);
+}
+
+void MainWindow::changeImage(){
+    current_index = ui->imageNumberSpinbox->value();
+    display();
 }
 
 void MainWindow::setDrawMode(){
@@ -63,10 +70,10 @@ void MainWindow::openProject()
             initDisplay();
             ui->imageGroupBox->setEnabled(true);
             ui->labelGroupBox->setEnabled(true);
+            ui->navigationGroupBox->setEnabled(true);
         }else{
             QMessageBox::warning(this,tr("Remove Image"), tr("Failed to open project."));
         }
-
     }
 
     return;
@@ -83,6 +90,7 @@ void MainWindow::updateImageList(){
     project->getImageList(images);
     number_images = images.size();
     ui->imageProgressBar->setMaximum(number_images-1);
+    ui->imageNumberSpinbox->setMaximum(number_images-1);
 }
 
 void MainWindow::updateClassList(){
@@ -145,8 +153,7 @@ void MainWindow::initDisplay(){
 
     if(number_images != 0){
         current_index = 0;
-        current_imagepath = images.at(current_index);
-        display(current_imagepath);
+        display();
     }
 }
 
@@ -164,8 +171,7 @@ void MainWindow::nextImage(){
         current_index++;
     }
 
-    current_imagepath = images.at(current_index);
-    display(images.at(current_index));
+    display();
 }
 
 void MainWindow::previousImage(){
@@ -182,23 +188,25 @@ void MainWindow::previousImage(){
       current_index--;
     }
 
-    current_imagepath = images.at(current_index);
-    display(images.at(current_index));
+    display();
 }
 
-void MainWindow::display(QString fileName){
+void MainWindow::display(){
 
-    pixmap.load(fileName);
+    current_imagepath = images.at(current_index);
+    pixmap.load(current_imagepath);
 
     if(pixmap.isNull()){
         qDebug() << "Null pixmap?";
     }else{
 
         ui->imageProgressBar->setValue(current_index);
+        ui->imageNumberSpinbox->setValue(current_index);
+        ui->imageIndexLabel->setText(QString("%1/%2").arg(current_index).arg(number_images));
         currentImage->setPixmap(pixmap);
         updateLabels();
 
-        auto image_info = QFileInfo(fileName);
+        auto image_info = QFileInfo(current_imagepath);
         ui->filenameLabel->setText(image_info.fileName());
         ui->filetypeLabel->setText(image_info.completeSuffix());
         ui->sizeLabel->setText(QString("%1 kB").arg(image_info.size() / 1000));

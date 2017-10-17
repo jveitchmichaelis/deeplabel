@@ -47,13 +47,14 @@ private slots:
     void addImageFolder(void);
     void nextImage(void);
     void previousImage(void);
-    void display(QString fileName);
+    void display();
     void addLabel(BoundingBox bbox);
     void removeLabel(BoundingBox bbox);
     void removeClass(void);
     void removeImage(void);
     void setDrawMode(void);
     void setSelectMode(void);
+    void changeImage(void);
 
 signals:
     void selectedClass(QString);
