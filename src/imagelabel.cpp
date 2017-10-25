@@ -207,10 +207,13 @@ void ImageLabel::keyPressEvent(QKeyEvent *event)
     if(event->key() == Qt::Key_Backspace || event->key() == Qt::Key_Delete){
         emit removeLabel(selected_bbox);
     }else if(event->key() == Qt::Key_Escape){
-        rubberBand->setGeometry(QRect(bbox_origin, QSize()));
-        bbox_state = WAIT_START;
+        if(bbox_state == WAIT_START){
 
-    }else if(event->key() == Qt::Key_Space && bbox_state == DRAWING_BBOX){
+        }else{
+            rubberBand->setGeometry(QRect(bbox_origin, QSize()));
+            bbox_state = WAIT_START;
+        }
+    }else if(event->key() == Qt::Key_Space && bbox_state == WAIT_START){
         if(rubberBand->width() > 0 && rubberBand->height() > 0){
 
             auto new_rect = QRect(bbox_origin, bbox_final).normalized();
@@ -229,7 +232,11 @@ void ImageLabel::keyPressEvent(QKeyEvent *event)
 
             rubberBand->setGeometry(QRect(bbox_origin, QSize()));
             drawBoundingBoxes();
-        }
+
+    }else if(event->key() == 'o'){
+        emit setOccluded(selected_bbox);
+        drawBoundingBoxes();
+    }
     }else{
         event->ignore();
     }

@@ -299,6 +299,40 @@ bool LabelProject::removeLabel(QString fileName, BoundingBox bbox){
     return res;
 }
 
+bool LabelProject::setOccluded(QString fileName, BoundingBox bbox, int occluded){
+    /*!
+     * Set a label to be occluded. Returns false
+     * if the query failed.
+     */
+    int image_id = getImageId(fileName);
+    int class_id = getClassId(bbox.classname);
+
+    bool res = false;
+
+    if(image_id > 0 && class_id > 0){
+        QSqlQuery query(db);
+
+        query.prepare("UPDATE labels SET occluded = :occluded WHERE (image_id = :image_id AND class_id = :class_id"
+                      " AND x = :x AND y = :y AND width = :width AND height = :height)");
+        query.bindValue(":image_id", image_id);
+        query.bindValue(":class_id", class_id);
+        query.bindValue(":x", bbox.rect.x());
+        query.bindValue(":y", bbox.rect.y());
+        query.bindValue(":width", bbox.rect.width());
+        query.bindValue(":height", bbox.rect.height());
+        query.bindValue(":occluded", occluded);
+
+        res = query.exec();
+
+        if(!res){
+            qDebug() << query.lastError();
+        }
+
+    }
+
+    return res;
+}
+
 bool LabelProject::removeClass(QString className){
     /*!
      * Remove a class given a class name (\a className). Also removes all labels with that class. Returns false

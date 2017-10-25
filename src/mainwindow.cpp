@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionPreviousImage, SIGNAL(triggered(bool)), this, SLOT(previousImage()));
 
     connect(ui->addClassButton, SIGNAL(clicked(bool)), this, SLOT(addClass()));
+    connect(ui->newClassText, SIGNAL(editingFinished()), this, SLOT(addClass()));
 
     currentImage = new ImageLabel(this);
     ui->scrollAreaWidgetContents->layout()->setAlignment(Qt::AlignHCenter);
@@ -135,6 +136,7 @@ void MainWindow::addClass(){
 
     if(new_class != "" && !classes.contains(new_class)){
         project->addClass(new_class);
+        ui->newClassText->clear();
         updateClassList();
     }
 }
@@ -299,7 +301,11 @@ void MainWindow::exportData(){
                                                     openDir);
 
     if(path != ""){
-        KittiExporter exporter(project, this);
+        KittiExporter exporter(project);
+        QThread *export_thread = new QThread;
+
+        exporter.moveToThread(export_thread);
+
         exporter.setOutputFolder(path);
         exporter.splitData();
         exporter.process();

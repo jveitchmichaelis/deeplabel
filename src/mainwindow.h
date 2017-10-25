@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QThread>
 #include <QFileDialog>
 #include <imagelabel.h>
 #include <labelproject.h>

@@ -34,6 +34,7 @@ public:
 signals:
     void newLabel(BoundingBox);
     void removeLabel(BoundingBox);
+    void setOccluded(BoundingBox);
 
 public slots:
     void setPixmap ( const QPixmap & );

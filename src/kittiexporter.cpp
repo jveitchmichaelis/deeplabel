@@ -57,14 +57,14 @@ void KittiExporter::appendLabel(QString label_filename, QList<BoundingBox> label
             QString text;
 
             text += label.classname;
+            text += " 0.0";
             text += " 0";
-            text += " 0";
-            text += " 0";
-            text += QString(" %1").arg(label.rect.left() / scale_x);
-            text += QString(" %2").arg(label.rect.right() / scale_x);
-            text += QString(" %3").arg(label.rect.top() / scale_y);
-            text += QString(" %4").arg(label.rect.bottom() / scale_y);
-            text += " 0 0 0 0 0 0 0 0\n";
+            text += " 0.0";
+            text += QString(" %1").arg(label.rect.left() * scale_x);
+            text += QString(" %2").arg(label.rect.top() * scale_x);
+            text += QString(" %3").arg(label.rect.right() * scale_y);
+            text += QString(" %4").arg(label.rect.bottom() * scale_y);
+            text += " 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n";
 
             f.write(text.toUtf8());
 
@@ -74,7 +74,13 @@ void KittiExporter::appendLabel(QString label_filename, QList<BoundingBox> label
 }
 
 bool KittiExporter::saveImage(QString input, QString output, double &scale_x, double &scale_y){
-    return true;
+    cv::Mat image = cv::imread(input.toStdString());
+    cv::Size imsize;
+
+    if(scale_x != 1 || scale_y !=1)
+        cv::resize(image, image, imsize, scale_x, scale_y);
+
+    return cv::imwrite(output.toStdString(), image);
 }
 
 int KittiExporter::processSet(QString folder, QList<QString> images, int i){
@@ -84,6 +90,7 @@ int KittiExporter::processSet(QString folder, QList<QString> images, int i){
 
     QString image;
     QList<BoundingBox> labels;
+    double scale_x=0.5, scale_y=0.5;
 
     foreach(image, images){
         project->getLabels(image, labels);

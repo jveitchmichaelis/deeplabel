@@ -2,9 +2,11 @@
 #define KITTIEXPORTER_H
 
 #include <QObject>
+#include <QImageReader>
 #include <QFileDialog>
 #include <boundingbox.h>
 #include <labelproject.h>
+#include <opencv2/opencv.hpp>
 
 class KittiExporter : public QObject
 {
@@ -31,14 +33,14 @@ private:
     QString output_folder;
 
 public slots:
-    void splitData(float split=0.75, bool shuffle=true);
+    void splitData(float split=0.9, bool shuffle=true);
     bool setOutputFolder(QString folder);
     void process();
 
 private:
     void appendLabel(QString file, QList<BoundingBox> labels, double scale_x=1, double scale_y=1);
     int processSet(QString folder, QList<QString> images, int i);
-    bool saveImage(QString input, QString output);
+    bool saveImage(QString input, QString output, double &scale_x, double &scale_y);
 };
 
 #endif // KITTIEXPORTER_H
