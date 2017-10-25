@@ -67,11 +67,7 @@ These fields are the bare minimum and more may be added later (see note on descr
 
 #### Export format
 
-Some common export formats are provided:
-
-- KITTI
-- Pascal VOC
-- YOLO
+Some common export formats are provided in-software.
 
 Since the labelling metadata is in the sqlite database, it should be fairly easy to write a Python script (or whatever) to convert the output to your preferred system.
 
