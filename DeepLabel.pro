@@ -22,6 +22,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+macx{
+CONFIG += link_pkgconfig
+PKGCONFIG += opencv
+}
+
 # For building in a single folder
 CONFIG(debug, debug|release) {
     DESTDIR = debug
@@ -84,4 +89,9 @@ CONFIG( debug, debug|release ) {
 #  warning($${DEPLOY_COMMAND} $${DEPLOY_TARGET})
 
 # Use += instead of = if you use multiple QMAKE_POST_LINKs
-QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET}
+win32 {
+    QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET}
+}
+macx {
+    QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET} -dmg
+}

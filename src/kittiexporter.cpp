@@ -90,7 +90,7 @@ int KittiExporter::processSet(QString folder, QList<QString> images, int i){
 
     QString image;
     QList<BoundingBox> labels;
-    double scale_x=0.5, scale_y=0.5;
+    double scale_x=1, scale_y=1;
 
     foreach(image, images){
         project->getLabels(image, labels);

@@ -12,6 +12,8 @@ A typical workflow for DeepLabel is:
 4. Label the images
 5. Export data in the desired format (e.g. KITTI, Pascal VOC)
 
+Currently only KITTI format is supported, but this should change shortly.
+
 Installation
 --
 
@@ -19,7 +21,9 @@ Clone the repo, open the pro file in Qt Creator and build. Deployment is automat
 
 It's recommended that you use Qt5, but Qt4 will probably work. You need to have Qt's SQL extensions installed.
 
-Currently this is a pure Qt project, but there are some limitations to what Qt can do with images. In particular, scaling sucks (even with `Qt::SmoothTransform`).
+This is mostly a pure Qt project, but there are some limitations to what Qt can do with images. In particular, scaling sucks (even with `Qt::SmoothTransform`). Qt's image reader is also not particularly robust, so OpenCV is used there. OpenCV is also used for image augmentation. On OS X it's expected that you have `pkg-config` installed to handle dependencies.
+
+`madeployqt` is automatically run after compilation, and on OS X will build a `.dmg` file. This does have the irritating side effect of linking and copying every `dylib` OpenCV has to offer so feel free to dig into the package and delete some of the dylibs that you don't need. This is a tradeoff between output file size and convenience. The main dependencies are `opencv_core`, `opencv_imgcodecs`, and `opencv_imgproc`. Unfortunately `core` and `imgproc` are by far the largest library files...
 
 Usage
 --
@@ -32,7 +36,7 @@ If you need to delete a label, switch to **select** mode. Click on a rectangle, 
 
 All changes are immediately relected in the database.
 
-Navigate through images using the left/right buttons. There is a progress bar to indicate how far through the dataset you've labelled.
+Navigate through images using the left/right or a/d keys. You should find a/d to be quite a natural way of navigating without moving your left hand. There is a progress bar to indicate how far through the dataset you've labelled.
 
 Once you're done labelling, open the export menu to copy and rename your images and generate label files.
 
