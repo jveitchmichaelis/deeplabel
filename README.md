@@ -1,6 +1,10 @@
 # DeepLabel
 
+![Deeplabel Interface](gui_example.png)
+
 DeepLabel is a cross-platform tool for annotating images with labelled bounding boxes. A typical use-case for the program is labelling ground truth data for object-detection machine learning applications.
+
+**This program is functional, but very much a work in progresss! Expect bugs and crashes :)**
 
 DeepLabel was built with convenience in mind. Image locations, classes and labels are stored in a local sqlite database (called a _project_, in the application). When a label is added or removed, this is immediately reflected in the database.
 
@@ -67,7 +71,7 @@ These fields are the bare minimum and more may be added later (see note on descr
 
 #### Export format
 
-Some common export formats are provided in-software.
+Currently KITTI formatting is provided in-software. I hope to add others e.g. VOC or yolo in the future.
 
 Since the labelling metadata is in the sqlite database, it should be fairly easy to write a Python script (or whatever) to convert the output to your preferred system.
 

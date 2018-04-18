@@ -90,8 +90,8 @@ CONFIG( debug, debug|release ) {
 
 # Use += instead of = if you use multiple QMAKE_POST_LINKs
 win32 {
-    QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET}
+    #QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET}
 }
 macx {
-    QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET} -dmg
+    #QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET} -dmg
 }

@@ -253,6 +253,7 @@ bool LabelProject::getLabels(QString fileName, QList<BoundingBox> &bboxes){
             auto rec = query.record();
 
             new_bbox.classname = rec.value(rec.indexOf("name")).toString();
+            new_bbox.classid = getClassId(new_bbox.classname);
 
             new_bbox.rect.setX(rec.value(rec.indexOf("x")).toInt());
             new_bbox.rect.setY(rec.value(rec.indexOf("y")).toInt());

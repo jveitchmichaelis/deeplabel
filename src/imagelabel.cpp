@@ -150,6 +150,12 @@ void ImageLabel::mouseMoveEvent(QMouseEvent *ev){
     }
 }
 
+void ImageLabel::drawBoundingBox(BoundingBox bbox){
+    auto colour_list = QColor::colorNames();
+    QColor colour = QColor( colour_list.at(bbox.classid % colour_list.size()) );
+    drawBoundingBox(bbox, colour);
+}
+
 void ImageLabel::drawBoundingBox(BoundingBox bbox, QColor colour){
     QPainter painter;
     painter.begin(&scaled_pixmap);
@@ -165,7 +171,7 @@ void ImageLabel::drawBoundingBox(BoundingBox bbox, QColor colour){
 
     if(bbox.classname != ""){
 
-        painter.fillRect(QRect(scaled_bbox.bottomLeft(), scaled_bbox.bottomRight()+QPoint(0,-10)).normalized(), QBrush(Qt::white));
+        //painter.fillRect(QRect(scaled_bbox.bottomLeft(), scaled_bbox.bottomRight()+QPoint(0,-10)).normalized(), QBrush(Qt::white));
 
         painter.setFont(QFont("Helvetica", 10));
         painter.drawText(scaled_bbox.bottomLeft(), bbox.classname);
@@ -193,7 +199,7 @@ void ImageLabel::drawBoundingBoxes(QPoint location){
             drawBoundingBox(bbox, Qt::green);
             selected_bbox = bbox;
         }else{
-            drawBoundingBox(bbox, Qt::red);
+            drawBoundingBox(bbox);
         }
     }
 

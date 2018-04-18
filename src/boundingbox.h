@@ -9,6 +9,7 @@ typedef struct{
     QString imagepath = "";
     int occluded = 0;
     bool truncated = false;
+    int classid = 0;
 } BoundingBox;
 
 #endif // BOUNDINGBOX_H

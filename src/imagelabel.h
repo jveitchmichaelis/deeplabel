@@ -60,8 +60,10 @@ private:
 
     QList<BoundingBox> bboxes;
     BoundingBox selected_bbox;
-    void drawBoundingBox(BoundingBox bbox, QColor colour=Qt::red);
+    void drawBoundingBox(BoundingBox bbox);
+    void drawBoundingBox(BoundingBox bbox, QColor colour);
     void drawBoundingBoxes(QPoint location = QPoint());
+
 
     QRect clip(QRect bbox);
 
