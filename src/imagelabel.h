@@ -37,7 +37,7 @@ signals:
     void setOccluded(BoundingBox);
 
 public slots:
-    void setPixmap ( const QPixmap & );
+    void setPixmap ( QPixmap & );
     void setBoundingBoxes(QList<BoundingBox> input_bboxes);
     void setClassname(QString classname){current_classname = classname;}
 

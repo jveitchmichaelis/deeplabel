@@ -1,6 +1,7 @@
 #ifndef BOUNDINGBOX_H
 #define BOUNDINGBOX_H
 
+#include<QString>
 #include<QRect>
 
 typedef struct{

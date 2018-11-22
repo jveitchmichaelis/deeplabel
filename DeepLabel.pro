@@ -27,6 +27,17 @@ CONFIG += link_pkgconfig
 PKGCONFIG += opencv
 }
 
+win32{
+message("Windows")
+INCLUDEPATH += "C:/Users/Josh/Code/opencv/build/install/include"
+LIBS += -L"C:/Users/Josh/Code/opencv/build/install/x64/vc15/lib"
+CONFIG(debug, debug|release) {
+LIBS += -lopencv_core400d -lopencv_highgui400d -lopencv_imgproc400d -lopencv_imgcodecs400d
+}else{
+LIBS += -lopencv_core400 -lopencv_highgui400 -lopencv_imgproc400 -lopencv_imgcodecs400
+}
+}
+
 # For building in a single folder
 CONFIG(debug, debug|release) {
     DESTDIR = debug

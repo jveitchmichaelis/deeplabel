@@ -31,7 +31,7 @@ void ImageLabel::setSelectMode(){
     rubberBand->hide();
 }
 
-void ImageLabel::setPixmap ( const QPixmap & p)
+void ImageLabel::setPixmap ( QPixmap & p)
 {
     bboxes.clear();
     base_pixmap = p;
@@ -213,32 +213,31 @@ void ImageLabel::keyPressEvent(QKeyEvent *event)
     if(event->key() == Qt::Key_Backspace || event->key() == Qt::Key_Delete){
         emit removeLabel(selected_bbox);
     }else if(event->key() == Qt::Key_Escape){
-        if(bbox_state == WAIT_START){
-
-        }else{
             rubberBand->setGeometry(QRect(bbox_origin, QSize()));
             bbox_state = WAIT_START;
-        }
     }else if(event->key() == Qt::Key_Space && bbox_state == WAIT_START){
         if(rubberBand->width() > 0 && rubberBand->height() > 0){
 
-            auto new_rect = QRect(bbox_origin, bbox_final).normalized();
+            if(current_classname == ""){
+                qDebug() << "No class selected!";
+            }else{
+                auto new_rect = QRect(bbox_origin, bbox_final).normalized();
 
-            new_rect.setRight(new_rect.right() / scale_x);
-            new_rect.setLeft(new_rect.left() / scale_x);
-            new_rect.setTop(new_rect.top() / scale_y);
-            new_rect.setBottom(new_rect.bottom() / scale_y);
+                new_rect.setRight(new_rect.right() / scale_x);
+                new_rect.setLeft(new_rect.left() / scale_x);
+                new_rect.setTop(new_rect.top() / scale_y);
+                new_rect.setBottom(new_rect.bottom() / scale_y);
 
-            BoundingBox new_bbox;
-            new_bbox.classname = current_classname;
-            new_bbox.rect = new_rect;
+                BoundingBox new_bbox;
+                new_bbox.classname = current_classname;
+                new_bbox.rect = new_rect;
 
-            bboxes.append(new_bbox);
-            emit newLabel(new_bbox);
+                bboxes.append(new_bbox);
+                emit newLabel(new_bbox);
 
-            rubberBand->setGeometry(QRect(bbox_origin, QSize()));
-            drawBoundingBoxes();
-
+                rubberBand->setGeometry(QRect(bbox_origin, QSize()));
+                drawBoundingBoxes();
+            }
     }else if(event->key() == 'o'){
         emit setOccluded(selected_bbox);
         drawBoundingBoxes();

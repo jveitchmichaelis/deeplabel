@@ -214,10 +214,61 @@ void MainWindow::previousImage(){
     display();
 }
 
+QImage MainWindow::convert16(const cv::Mat &source){
+    short* pSource = reinterpret_cast<short*>(source.data);
+
+    QImage dest(source.cols, source.rows, QImage::Format_Grayscale8);
+    int pixelCounts = dest.width() * dest.height();
+
+    double minval, maxval;
+    cv::minMaxIdx(source, &minval, &maxval);
+    double range = maxval-minval;
+    double scale_factor = 255.0/range;
+
+    uchar* pDest = dest.bits();
+
+    for (int i = 0; i < pixelCounts; i++)
+    {
+        uchar value = static_cast<uchar>((*(pSource) - minval)*scale_factor);
+        *(pDest++) = value;
+        pSource++;
+   }
+
+   return dest;
+}
+
 void MainWindow::display(){
 
     current_imagepath = images.at(current_index);
     pixmap.load(current_imagepath);
+
+    auto image = cv::imread(current_imagepath.toStdString(), cv::IMREAD_UNCHANGED|cv::IMREAD_ANYDEPTH);
+
+    if(image.empty()) return;
+
+    display_image = image.clone();
+
+    if(image.elemSize() == 2){
+        // Filthy hack because Qt sucks...
+        QTemporaryDir dir;
+        if (dir.isValid()) {
+            convert16(display_image).save(dir.path()+"/temp.png");
+            pixmap.load(dir.path()+"/temp.png");
+        }
+    }else{
+        // Default to single channel 8-bit image
+        QImage::Format format = QImage::Format_Grayscale8;
+
+        if(display_image.channels() == 3){
+            cv::cvtColor(display_image, display_image, cv::COLOR_BGR2RGB);
+            format = QImage::Format_RGB888;
+        }else if (display_image.channels() == 4){
+            cv::cvtColor(display_image, display_image, cv::COLOR_BGRA2RGBA);
+            format = QImage::Format_RGBA8888;
+        }
+
+        pixmap.fromImage(QImage(display_image.data, display_image.cols, display_image.rows, display_image.step, format));
+    }
 
     if(pixmap.isNull()){
         qDebug() << "Null pixmap?";
@@ -231,13 +282,23 @@ void MainWindow::display(){
         ui->imageIndexLabel->setText(QString("%1/%2").arg(current_index).arg(number_images));
 
         auto image_info = QFileInfo(current_imagepath);
+        ui->imageBitDepthLabel->setText(QString("%1 bit").arg(image.elemSize() * 8));
         ui->filenameLabel->setText(image_info.fileName());
         ui->filetypeLabel->setText(image_info.completeSuffix());
         ui->sizeLabel->setText(QString("%1 kB").arg(image_info.size() / 1000));
         ui->dimensionsLabel->setText(QString("(%1, %2) px").arg(pixmap.width()).arg(pixmap.height()));
     }
+}
 
+void MainWindow::histogram(const cv::Mat &image, cv::Mat &hist){
+    int histSize = 256;
+    float range[] = { 0, 256 }; //the upper boundary is exclusive
+    const float* histRange = { range };
 
+    bool uniform = true;
+    bool accumulate = true;
+
+    calcHist( &image, 1, nullptr, cv::Mat(), hist, 1, &histSize, &histRange, uniform, accumulate);
 }
 
 void MainWindow::newProject()
@@ -258,7 +319,7 @@ void MainWindow::addImages(void){
     QString openDir = QDir::homePath();
     QStringList image_filenames = QFileDialog::getOpenFileNames(this, tr("Select image(s)"),
                                                     openDir,
-                                                    tr("Images (*.jpg, *.jpeg, *.png, *.bmp, *.tiff)"));
+                                                    tr("JPEG (*.jpg, *.jpeg, *.JPG, *.JPEG);;PNG (*.png, *.PNG);;BMP (*.bmp, *.BMP);;TIFF (*.tif, *.tiff, *.TIF, *.TIFF);;All images (*.jpg, *.jpeg, *.png, *.bmp, *.tiff)"));
 
     if(image_filenames.size() != 0){
         QString path;

@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QThread>
 #include <QFileDialog>
+#include <QTemporaryDir>
 #include <imagelabel.h>
 #include <labelproject.h>
 #include <kittiexporter.h>
@@ -17,7 +18,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 private:
@@ -25,6 +26,7 @@ private:
     LabelProject *project;
     QPixmap pixmap;
     ImageLabel *currentImage;
+    cv::Mat display_image;
 
     bool wrap_index;
     unsigned int current_index;
@@ -59,6 +61,8 @@ private slots:
     void changeImage(void);
     void enableWrap(bool enable);
     void exportData();
+    void histogram(const cv::Mat &image, cv::Mat &hist);
+    QImage convert16(const cv::Mat &source);
 
 signals:
     void selectedClass(QString);
