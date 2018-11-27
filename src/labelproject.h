@@ -26,11 +26,13 @@ public:
     bool addClass(QString className);
     bool getClassList(QList<QString> &classes);
     bool removeClass(QString className);
+    bool classInDB(QString classname);
 
     int addImageFolder(QString path);
     bool addImage(QString fileName);
     bool getImageList(QList<QString> &images);
     bool removeImage(QString fileName);
+    bool imageInDB(QString fileName);
 
     bool addLabel(QString fileName, BoundingBox bbox);
     bool getLabels(QString fileName, QList<BoundingBox> &bboxes);

@@ -9,6 +9,7 @@
 #include <QRubberBand>
 #include <QResizeEvent>
 
+#include <opencv2/opencv.hpp>
 #include<boundingbox.h>
 
 enum drawState{
@@ -30,6 +31,8 @@ public:
     virtual int heightForWidth( int width ) const;
     virtual QSize sizeHint() const;
     QPixmap scaledPixmap();
+    QList<BoundingBox> getBoundingBoxes(){return bboxes;}
+    cv::Mat getImage(){return image;}
 
 signals:
     void newLabel(BoundingBox);
@@ -38,8 +41,10 @@ signals:
 
 public slots:
     void setPixmap ( QPixmap & );
+    void setImage(cv::Mat &image){this->image = image;}
     void setBoundingBoxes(QList<BoundingBox> input_bboxes);
     void setClassname(QString classname){current_classname = classname;}
+    void addLabel(QRect rect, QString classname);
 
     void setDrawMode();
     void setDrawDragMode();
@@ -53,6 +58,7 @@ public slots:
     void keyPressEvent(QKeyEvent *event);
 
 private:
+    cv::Mat image;
     QPixmap pix;
     QPixmap base_pixmap;
     QPixmap scaled_pixmap;

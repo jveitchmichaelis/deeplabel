@@ -243,16 +243,6 @@
        <string>Navigation</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_4">
-       <item row="2" column="0">
-        <widget class="QSpinBox" name="imageNumberSpinbox">
-         <property name="maximumSize">
-          <size>
-           <width>300</width>
-           <height>16777215</height>
-          </size>
-         </property>
-        </widget>
-       </item>
        <item row="2" column="1">
         <widget class="QPushButton" name="changeImageButton">
          <property name="text">
@@ -295,6 +285,29 @@
          </property>
          <property name="format">
           <string>Image %v/%m </string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QSpinBox" name="imageNumberSpinbox">
+         <property name="maximumSize">
+          <size>
+           <width>300</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="minimum">
+          <number>1</number>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0" colspan="2">
+        <widget class="QCheckBox" name="propagateCheckBox">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Propagate label on next image</string>
          </property>
         </widget>
        </item>
@@ -361,6 +374,8 @@
    <addaction name="actionDraw_Tool"/>
    <addaction name="actionSelect_Tool"/>
    <addaction name="actionExport"/>
+   <addaction name="actionInit_Tracking"/>
+   <addaction name="actionPropagate_Tracking"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionPreviousImage">
@@ -474,6 +489,25 @@
    </property>
    <property name="toolTip">
     <string>Export Data</string>
+   </property>
+  </action>
+  <action name="actionInit_Tracking">
+   <property name="text">
+    <string>Init Tracking</string>
+   </property>
+   <property name="toolTip">
+    <string>Initialise object tracker with this image</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
+  </action>
+  <action name="actionPropagate_Tracking">
+   <property name="text">
+    <string>Propagate Tracking</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
    </property>
   </action>
  </widget>

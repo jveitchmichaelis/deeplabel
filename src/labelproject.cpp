@@ -155,6 +155,42 @@ bool LabelProject::getClassList(QList<QString> &classes)
     return res;
 }
 
+bool LabelProject::classInDB(QString className){
+    bool res = false;
+    QSqlQuery query(db);
+    query.prepare("SELECT * FROM classes WHERe (name)"
+                  "= (:name)");
+
+    query.bindValue(":name", className);
+    res = query.exec();
+
+    if(!res){
+        qDebug() << "Error: " << query.lastError();
+    }else{
+        return query.next();
+    }
+}
+
+bool LabelProject::imageInDB(QString fileName){
+    bool res = false;
+    //IF NOT EXISTS(SELECT * FROM images where (path) = (:PATH))
+
+    QSqlQuery query(db);
+    query.prepare("SELECT * FROM images WHERe (path)"
+                  "= (:path)");
+
+    query.bindValue(":path", QDir(db.databaseName()).relativeFilePath(fileName));
+    res = query.exec();
+
+    if(!res){
+        qDebug() << "Error: " << query.lastError();
+    }else{
+        return query.next();
+    }
+
+    return false;
+}
+
 bool LabelProject::addImage(QString fileName)
 {
     /*!
@@ -162,6 +198,10 @@ bool LabelProject::addImage(QString fileName)
      */
     bool res = false;
 
+    if(imageInDB(fileName)){
+        qDebug() << "Image exists!";
+        return true;
+    }
     QFileInfo check_file(fileName);
 
     if (  check_file.exists() && check_file.isFile() ){
@@ -482,6 +522,11 @@ bool LabelProject::addClass(QString className)
      * if the query failed.
      */
     bool res = false;
+
+    if(classInDB(className)){
+        qDebug() << "Class exists!";
+        return true;
+    }
 
     QSqlQuery query(db);
     query.prepare("INSERT INTO classes (name)"

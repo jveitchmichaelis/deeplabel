@@ -32,9 +32,9 @@ message("Windows")
 INCLUDEPATH += "C:/Users/Josh/Code/opencv/build/install/include"
 LIBS += -L"C:/Users/Josh/Code/opencv/build/install/x64/vc15/lib"
 CONFIG(debug, debug|release) {
-LIBS += -lopencv_core400d -lopencv_highgui400d -lopencv_imgproc400d -lopencv_imgcodecs400d
+LIBS += -lopencv_core400d -lopencv_highgui400d -lopencv_imgproc400d -lopencv_imgcodecs400d -lopencv_tracking400d
 }else{
-LIBS += -lopencv_core400 -lopencv_highgui400 -lopencv_imgproc400 -lopencv_imgcodecs400
+LIBS += -lopencv_core400 -lopencv_highgui400 -lopencv_imgproc400 -lopencv_imgcodecs400 -lopencv_tracking400
 }
 }
 

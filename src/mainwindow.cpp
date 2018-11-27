@@ -19,6 +19,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->addClassButton, SIGNAL(clicked(bool)), this, SLOT(addClass()));
     connect(ui->newClassText, SIGNAL(editingFinished()), this, SLOT(addClass()));
 
+    connect(ui->actionInit_Tracking, SIGNAL(triggered(bool)), this, SLOT(setupTracking()));
+    connect(ui->actionPropagate_Tracking, SIGNAL(triggered(bool)), this, SLOT(propagateTracking()));
+    connect(ui->propagateCheckBox, SIGNAL(clicked(bool)), this, SLOT(toggleAutoPropagate(bool)));
+
     currentImage = new ImageLabel(this);
     ui->scrollAreaWidgetContents->layout()->setAlignment(Qt::AlignHCenter);
     ui->scrollAreaWidgetContents->layout()->setAlignment(Qt::AlignVCenter);
@@ -54,8 +58,39 @@ MainWindow::MainWindow(QWidget *parent) :
 #ifdef WIN32
     ui->imageProgressBar->setStyleSheet("QProgressBar::chunk {background-color: #3add36; width: 1px;}");
 #endif
-
     project = new LabelProject(this);
+}
+
+void MainWindow::toggleAutoPropagate(bool state){
+    track_previous = state;
+}
+
+cv::Ptr<cv::Tracker> MainWindow::createTrackerByName(trackerType type)
+{
+  using namespace cv;
+  using namespace std;
+
+  Ptr<Tracker> tracker;
+  if (type == BOOSTING)
+    tracker = TrackerBoosting::create();
+  else if (type == MIL)
+    tracker = TrackerMIL::create();
+  else if (type == KCF)
+    tracker = TrackerKCF::create();
+  else if (type == TLD)
+    tracker = TrackerTLD::create();
+  else if (type == MEDIANFLOW)
+    tracker = TrackerMedianFlow::create();
+  else if (type == GOTURN)
+    tracker = TrackerGOTURN::create();
+  else if (type == MOSSE)
+    tracker = TrackerMOSSE::create();
+  else if (type == CSRT)
+    tracker = TrackerCSRT::create();
+  else {
+    cout << "Incorrect tracker specified";
+  }
+  return tracker;
 }
 
 void MainWindow::enableWrap(bool enable){
@@ -64,8 +99,8 @@ void MainWindow::enableWrap(bool enable){
 
 
 void MainWindow::changeImage(){
-    current_index = ui->imageNumberSpinbox->value();
-    display();
+    current_index = ui->imageNumberSpinbox->value()-1;
+    updateDisplay();
 }
 
 void MainWindow::setDrawMode(){
@@ -90,9 +125,6 @@ void MainWindow::openProject()
     if(fileName != ""){
         if(project->loadDatabase(fileName)){
             initDisplay();
-            ui->imageGroupBox->setEnabled(true);
-            ui->labelGroupBox->setEnabled(true);
-            ui->navigationGroupBox->setEnabled(true);
         }else{
             QMessageBox::warning(this,tr("Remove Image"), tr("Failed to open project."));
         }
@@ -101,8 +133,44 @@ void MainWindow::openProject()
     return;
 }
 
+void MainWindow::propagateTracking(){
+
+    // If there are no labels, and we're tracking the previous frame
+    // propagate the bounding boxes. Otherwise we assume that the
+    // current labels are the correct ones and should override.
+    for(auto& bbox_class : classes){
+
+        // Skip uninitialised tracker
+        if(tracker_map.find(bbox_class.toStdString()) == tracker_map.end()) continue;
+
+        qDebug() << "Updating tracker: " << bbox_class;
+
+        auto tracker = tracker_map[bbox_class.toStdString()];
+        bool res = tracker->update(currentImage->getImage());
+
+        if(!res) continue;
+
+        // Add the new object labels
+        for(auto &bbox : tracker->getObjects()){
+
+            cv::imwrite("bbox_post.png", currentImage->getImage()(bbox));
+
+            QRect new_bbox;
+            new_bbox.setX(bbox.x);
+            new_bbox.setY(bbox.y);
+            new_bbox.setWidth(bbox.width);
+            new_bbox.setHeight(bbox.height);
+
+            currentImage->addLabel(new_bbox, bbox_class);
+        }
+    }
+
+    updateLabels();
+}
+
 void MainWindow::updateLabels(){
     QList<BoundingBox> bboxes;
+
     project->getLabels(current_imagepath, bboxes);
     ui->instanceCountLabel->setNum(bboxes.size());
     currentImage->setBoundingBoxes(bboxes);
@@ -111,8 +179,20 @@ void MainWindow::updateLabels(){
 void MainWindow::updateImageList(){
     project->getImageList(images);
     number_images = images.size();
-    ui->imageProgressBar->setMaximum(number_images-1);
-    ui->imageNumberSpinbox->setMaximum(number_images-1);
+    ui->imageProgressBar->setMaximum(number_images);
+    ui->imageNumberSpinbox->setMaximum(number_images);
+
+    if(number_images == 0){
+        ui->changeImageButton->setDisabled(true);
+        ui->imageNumberSpinbox->setDisabled(true);
+        ui->imageProgressBar->setDisabled(true);
+        ui->propagateCheckBox->setDisabled(true);
+    }else{
+        ui->changeImageButton->setEnabled(true);
+        ui->imageNumberSpinbox->setEnabled(true);
+        ui->imageProgressBar->setEnabled(true);
+        ui->propagateCheckBox->setEnabled(true);
+    }
 }
 
 void MainWindow::updateClassList(){
@@ -126,8 +206,13 @@ void MainWindow::updateClassList(){
     }
 
     if(classes.size() > 0){
+        ui->classComboBox->setEnabled(true);
+        ui->removeClassButton->setEnabled(true);
         current_class = ui->classComboBox->currentText();
         emit selectedClass(current_class);
+    }else{
+        ui->classComboBox->setDisabled(true);
+        ui->removeClassButton->setDisabled(true);
     }
 }
 
@@ -156,6 +241,7 @@ void MainWindow::removeImage(){
                                                   tr("Really delete image and associated labels?"))){
         project->removeImage(current_imagepath);
         updateImageList();
+        updateDisplay();
     }
 
 }
@@ -176,7 +262,35 @@ void MainWindow::initDisplay(){
 
     if(number_images != 0){
         current_index = 0;
-        display();
+        ui->imageGroupBox->setEnabled(true);
+        ui->labelGroupBox->setEnabled(true);
+        ui->navigationGroupBox->setEnabled(true);
+        updateDisplay();
+    }
+}
+
+cv::Rect2d MainWindow::qrect2cv(QRect rect){
+    return cv::Rect2d(rect.x(), rect.y(), rect.width(),rect.height());
+}
+
+void MainWindow::setupTracking(){
+    auto bboxes = currentImage->getBoundingBoxes();
+
+    // If we are tracking and we have some labelled boxes already
+    if(bboxes.size() > 0){
+
+        // Make a tracker per label class
+        for(auto &label : classes){
+            tracker_map[label.toStdString()] = cv::MultiTracker::create();
+        }
+
+        // Add objects to the multi-tracker
+        for(auto &bbox : bboxes){
+            auto tracker = createTrackerByName(CSRT);
+            tracker_map[bbox.classname.toStdString()]->add(tracker, currentImage->getImage(), qrect2cv(bbox.rect));
+            //cv::imwrite("bbox_pre.png", currentImage->getImage()(qrect2cv(bbox.rect)));
+        }
+
     }
 }
 
@@ -194,7 +308,10 @@ void MainWindow::nextImage(){
         current_index++;
     }
 
-    display();
+    updateDisplay();
+
+    // Only auto-propagtae if we've enabled it and there are no boxes in the image already.
+    if(track_previous && currentImage->getBoundingBoxes().size() == 0) propagateTracking();
 }
 
 void MainWindow::previousImage(){
@@ -211,7 +328,7 @@ void MainWindow::previousImage(){
       current_index--;
     }
 
-    display();
+    updateDisplay();
 }
 
 QImage MainWindow::convert16(const cv::Mat &source){
@@ -237,7 +354,7 @@ QImage MainWindow::convert16(const cv::Mat &source){
    return dest;
 }
 
-void MainWindow::display(){
+void MainWindow::updateDisplay(){
 
     current_imagepath = images.at(current_index);
     pixmap.load(current_imagepath);
@@ -274,12 +391,14 @@ void MainWindow::display(){
         qDebug() << "Null pixmap?";
     }else{
 
+        currentImage->setImage(image);
         currentImage->setPixmap(pixmap);
+
         updateLabels();
 
-        ui->imageProgressBar->setValue(current_index);
-        ui->imageNumberSpinbox->setValue(current_index);
-        ui->imageIndexLabel->setText(QString("%1/%2").arg(current_index).arg(number_images));
+        ui->imageProgressBar->setValue(current_index+1);
+        ui->imageNumberSpinbox->setValue(current_index+1);
+        ui->imageIndexLabel->setText(QString("%1/%2").arg(current_index+1).arg(number_images));
 
         auto image_info = QFileInfo(current_imagepath);
         ui->imageBitDepthLabel->setText(QString("%1 bit").arg(image.elemSize() * 8));
@@ -323,16 +442,29 @@ void MainWindow::addImages(void){
 
     if(image_filenames.size() != 0){
         QString path;
+
+        QDialog image_load_progress(this);
+        image_load_progress.setModal(true);
+        image_load_progress.show();
+
+        auto bar = new QProgressBar();
+        bar->setMaximum(image_filenames.size());
+
+        image_load_progress.setLayout(new QVBoxLayout());
+
+        image_load_progress.layout()->addWidget(bar);
+        int i=0;
+
         foreach(path, image_filenames){
             project->addImage(path);
+            bar->setValue(i++);
         }
+
+        image_load_progress.close();
     }
 
     updateImageList();
-
-    if(number_images > 0){
-        initDisplay();
-    }
+    initDisplay();
 
     return;
 }

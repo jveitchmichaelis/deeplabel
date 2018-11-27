@@ -207,6 +207,17 @@ void ImageLabel::drawBoundingBoxes(QPoint location){
 
 }
 
+void ImageLabel::addLabel(QRect rect, QString classname){
+    BoundingBox new_bbox;
+    new_bbox.classname = classname;
+    new_bbox.rect = rect;
+
+    bboxes.append(new_bbox);
+    emit newLabel(new_bbox);
+
+    drawBoundingBoxes();
+}
+
 void ImageLabel::keyPressEvent(QKeyEvent *event)
 {
 
@@ -228,15 +239,9 @@ void ImageLabel::keyPressEvent(QKeyEvent *event)
                 new_rect.setTop(new_rect.top() / scale_y);
                 new_rect.setBottom(new_rect.bottom() / scale_y);
 
-                BoundingBox new_bbox;
-                new_bbox.classname = current_classname;
-                new_bbox.rect = new_rect;
-
-                bboxes.append(new_bbox);
-                emit newLabel(new_bbox);
+                addLabel(new_rect, current_classname);
 
                 rubberBand->setGeometry(QRect(bbox_origin, QSize()));
-                drawBoundingBoxes();
             }
     }else if(event->key() == 'o'){
         emit setOccluded(selected_bbox);
