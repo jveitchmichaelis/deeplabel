@@ -243,13 +243,6 @@
        <string>Navigation</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_4">
-       <item row="2" column="1">
-        <widget class="QPushButton" name="changeImageButton">
-         <property name="text">
-          <string>Jump to image</string>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="0">
         <widget class="QLabel" name="imageIndexLabel">
          <property name="text">
@@ -257,7 +250,30 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
+       <item row="2" column="0">
+        <widget class="QSpinBox" name="imageNumberSpinbox">
+         <property name="maximumSize">
+          <size>
+           <width>300</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="minimum">
+          <number>1</number>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0" colspan="2">
+        <widget class="QCheckBox" name="propagateCheckBox">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Propagate label on next image</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1" colspan="2">
         <widget class="QProgressBar" name="imageProgressBar">
          <property name="minimumSize">
           <size>
@@ -288,26 +304,17 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
-        <widget class="QSpinBox" name="imageNumberSpinbox">
-         <property name="maximumSize">
-          <size>
-           <width>300</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="minimum">
-          <number>1</number>
+       <item row="2" column="1" colspan="2">
+        <widget class="QPushButton" name="changeImageButton">
+         <property name="text">
+          <string>Jump to image</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="0" colspan="2">
-        <widget class="QCheckBox" name="propagateCheckBox">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
+       <item row="3" column="0" colspan="3">
+        <widget class="QPushButton" name="nextUnlabelledButton">
          <property name="text">
-          <string>Propagate label on next image</string>
+          <string>Next unlabelled</string>
          </property>
         </widget>
        </item>

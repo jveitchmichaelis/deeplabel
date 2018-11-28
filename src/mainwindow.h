@@ -75,6 +75,7 @@ private slots:
     cv::Rect2d qrect2cv(QRect rect);
     void setupTracking();
     void toggleAutoPropagate(bool state);
+    void nextUnlabelled();
 
 signals:
     void selectedClass(QString);

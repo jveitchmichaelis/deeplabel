@@ -36,9 +36,12 @@ public:
 
     bool addLabel(QString fileName, BoundingBox bbox);
     bool getLabels(QString fileName, QList<BoundingBox> &bboxes);
+    bool getLabels(int imageId, QList<BoundingBox> &bboxes);
     bool removeLabel(QString fileName, BoundingBox bbox);
 
     bool setOccluded(QString fileName, BoundingBox bbox, int occluded);
+
+    int getNextUnlabelled(QString fileName);
 
     //QString getClassName(int classId);
     int getImageId(QString fileName);

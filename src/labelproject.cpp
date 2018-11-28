@@ -267,13 +267,17 @@ int LabelProject::getClassId(QString className){
 }
 
 bool LabelProject::getLabels(QString fileName, QList<BoundingBox> &bboxes){
+    bboxes.clear();
+    int image_id = getImageId(fileName);
+    return getLabels(image_id, bboxes);
+}
+
+bool LabelProject::getLabels(int image_id, QList<BoundingBox> &bboxes){
     /*!
      * Get the labels for a given image  (at absolute path \a fileName) and puts them in the provided list: \a bboxes. Note \a bboxes will be emptied.
      * Returns false if the query failed.
      */
     bool res = false;
-    bboxes.clear();
-    int image_id = getImageId(fileName);
 
     if(image_id > 0){
         QSqlQuery query(db);
@@ -409,6 +413,25 @@ bool LabelProject::removeClass(QString className){
     }
 
     return res;
+}
+
+int LabelProject::getNextUnlabelled(QString fileName){
+    int image_id = getImageId(fileName);
+
+    // Lazy - optimise this later.
+    QList<QString> images;
+    getImageList(images);
+    int num_images = images.size();
+
+    QList<BoundingBox> bboxes;
+    for(int i=image_id; i < num_images; i++){
+        bboxes.clear();
+        getLabels(i, bboxes);
+
+        if(bboxes.size() == 0) return i;
+    }
+
+    return -1;
 }
 
 bool LabelProject::removeImage(QString fileName){

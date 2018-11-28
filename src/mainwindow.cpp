@@ -23,6 +23,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionPropagate_Tracking, SIGNAL(triggered(bool)), this, SLOT(propagateTracking()));
     connect(ui->propagateCheckBox, SIGNAL(clicked(bool)), this, SLOT(toggleAutoPropagate(bool)));
 
+    connect(ui->nextUnlabelledButton, SIGNAL(clicked(bool)), this, SLOT(nextUnlabelled()));
+
     currentImage = new ImageLabel(this);
     ui->scrollAreaWidgetContents->layout()->setAlignment(Qt::AlignHCenter);
     ui->scrollAreaWidgetContents->layout()->setAlignment(Qt::AlignVCenter);
@@ -271,6 +273,15 @@ void MainWindow::initDisplay(){
 
 cv::Rect2d MainWindow::qrect2cv(QRect rect){
     return cv::Rect2d(rect.x(), rect.y(), rect.width(),rect.height());
+}
+
+void MainWindow::nextUnlabelled(){
+    int n = project->getNextUnlabelled(current_imagepath);
+
+    if(n != -1){
+        ui->imageNumberSpinbox->setValue(n);
+        changeImage();
+    }
 }
 
 void MainWindow::setupTracking(){
