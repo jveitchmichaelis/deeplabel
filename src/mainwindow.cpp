@@ -135,41 +135,6 @@ void MainWindow::openProject()
     return;
 }
 
-void MainWindow::propagateTracking(){
-
-    // If there are no labels, and we're tracking the previous frame
-    // propagate the bounding boxes. Otherwise we assume that the
-    // current labels are the correct ones and should override.
-    for(auto& bbox_class : classes){
-
-        // Skip uninitialised tracker
-        if(tracker_map.find(bbox_class.toStdString()) == tracker_map.end()) continue;
-
-        qDebug() << "Updating tracker: " << bbox_class;
-
-        auto tracker = tracker_map[bbox_class.toStdString()];
-        bool res = tracker->update(currentImage->getImage());
-
-        if(!res) continue;
-
-        // Add the new object labels
-        for(auto &bbox : tracker->getObjects()){
-
-            cv::imwrite("bbox_post.png", currentImage->getImage()(bbox));
-
-            QRect new_bbox;
-            new_bbox.setX(bbox.x);
-            new_bbox.setY(bbox.y);
-            new_bbox.setWidth(bbox.width);
-            new_bbox.setHeight(bbox.height);
-
-            currentImage->addLabel(new_bbox, bbox_class);
-        }
-    }
-
-    updateLabels();
-}
-
 void MainWindow::updateLabels(){
     QList<BoundingBox> bboxes;
 
@@ -284,6 +249,101 @@ void MainWindow::nextUnlabelled(){
     }
 }
 
+QRect MainWindow::refineBoundingBox(cv::Mat image, QRect bbox){
+    // Simple connected components refinement.
+
+    QMargins margins(5,5,5,5);
+    bbox += margins;
+    auto roi = image(qrect2cv(bbox));
+
+    // First we need to do foreground/background segmentation
+
+    // Threshold input, 1 == good
+    cv::Mat roi_thresh;
+    cv::threshold(roi, roi_thresh, 0, 255, cv::THRESH_OTSU|cv::THRESH_BINARY);
+
+    cv::imwrite("roi.png", roi);
+    cv::imwrite("roi_thresh.png", roi_thresh);
+
+    auto kernel_size = cv::Size(3,3);
+    int iterations = 2;
+    auto anchor = cv::Point(-1,-1);
+    auto structure = cv::getStructuringElement(cv::MORPH_RECT, kernel_size);
+
+    cv::Mat opening;
+    cv::morphologyEx(roi_thresh, opening, cv::MORPH_OPEN, structure, anchor, iterations);
+
+    // Background area
+    iterations = 3;
+    cv::Mat background;
+    cv::dilate(opening, background, structure, anchor, iterations);
+
+    cv::imwrite("background.png", background);
+
+    // Foreground area
+    cv::Mat dist_transform;
+    cv::Mat dist_labels;
+    int mask_size = 5;
+    cv::distanceTransform(opening, dist_transform, dist_labels, cv::DIST_L2, mask_size);
+
+    cv::imwrite("distance.png", dist_transform);
+
+    cv::Mat foreground;
+    double min_val, max_val;
+    cv::minMaxIdx(dist_transform, &min_val, &max_val);
+    int thresh = 0.7*max_val;
+    cv::threshold(dist_transform, foreground, thresh, 255,
+                          cv::THRESH_BINARY);
+
+    foreground.convertTo(foreground, CV_8UC1);
+    cv::imwrite("foreground.png", foreground);
+
+
+    // Unknown region
+    cv::Mat unknown;
+    cv::subtract(background, foreground, unknown, cv::noArray(), CV_8UC1);
+
+    cv::imwrite("unknown.png", unknown);
+
+    cv::Mat markers;
+    cv::connectedComponents(foreground, markers, 8, CV_32SC1);
+    markers += 1;
+
+    auto region_id = markers.at<int>(cv::Point(markers.cols/2, markers.rows/2));
+
+    for(int i=0; i<markers.total();i++){
+        if(unknown.at<uchar>(i) == 255){
+            markers.at<float>(i) = 0;
+        }
+    }
+
+    cv::imwrite("markers.png", markers);
+
+    if(roi.channels() == 1) cv::cvtColor(roi, roi, cv::COLOR_GRAY2BGR);
+    cv::watershed(roi, markers);
+
+    markers.convertTo(markers, CV_8UC1);
+    cv::threshold(markers, markers, 0, 255, cv::THRESH_OTSU);
+    cv::imwrite("watershed.png", markers);
+
+    std::vector<std::vector<cv::Point>> contours;
+    cv::Mat hierarchy;
+    cv::findContours(markers, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);
+
+    cv::cvtColor(markers, markers, cv::COLOR_GRAY2BGR);
+    for(auto &contour : contours){
+        //cv::drawContours(markers, {contour}, 0, {0,0,255});
+        auto contour_bound = cv::boundingRect(contour);
+        cv::rectangle(markers, contour_bound, {0,0,255});
+    }
+
+    cv::imwrite("contours.png", markers);
+
+    // Size consistency?
+
+    return QRect();
+}
+
 void MainWindow::setupTracking(){
     auto bboxes = currentImage->getBoundingBoxes();
 
@@ -303,6 +363,41 @@ void MainWindow::setupTracking(){
         }
 
     }
+}
+
+void MainWindow::propagateTracking(){
+
+    // If there are no labels, and we're tracking the previous frame
+    // propagate the bounding boxes. Otherwise we assume that the
+    // current labels are the correct ones and should override.
+    for(auto& bbox_class : classes){
+
+        // Skip uninitialised tracker
+        if(tracker_map.find(bbox_class.toStdString()) == tracker_map.end()) continue;
+
+        qDebug() << "Updating tracker: " << bbox_class;
+
+        auto tracker = tracker_map[bbox_class.toStdString()];
+        bool res = tracker->update(currentImage->getImage());
+
+        if(!res) continue;
+
+        // Add the new object labels
+        for(auto &bbox : tracker->getObjects()){
+
+            QRect new_bbox;
+            new_bbox.setX(bbox.x);
+            new_bbox.setY(bbox.y);
+            new_bbox.setWidth(bbox.width);
+            new_bbox.setHeight(bbox.height);
+
+            currentImage->addLabel(new_bbox, bbox_class);
+
+            refineBoundingBox(currentImage->getImage(), new_bbox);
+        }
+    }
+
+    updateLabels();
 }
 
 void MainWindow::nextImage(){
@@ -491,7 +586,7 @@ void MainWindow::addImageFolder(void){
     }
 
     updateImageList();
-    if(number_images == 0){
+    if(number_images != 0){
         initDisplay();
     }
 

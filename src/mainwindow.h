@@ -76,6 +76,7 @@ private slots:
     void setupTracking();
     void toggleAutoPropagate(bool state);
     void nextUnlabelled();
+    QRect refineBoundingBox(cv::Mat image, QRect bbox);
 
 signals:
     void selectedClass(QString);
