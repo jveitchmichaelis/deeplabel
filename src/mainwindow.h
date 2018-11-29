@@ -5,11 +5,14 @@
 #include <QThread>
 #include <QFileDialog>
 #include <QTemporaryDir>
+#include <QtConcurrent/qtconcurrentmap.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/tracking.hpp>
 #include <imagelabel.h>
 #include <labelproject.h>
 #include <kittiexporter.h>
+#include <concurrent_vector.h>
+#include <algorithm>
 
 namespace Ui {
 class MainWindow;
@@ -29,7 +32,7 @@ private:
     QPixmap pixmap;
     ImageLabel *currentImage;
     cv::Mat display_image;
-    std::map<std::string, cv::Ptr<cv::MultiTracker>> tracker_map;
+    Concurrency::concurrent_vector<std::pair<cv::Ptr<cv::Tracker>, QString>> trackers;
 
     enum trackerType {BOOSTING, MIL, KCF, TLD, MEDIANFLOW, GOTURN, MOSSE, CSRT};
 
@@ -77,6 +80,7 @@ private slots:
     void toggleAutoPropagate(bool state);
     void nextUnlabelled();
     QRect refineBoundingBox(cv::Mat image, QRect bbox);
+
 
 signals:
     void selectedClass(QString);

@@ -8,6 +8,8 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 #include <QSqlError>
+#include <QMutex>
+#include <QMutexLocker>
 
 #include <QDebug>
 #include <QMessageBox>
@@ -54,6 +56,7 @@ public slots:
 
 private:
     QSqlDatabase db;
+    QMutex mutex;
     bool checkDatabase();
 
 };

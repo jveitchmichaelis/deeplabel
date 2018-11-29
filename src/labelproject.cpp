@@ -478,6 +478,9 @@ bool LabelProject::addLabel(QString fileName, BoundingBox bbox)
      * Add a label given an absolute path (\a fileName) and the bounding box (\a bbox). Returns false
      * if the query failed.
      */
+
+    QMutexLocker locker(&mutex);
+
     bool res = false;
 
     int image_id = getImageId(fileName);

@@ -347,22 +347,16 @@ QRect MainWindow::refineBoundingBox(cv::Mat image, QRect bbox){
 void MainWindow::setupTracking(){
     auto bboxes = currentImage->getBoundingBoxes();
 
+    trackers.clear();
+    auto image = currentImage->getImage();
+
     // If we are tracking and we have some labelled boxes already
-    if(bboxes.size() > 0){
-
-        // Make a tracker per label class
-        for(auto &label : classes){
-            tracker_map[label.toStdString()] = cv::MultiTracker::create();
-        }
-
-        // Add objects to the multi-tracker
-        for(auto &bbox : bboxes){
-            auto tracker = createTrackerByName(CSRT);
-            tracker_map[bbox.classname.toStdString()]->add(tracker, currentImage->getImage(), qrect2cv(bbox.rect));
-            //cv::imwrite("bbox_pre.png", currentImage->getImage()(qrect2cv(bbox.rect)));
-        }
-
-    }
+    QtConcurrent::blockingMap(bboxes.begin(), bboxes.end(), [&](BoundingBox &bbox)
+    {
+        auto tracker = createTrackerByName(CSRT);
+        tracker->init(image, qrect2cv(bbox.rect));
+        trackers.push_back({tracker, bbox.classname});
+    });
 }
 
 void MainWindow::propagateTracking(){
@@ -370,32 +364,26 @@ void MainWindow::propagateTracking(){
     // If there are no labels, and we're tracking the previous frame
     // propagate the bounding boxes. Otherwise we assume that the
     // current labels are the correct ones and should override.
-    for(auto& bbox_class : classes){
 
-        // Skip uninitialised tracker
-        if(tracker_map.find(bbox_class.toStdString()) == tracker_map.end()) continue;
+    QtConcurrent::blockingMap(trackers.begin(), trackers.end(), [&](auto&& tracker)
+    {
+        cv::Rect2d bbox;
 
-        qDebug() << "Updating tracker: " << bbox_class;
+        if( tracker.first->update(currentImage->getImage(), bbox)){
 
-        auto tracker = tracker_map[bbox_class.toStdString()];
-        bool res = tracker->update(currentImage->getImage());
+            QRect new_roi;
+            new_roi.setX(bbox.x);
+            new_roi.setY(bbox.y);
+            new_roi.setWidth(bbox.width);
+            new_roi.setHeight(bbox.height);
 
-        if(!res) continue;
+            BoundingBox new_bbox;
+            new_bbox.rect = new_roi;
+            new_bbox.classname = tracker.second;
 
-        // Add the new object labels
-        for(auto &bbox : tracker->getObjects()){
-
-            QRect new_bbox;
-            new_bbox.setX(bbox.x);
-            new_bbox.setY(bbox.y);
-            new_bbox.setWidth(bbox.width);
-            new_bbox.setHeight(bbox.height);
-
-            currentImage->addLabel(new_bbox, bbox_class);
-
-            refineBoundingBox(currentImage->getImage(), new_bbox);
+            project->addLabel(current_imagepath, new_bbox);
         }
-    }
+    });
 
     updateLabels();
 }

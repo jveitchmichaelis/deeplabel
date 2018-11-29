@@ -7,6 +7,7 @@
 #include <boundingbox.h>
 #include <labelproject.h>
 #include <opencv2/opencv.hpp>
+#include <random>
 
 class KittiExporter : public QObject
 {

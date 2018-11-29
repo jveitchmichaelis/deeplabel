@@ -10,7 +10,10 @@ KittiExporter::KittiExporter(LabelProject *project, QObject *parent) : QObject(p
 void KittiExporter::splitData(float split, bool shuffle){
 
     if(shuffle){
-        std::random_shuffle(images.begin(), images.end());
+        std::random_device rd;
+        std::mt19937 g(rd());
+
+        std::shuffle(images.begin(), images.end(), g);
     }
 
     auto pivot = images.size() * split;
