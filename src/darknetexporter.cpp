@@ -84,6 +84,9 @@ void DarknetExporter::generateLabelIds(const QString names_file){
 
 void DarknetExporter::appendLabel(const cv::Mat &image, const QString label_filename, const QList<BoundingBox> labels){
 
+    // Still make a label file even if there are no detections. This is important
+    // for background class detection.
+
     QFile f(label_filename);
 
     if (f.open(QIODevice::WriteOnly | QIODevice::Append)) {
@@ -96,8 +99,8 @@ void DarknetExporter::appendLabel(const cv::Mat &image, const QString label_file
                 continue;
             }
 
-            double x = static_cast<double>(label.rect.left())/image.cols;
-            double y = static_cast<double>(label.rect.top())/image.rows;
+            double x = static_cast<double>(label.rect.center().x())/image.cols;
+            double y = static_cast<double>(label.rect.center().y())/image.rows;
             double width = static_cast<double>(label.rect.width())/image.cols;
             double height = static_cast<double>(label.rect.height())/image.rows;
 
