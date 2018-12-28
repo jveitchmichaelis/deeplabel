@@ -716,7 +716,7 @@ void MainWindow::handleExportDialog(){
     }else if(export_dialog.getExporter() == "Darknet"){
         DarknetExporter exporter(project);
         exporter.moveToThread(export_thread);
-
+        exporter.generateLabelIds(export_dialog.getNamesFile());
         exporter.setOutputFolder(export_dialog.getOutputFolder());
         exporter.splitData(export_dialog.getValidationSplit(), export_dialog.getShuffle());
         exporter.process();

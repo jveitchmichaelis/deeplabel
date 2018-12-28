@@ -8,6 +8,10 @@ DarknetExporter::DarknetExporter(LabelProject *project, QObject *parent) : QObje
 
 void DarknetExporter::splitData(float split, bool shuffle){
 
+    if(split < 0 || split > 1){
+        qDebug() << "Invalid split fraction, should be [0,1]";
+    }
+
     if(shuffle){
         std::random_device rd;
         std::mt19937 g(rd());
@@ -65,11 +69,16 @@ void DarknetExporter::generateLabelIds(const QString names_file){
         }
     }
 
-    if(class_list.size() == 0) return;
+    if(class_list.size() == 0){
+        qDebug() << "No classes found in names file.";
+        return;
+    }
 
     int i = 0;
     for(auto &name : class_list){
-        id_map[name.toLower()] = i++;
+        auto cleaned_name = name.simplified().toLower();
+        id_map[cleaned_name] = i++;
+        qDebug() << "Adding: " << cleaned_name << " (" << i << ")";
     }
 }
 
@@ -92,7 +101,7 @@ void DarknetExporter::appendLabel(const cv::Mat &image, const QString label_file
             double width = static_cast<double>(label.rect.width())/image.cols;
             double height = static_cast<double>(label.rect.height())/image.rows;
 
-            text += QString(" %1").arg(id_map[label.classname.toLower()]);
+            text += QString("%1").arg(id_map[label.classname.toLower()]);
             text += QString(" %1").arg(x);
             text += QString(" %1").arg(y);
             text += QString(" %1").arg(width);
@@ -102,7 +111,6 @@ void DarknetExporter::appendLabel(const cv::Mat &image, const QString label_file
             f.write(text.toUtf8());
 
         }
-
     }
 }
 
@@ -130,7 +138,7 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
         if(labels.size() > 0){
 
             QString extension = QFileInfo(image_path).suffix();
-            QString filename_noext = QFileInfo(image_path).fileName();
+            QString filename_noext = QFileInfo(image_path).baseName();
             QString image_filename = QString("%1/%2.%3").arg(folder).arg(filename_noext).arg(extension);
 
             cv::Mat image = cv::imread(image_path.toStdString());
@@ -140,7 +148,6 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
             appendLabel(image, label_filename, labels);
 
         }
-
     }
 
     return true;

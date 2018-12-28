@@ -20,6 +20,7 @@ signals:
 public slots:
     void splitData(float split=1, bool shuffle=false);
     bool setOutputFolder(QString folder);
+    void generateLabelIds(const QString names_file);
     void process();
 
 private:
@@ -38,7 +39,7 @@ private:
 
     QString output_folder;
 
-    void generateLabelIds(const QString names_file);
+
     std::map<QString, int> id_map;
 
     void appendLabel(const cv::Mat &image, const QString file, const QList<BoundingBox> labels);

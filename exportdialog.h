@@ -22,7 +22,7 @@ public:
     QString getOutputFolder(){return output_folder; }
     QString getNamesFile(){return names_file; }
     int getShuffle(){return do_shuffle; }
-    int getValidationSplit(){return validation_split_pc; }
+    float getValidationSplit(){return static_cast<float>(validation_split_pc)/100; }
 
 private slots:
     void setNamesFile();
