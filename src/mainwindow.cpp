@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->addClassButton, SIGNAL(clicked(bool)), this, SLOT(addClass()));
     connect(ui->newClassText, SIGNAL(editingFinished()), this, SLOT(addClass()));
 
-    connect(ui->actionInit_Tracking, SIGNAL(triggered(bool)), this, SLOT(setupTracking()));
+    connect(ui->actionInit_Tracking, SIGNAL(triggered(bool)), this, SLOT(initTrackers()));
     connect(ui->actionPropagate_Tracking, SIGNAL(triggered(bool)), this, SLOT(propagateTracking()));
     connect(ui->propagateCheckBox, SIGNAL(clicked(bool)), this, SLOT(toggleAutoPropagate(bool)));
 
@@ -46,7 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->imageNumberSpinbox, SIGNAL(editingFinished()), this, SLOT(changeImage()));
 
     connect(ui->actionWrap_images, SIGNAL(triggered(bool)), this, SLOT(enableWrap(bool)));
-    connect(ui->actionExport, SIGNAL(triggered(bool)), this, SLOT(exportData()));
+    connect(ui->actionExport, SIGNAL(triggered(bool)), this, SLOT(launchExportDialog()));
 
     auto prev_shortcut = ui->actionPreviousImage->shortcuts();
     prev_shortcut.append(QKeySequence("Left"));
@@ -61,6 +61,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->imageProgressBar->setStyleSheet("QProgressBar::chunk {background-color: #3add36; width: 1px;}");
 #endif
     project = new LabelProject(this);
+
+    connect(&export_dialog, SIGNAL(accepted()), this, SLOT(handleExportDialog()));
+    export_dialog.setModal(true);
 }
 
 void MainWindow::toggleAutoPropagate(bool state){
@@ -233,6 +236,7 @@ void MainWindow::initDisplay(){
         ui->labelGroupBox->setEnabled(true);
         ui->navigationGroupBox->setEnabled(true);
         updateDisplay();
+        ui->actionExport->setEnabled(true);
     }
 }
 
@@ -249,8 +253,71 @@ void MainWindow::nextUnlabelled(){
     }
 }
 
+cv::Mat MainWindow::initCamShift(cv::Mat image, QRect bbox){
+    auto roi = image(qrect2cv(bbox));
+
+    if(roi.channels() == 1){
+    cv::cvtColor(roi, roi, cv::COLOR_GRAY2BGR);
+    cv::cvtColor(roi, roi, cv::COLOR_BGR2HSV);
+    }else if(roi.channels() == 3){
+        cv::cvtColor(roi, roi, cv::COLOR_BGR2HSV);
+    }else{
+        // What the hell kind of 2 channel image is this?
+        return cv::Mat();
+    }
+
+    // Generate histogram
+    auto lowScalar = cv::Scalar(30,30,0);
+    auto highScalar = cv::Scalar(180,180,180);
+
+    cv::Mat mask;;
+    cv::inRange(roi, lowScalar, highScalar, mask);
+
+    cv::Mat roiHist;
+
+    int histSize = 256;
+    float range[] = { 0, 180 }; //the upper boundary is exclusive
+    const float* histRange = { range };
+
+    bool uniform = true;
+    bool accumulate = true;
+
+    cv::calcHist( &roi, 1, nullptr, mask, roiHist, 1, &histSize, &histRange, uniform, accumulate);
+    cv::normalize(roiHist, roiHist, 0, 255, cv::NORM_MINMAX);
+
+    return roiHist;
+
+}
+
+cv::Rect2i MainWindow::updateCamShift(cv::Mat image, cv::Mat roiHist, QRect bbox){
+    auto rect = qrect2cv(bbox);
+    auto roi = image(rect);
+
+    if(roi.channels() == 1){
+    cv::cvtColor(roi, roi, cv::COLOR_GRAY2BGR);
+    cv::cvtColor(roi, roi, cv::COLOR_BGR2HSV);
+    }else if(roi.channels() == 3){
+        cv::cvtColor(roi, roi, cv::COLOR_BGR2HSV);
+    }else{
+        // What the hell kind of 2 channel image is this?
+        return cv::Rect();
+    }
+
+    auto rectInt = cv::Rect2i(rect);
+
+    cv::Mat backProjection;
+    float range[] = { 0, 180 }; //the upper boundary is exclusive
+    const float* histRange = { range };
+    cv::calcBackProject(&image, 1, nullptr, roiHist, backProjection, &histRange);
+
+    auto termcrit = cv::TermCriteria(cv::TermCriteria::EPS|cv::TermCriteria::COUNT, 10, 1);
+    auto rotated_rect = cv::CamShift(backProjection, rectInt, termcrit);
+
+    return rotated_rect.boundingRect();
+}
+
 QRect MainWindow::refineBoundingBox(cv::Mat image, QRect bbox){
-    // Simple connected components refinement.
+    // Simple connected components refinement - debug only for now.
 
     QMargins margins(5,5,5,5);
     bbox += margins;
@@ -344,7 +411,46 @@ QRect MainWindow::refineBoundingBox(cv::Mat image, QRect bbox){
     return QRect();
 }
 
-void MainWindow::setupTracking(){
+void MainWindow::initTrackersCamShift(){
+    auto bboxes = currentImage->getBoundingBoxes();
+
+    trackers_camshift.clear();
+    auto image = currentImage->getImage();
+
+    QtConcurrent::blockingMap(bboxes.begin(), bboxes.end(), [&](BoundingBox &bbox)
+    {
+        auto roi_hist = initCamShift(image, bbox.rect);
+        trackers_camshift.push_back({roi_hist, bbox});
+    });
+
+}
+
+void MainWindow::propagateTrackingCamShift(){
+
+    const auto image = currentImage->getImage();
+
+    QtConcurrent::blockingMap(trackers_camshift.begin(), trackers_camshift.end(), [&](auto&& tracker)
+    {
+        cv::Rect2d bbox = updateCamShift(image, tracker.first, tracker.second.rect);
+
+        QRect new_roi;
+        new_roi.setX(bbox.x);
+        new_roi.setY(bbox.y);
+        new_roi.setWidth(bbox.width);
+        new_roi.setHeight(bbox.height);
+
+        BoundingBox new_bbox;
+        new_bbox.rect = new_roi;
+        new_bbox.classname = tracker.second.classname;
+
+        project->addLabel(current_imagepath, new_bbox);
+
+    });
+
+    updateLabels();
+}
+
+void MainWindow::initTrackers(){
     auto bboxes = currentImage->getBoundingBoxes();
 
     trackers.clear();
@@ -450,12 +556,25 @@ QImage MainWindow::convert16(const cv::Mat &source){
 
 void MainWindow::updateDisplay(){
 
+    if(images.size() == 0){
+        QPixmap pixmap = QPixmap::fromImage(QImage());
+        currentImage->setPixmap(pixmap);
+        return;
+    }
+
     current_imagepath = images.at(current_index);
     pixmap.load(current_imagepath);
 
+    ui->imageProgressBar->setValue(current_index+1);
+    ui->imageNumberSpinbox->setValue(current_index+1);
+    ui->imageIndexLabel->setText(QString("%1/%2").arg(current_index+1).arg(number_images));
+
     auto image = cv::imread(current_imagepath.toStdString(), cv::IMREAD_UNCHANGED|cv::IMREAD_ANYDEPTH);
 
-    if(image.empty()) return;
+    if(image.empty()){
+        qDebug() << "Failed to load image " << current_imagepath;
+        return;
+    }
 
     display_image = image.clone();
 
@@ -490,10 +609,6 @@ void MainWindow::updateDisplay(){
 
         updateLabels();
 
-        ui->imageProgressBar->setValue(current_index+1);
-        ui->imageNumberSpinbox->setValue(current_index+1);
-        ui->imageIndexLabel->setText(QString("%1/%2").arg(current_index+1).arg(number_images));
-
         auto image_info = QFileInfo(current_imagepath);
         ui->imageBitDepthLabel->setText(QString("%1 bit").arg(image.elemSize() * 8));
         ui->filenameLabel->setText(image_info.fileName());
@@ -524,6 +639,8 @@ void MainWindow::newProject()
     if(fileName != ""){
         project->createDatabase(fileName);
     }
+
+    updateDisplay();
 
     return;
 }
@@ -575,29 +692,39 @@ void MainWindow::addImageFolder(void){
 
     updateImageList();
     if(number_images != 0){
+        current_index = 0;
         initDisplay();
     }
 
     return;
 }
 
-void MainWindow::exportData(){
+void MainWindow::handleExportDialog(){
 
-    QString openDir = QDir::homePath();
-    QString path = QFileDialog::getExistingDirectory(this, tr("Select output folder"),
-                                                    openDir);
+    // If we hit OK and not cancel
+    if(export_dialog.result() != QDialog::Accepted ) return;
 
-    if(path != ""){
+    QThread* export_thread = new QThread;
+
+    if(export_dialog.getExporter() == "Kitti"){
         KittiExporter exporter(project);
-        QThread *export_thread = new QThread;
-
         exporter.moveToThread(export_thread);
 
-        exporter.setOutputFolder(path);
-        exporter.splitData();
+        exporter.setOutputFolder(export_dialog.getOutputFolder());
+        exporter.splitData(export_dialog.getValidationSplit(), export_dialog.getShuffle());
+        exporter.process();
+    }else if(export_dialog.getExporter() == "Darknet"){
+        DarknetExporter exporter(project);
+        exporter.moveToThread(export_thread);
+
+        exporter.setOutputFolder(export_dialog.getOutputFolder());
+        exporter.splitData(export_dialog.getValidationSplit(), export_dialog.getShuffle());
         exporter.process();
     }
+}
 
+void MainWindow::launchExportDialog(){
+    export_dialog.open();
 }
 
 MainWindow::~MainWindow()

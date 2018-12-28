@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QThread>
 #include <QFileDialog>
+#include <QDialog>
 #include <QTemporaryDir>
 #include <QtConcurrent/qtconcurrentmap.h>
 #include <opencv2/opencv.hpp>
@@ -11,8 +12,10 @@
 #include <imagelabel.h>
 #include <labelproject.h>
 #include <kittiexporter.h>
+#include <darknetexporter.h>
 #include <concurrent_vector.h>
 #include <algorithm>
+#include <exportdialog.h>
 
 namespace Ui {
 class MainWindow;
@@ -33,6 +36,8 @@ private:
     ImageLabel *currentImage;
     cv::Mat display_image;
     Concurrency::concurrent_vector<std::pair<cv::Ptr<cv::Tracker>, QString>> trackers;
+    Concurrency::concurrent_vector<std::pair<cv::Mat, BoundingBox>> trackers_camshift;
+    ExportDialog export_dialog;
 
     enum trackerType {BOOSTING, MIL, KCF, TLD, MEDIANFLOW, GOTURN, MOSSE, CSRT};
 
@@ -70,17 +75,24 @@ private slots:
     void setSelectMode(void);
     void changeImage(void);
     void enableWrap(bool enable);
-    void exportData();
-    void propagateTracking();
+    void launchExportDialog();
+    void handleExportDialog();
     void histogram(const cv::Mat &image, cv::Mat &hist);
     QImage convert16(const cv::Mat &source);
+
+
+    // Tracking
+    void propagateTracking();
     cv::Ptr<cv::Tracker> createTrackerByName(trackerType type);
     cv::Rect2d qrect2cv(QRect rect);
-    void setupTracking();
+    void initTrackers();
     void toggleAutoPropagate(bool state);
     void nextUnlabelled();
     QRect refineBoundingBox(cv::Mat image, QRect bbox);
-
+    cv::Rect2i updateCamShift(cv::Mat image, cv::Mat roiHist, QRect bbox);
+    cv::Mat initCamShift(cv::Mat image, QRect bbox);
+    void initTrackersCamShift();
+    void propagateTrackingCamShift();
 
 signals:
     void selectedClass(QString);

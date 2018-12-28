@@ -34,9 +34,9 @@ message("Windows")
 INCLUDEPATH += "C:/Users/Josh/Code/opencv/build/install/include"
 LIBS += -L"C:/Users/Josh/Code/opencv/build/install/x64/vc15/lib"
 CONFIG(debug, debug|release) {
-LIBS += -lopencv_core400d -lopencv_highgui400d -lopencv_imgproc400d -lopencv_imgcodecs400d -lopencv_tracking400d
+LIBS += -lopencv_core400d -lopencv_highgui400d -lopencv_imgproc400d -lopencv_imgcodecs400d -lopencv_tracking400d -lopencv_video400d
 }else{
-LIBS += -lopencv_core400 -lopencv_highgui400 -lopencv_imgproc400 -lopencv_imgcodecs400 -lopencv_tracking400
+LIBS += -lopencv_core400 -lopencv_highgui400 -lopencv_imgproc400 -lopencv_imgcodecs400 -lopencv_tracking400 -lopencv_video400
 }
 }
 
@@ -59,17 +59,22 @@ SOURCES += \
         mainwindow.cpp \
     src/labelproject.cpp \
     src/imagelabel.cpp \
-    src/kittiexporter.cpp
+    src/kittiexporter.cpp \
+    src/darknetexporter.cpp \
+    exportdialog.cpp
 
 HEADERS += \
         mainwindow.h \
     src/labelproject.h \
     src/imagelabel.h \
     src/boundingbox.h \
-    src/kittiexporter.h
+    src/kittiexporter.h \
+    src/darknetexporter.h \
+    exportdialog.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    exportdialog.ui
 
 # Deploy apps in OS X and Windows
 isEmpty(TARGET_EXT) {

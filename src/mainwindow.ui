@@ -338,6 +338,7 @@
     </property>
     <addaction name="actionNew_Project"/>
     <addaction name="actionOpen_Project"/>
+    <addaction name="actionExport"/>
    </widget>
    <widget class="QMenu" name="menuImages">
     <property name="title">
@@ -380,7 +381,6 @@
    <addaction name="actionNextImage"/>
    <addaction name="actionDraw_Tool"/>
    <addaction name="actionSelect_Tool"/>
-   <addaction name="actionExport"/>
    <addaction name="actionInit_Tracking"/>
    <addaction name="actionPropagate_Tracking"/>
   </widget>
@@ -490,14 +490,6 @@
     <string>Wrap images</string>
    </property>
   </action>
-  <action name="actionExport">
-   <property name="text">
-    <string>Export</string>
-   </property>
-   <property name="toolTip">
-    <string>Export Data</string>
-   </property>
-  </action>
   <action name="actionInit_Tracking">
    <property name="text">
     <string>Init Tracking</string>
@@ -515,6 +507,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionExport">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Export labels</string>
    </property>
   </action>
  </widget>
