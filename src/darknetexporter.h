@@ -42,7 +42,7 @@ private:
 
     std::map<QString, int> id_map;
 
-    void appendLabel(const cv::Mat &image, const QString file, const QList<BoundingBox> labels);
+    void writeLabels(const cv::Mat &image, const QString file, const QList<BoundingBox> labels);
     bool processImages(const QString folder, const QList<QString> images);
     bool saveImage(cv::Mat &image, const QString output, const double scale_x = -1.0, const double scale_y = -1.0);
 };

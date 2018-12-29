@@ -16,45 +16,84 @@ ExportDialog::ExportDialog(QWidget *parent) :
 
     connect(ui->namesFilePushButton, SIGNAL(clicked()), this, SLOT(setNamesFile()));
     connect(ui->outputFolderPushButton, SIGNAL(clicked()), this, SLOT(setOutputFolder()));
+
+    settings = new QSettings("DeepLabel", "DeepLabel");
+
+    setValidationSplit(settings->value("validation_split_pc", 0.8).toInt());
+    toggleShuffle(settings->value("do_shuffle", false).toBool());
+
+    if(settings->contains("output_folder")){
+        setOutputFolder(settings->value("output_folder").toString());
+    }else{
+        settings->setValue("output_folder", "");
+    }
+
+    if(settings->contains("names_file")){
+        setNamesFile(settings->value("names_file").toString());
+    }else{
+        settings->setValue("names_file", "");
+    }
 }
 
 ExportDialog::~ExportDialog()
 {
+    delete settings;
     delete ui;
 }
 
 void ExportDialog::setValidationSplit(int value){
     if (value < 0 || value > 100) return;
     validation_split_pc = value;
+    settings->setValue("validation_split_pc", validation_split_pc);
 }
 
 void ExportDialog::toggleShuffle(bool shuffle){
     do_shuffle = shuffle;
+    settings->setValue("do_shuffle", do_shuffle);
 }
 
-void ExportDialog::setOutputFolder(){
+void ExportDialog::setOutputFolder(QString path){
 
-    QString openDir = QDir::homePath();
-    QString path = QFileDialog::getExistingDirectory(this, tr("Select output folder"),
-                                                    openDir);
+    if(path == ""){
+        QString openDir;
+        if(output_folder == ""){
+             openDir = QDir::homePath();
+        }else{
+             openDir = output_folder;
+        }
+
+        path = QFileDialog::getExistingDirectory(this, tr("Select output folder"),
+                                                        openDir);
+    }
 
     if(path != ""){
         output_folder = path;
         ui->outputFolderLineEdit->setText(output_folder);
+        settings->setValue("output_folder", output_folder);
     }
 
     checkOK();
 }
 
-void ExportDialog::setNamesFile(){
+void ExportDialog::setNamesFile(QString path){
 
-    QString openDir = QDir::homePath();
-    QString path = QFileDialog::getOpenFileName(this, tr("Select darknet names file"),
-                                                    openDir);
+    if(path == ""){
+        QString openDir;
+
+        if(names_file == ""){
+             openDir = QDir::homePath();
+        }else{
+             openDir = QDir(names_file).dirName();
+        }
+
+        path = QFileDialog::getOpenFileName(this, tr("Select darknet names file"),
+                                                        openDir);
+    }
 
     if(path != ""){
         names_file = path;
         ui->namesFileLineEdit->setText(names_file);
+        settings->setValue("names_file", names_file);
     }
 
     checkOK();

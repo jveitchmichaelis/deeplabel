@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QDir>
 #include <QFileDialog>
+#include <QSettings>
 
 namespace Ui {
 class ExportDialog;
@@ -25,8 +26,8 @@ public:
     float getValidationSplit(){return static_cast<float>(validation_split_pc)/100; }
 
 private slots:
-    void setNamesFile();
-    void setOutputFolder();
+    void setNamesFile(QString path="");
+    void setOutputFolder(QString path="");
     void setValidationSplit(int value);
     void toggleShuffle(bool shuffle);
     void toggleExporter();
@@ -35,12 +36,13 @@ private:
     Ui::ExportDialog *ui;
     void checkOK();
 
+    QSettings *settings;
 
     QString output_folder = "";
     QString names_file = "";
     QString current_exporter = "Darknet";
     bool do_shuffle = false;
-    int validation_split_pc = 20;
+    int validation_split_pc = 80;
 
 };
 

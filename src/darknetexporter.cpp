@@ -82,14 +82,15 @@ void DarknetExporter::generateLabelIds(const QString names_file){
     }
 }
 
-void DarknetExporter::appendLabel(const cv::Mat &image, const QString label_filename, const QList<BoundingBox> labels){
+void DarknetExporter::writeLabels(const cv::Mat &image, const QString label_filename, const QList<BoundingBox> labels){
 
     // Still make a label file even if there are no detections. This is important
     // for background class detection.
 
     QFile f(label_filename);
 
-    if (f.open(QIODevice::WriteOnly | QIODevice::Append)) {
+    // Delete existing files for simplicity.
+    if (f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
         BoundingBox label;
         foreach(label, labels){
             QString text;
@@ -138,19 +139,16 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
     foreach(image_path, images){
         project->getLabels(image_path, labels);
 
-        if(labels.size() > 0){
+        QString extension = QFileInfo(image_path).suffix();
+        QString filename_noext = QFileInfo(image_path).baseName();
+        QString image_filename = QString("%1/%2.%3").arg(folder).arg(filename_noext).arg(extension);
 
-            QString extension = QFileInfo(image_path).suffix();
-            QString filename_noext = QFileInfo(image_path).baseName();
-            QString image_filename = QString("%1/%2.%3").arg(folder).arg(filename_noext).arg(extension);
+        cv::Mat image = cv::imread(image_path.toStdString());
+        saveImage(image, image_filename);
 
-            cv::Mat image = cv::imread(image_path.toStdString());
-            saveImage(image, image_filename);
+        QString label_filename = QString("%1/%2.txt").arg(folder).arg(filename_noext);
+        writeLabels(image, label_filename, labels);
 
-            QString label_filename = QString("%1/%2.txt").arg(folder).arg(filename_noext);
-            appendLabel(image, label_filename, labels);
-
-        }
     }
 
     return true;
