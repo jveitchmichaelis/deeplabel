@@ -19,7 +19,7 @@ ExportDialog::ExportDialog(QWidget *parent) :
 
     settings = new QSettings("DeepLabel", "DeepLabel");
 
-    setValidationSplit(settings->value("validation_split_pc", 0.8).toDouble());
+    setValidationSplit(settings->value("validation_split_pc", 80).toDouble());
     toggleShuffle(settings->value("do_shuffle", false).toBool());
 
     if(settings->contains("output_folder")){
@@ -50,6 +50,7 @@ void ExportDialog::setValidationSplit(int value){
 void ExportDialog::toggleShuffle(bool shuffle){
     do_shuffle = shuffle;
     settings->setValue("do_shuffle", do_shuffle);
+    ui->randomSplitCheckbox->setChecked(do_shuffle);
 }
 
 void ExportDialog::setOutputFolder(QString path){
@@ -83,7 +84,7 @@ void ExportDialog::setNamesFile(QString path){
         if(names_file == ""){
              openDir = QDir::homePath();
         }else{
-             openDir = QDir(names_file).dirName();
+             openDir = QFileInfo(names_file).absoluteDir().absolutePath();
         }
 
         path = QFileDialog::getOpenFileName(this, tr("Select darknet names file"),

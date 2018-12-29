@@ -6,7 +6,7 @@ DarknetExporter::DarknetExporter(LabelProject *project, QObject *parent) : QObje
     project->getImageList(images);
 }
 
-void DarknetExporter::splitData(float split, bool shuffle){
+void DarknetExporter::splitData(float split, bool shuffle, int seed){
 
     if(split < 0 || split > 1){
         qDebug() << "Invalid split fraction, should be [0,1]";
@@ -14,14 +14,18 @@ void DarknetExporter::splitData(float split, bool shuffle){
 
     if(shuffle){
         std::random_device rd;
-        std::mt19937 g(rd());
+        std::mt19937 generator(rd());
+        generator.seed(seed);
 
-        std::shuffle(images.begin(), images.end(), g);
+        std::shuffle(images.begin(), images.end(), generator);
     }
 
     int pivot = static_cast<int>(images.size() * split);
     train_set = images.mid(0, pivot);
     validation_set = images.mid(pivot);
+
+    qDebug() << train_set.size() << " images selected for train set.";
+    qDebug() << validation_set.size() << " images selected for validation set.";
 
 }
 
@@ -128,7 +132,15 @@ bool DarknetExporter::saveImage(cv::Mat &image, const QString output, const doub
     if(scale_x > 0 && scale_y > 0)
         cv::resize(image, image, cv::Size(), scale_x, scale_y);
 
-    return cv::imwrite(output.toStdString(), image);
+    std::vector<int> compression_params;
+
+    // Maximum png compression
+    if(output.split(".").last().toLower() == "png"){
+        compression_params.push_back(cv::IMWRITE_PNG_COMPRESSION);
+        compression_params.push_back(9);
+    }
+
+    return cv::imwrite(output.toStdString(), image, compression_params);
 }
 
 bool DarknetExporter::processImages(const QString folder, const QList<QString> images){

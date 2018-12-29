@@ -18,7 +18,7 @@ public:
 signals:
 
 public slots:
-    void splitData(float split=1, bool shuffle=false);
+    void splitData(float split=1, bool shuffle=false, int seed=42);
     bool setOutputFolder(QString folder);
     void generateLabelIds(const QString names_file);
     void process();

@@ -5,6 +5,7 @@
 #include <QThread>
 #include <QFileDialog>
 #include <QDialog>
+#include <QSettings>
 #include <QTemporaryDir>
 #include <QtConcurrent/qtconcurrentmap.h>
 #include <opencv2/opencv.hpp>
@@ -57,6 +58,8 @@ private:
     void updateImageList();
     void updateClassList();
     void updateLabels();
+
+    QSettings* settings;
 
 private slots:
     void openProject(void);

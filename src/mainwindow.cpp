@@ -64,6 +64,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(&export_dialog, SIGNAL(accepted()), this, SLOT(handleExportDialog()));
     export_dialog.setModal(true);
+
+    settings = new QSettings("DeepLabel", "DeepLabel");
+    qDebug() << settings->value("project_folder").toString();
+
 }
 
 void MainWindow::toggleAutoPropagate(bool state){
@@ -122,12 +126,14 @@ void MainWindow::setSelectMode(){
 
 void MainWindow::openProject()
 {
-    QString openDir = QDir::homePath();
+    QString openDir = settings->value("project_folder", QDir::homePath()).toString();
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Project"),
                                                     openDir,
                                                     tr("Label database (*.lbldb)"));
 
+
     if(fileName != ""){
+        settings->setValue("project_folder", QFileInfo(fileName).absoluteDir().absolutePath());
         if(project->loadDatabase(fileName)){
             initDisplay();
         }else{
@@ -631,7 +637,7 @@ void MainWindow::histogram(const cv::Mat &image, cv::Mat &hist){
 
 void MainWindow::newProject()
 {
-    QString openDir = QDir::homePath();
+    QString openDir = settings->value("project_folder", QDir::homePath()).toString();
     QString fileName = QFileDialog::getSaveFileName(this, tr("New Project"),
                                                     openDir,
                                                     tr("Label database (*.lbldb)"));
