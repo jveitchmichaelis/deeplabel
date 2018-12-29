@@ -19,7 +19,7 @@ ExportDialog::ExportDialog(QWidget *parent) :
 
     settings = new QSettings("DeepLabel", "DeepLabel");
 
-    setValidationSplit(settings->value("validation_split_pc", 0.8).toInt());
+    setValidationSplit(settings->value("validation_split_pc", 0.8).toDouble());
     toggleShuffle(settings->value("do_shuffle", false).toBool());
 
     if(settings->contains("output_folder")){
