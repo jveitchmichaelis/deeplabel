@@ -61,7 +61,7 @@ SOURCES += \
     src/imagelabel.cpp \
     src/kittiexporter.cpp \
     src/darknetexporter.cpp \
-    exportdialog.cpp
+    src/exportdialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -70,7 +70,7 @@ HEADERS += \
     src/boundingbox.h \
     src/kittiexporter.h \
     src/darknetexporter.h \
-    exportdialog.h
+    src/exportdialog.h
 
 FORMS += \
         mainwindow.ui \

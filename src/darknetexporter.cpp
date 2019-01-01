@@ -15,7 +15,7 @@ void DarknetExporter::splitData(float split, bool shuffle, int seed){
     if(shuffle){
         std::random_device rd;
         std::mt19937 generator(rd());
-        generator.seed(seed);
+        generator.seed(static_cast<unsigned int>(seed));
 
         std::shuffle(images.begin(), images.end(), generator);
     }
@@ -132,12 +132,13 @@ bool DarknetExporter::saveImage(cv::Mat &image, const QString output, const doub
     if(scale_x > 0 && scale_y > 0)
         cv::resize(image, image, cv::Size(), scale_x, scale_y);
 
-    std::vector<int> compression_params;
+        std::vector<int> compression_params;
 
-    // Maximum png compression
+    // Png compression - maximum is super slow
+    // TODO: add support to adjust this
     if(output.split(".").last().toLower() == "png"){
         compression_params.push_back(cv::IMWRITE_PNG_COMPRESSION);
-        compression_params.push_back(9);
+        compression_params.push_back(6);
     }
 
     return cv::imwrite(output.toStdString(), image, compression_params);
@@ -148,7 +149,10 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
     QString image_path;
     QList<BoundingBox> labels;
 
+    int i = 0;
+
     foreach(image_path, images){
+        qDebug() << image_path;
         project->getLabels(image_path, labels);
 
         QString extension = QFileInfo(image_path).suffix();
@@ -156,10 +160,14 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
         QString image_filename = QString("%1/%2.%3").arg(folder).arg(filename_noext).arg(extension);
 
         cv::Mat image = cv::imread(image_path.toStdString());
-        saveImage(image, image_filename);
+        //saveImage(image, image_filename);
+
+        QFile::copy(image_path, image_filename);
 
         QString label_filename = QString("%1/%2.txt").arg(folder).arg(filename_noext);
         writeLabels(image, label_filename, labels);
+
+        emit export_progress((100 * i)/images.size());
 
     }
 

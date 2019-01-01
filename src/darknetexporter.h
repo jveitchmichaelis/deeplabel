@@ -16,12 +16,14 @@ public:
     explicit DarknetExporter(LabelProject *project, QObject *parent = nullptr);
 
 signals:
+    void export_progress(int);
 
 public slots:
     void splitData(float split=1, bool shuffle=false, int seed=42);
     bool setOutputFolder(QString folder);
     void generateLabelIds(const QString names_file);
     void process();
+
 
 private:
     LabelProject *project;

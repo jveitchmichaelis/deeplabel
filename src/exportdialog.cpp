@@ -14,7 +14,9 @@ ExportDialog::ExportDialog(QWidget *parent) :
     connect(ui->randomSplitCheckbox, SIGNAL(clicked(bool)), this, SLOT(toggleShuffle(bool)));
     connect(ui->validationSplitSpinbox, SIGNAL(valueChanged(int)), this, SLOT(setValidationSplit(int)));
 
+    connect(ui->namesFileLineEdit, SIGNAL(textEdited(QString)), SLOT(setNamesFile(QString)));
     connect(ui->namesFilePushButton, SIGNAL(clicked()), this, SLOT(setNamesFile()));
+    connect(ui->outputFolderLineEdit, SIGNAL(textEdited(QString)), SLOT(setOutputFolder(QString)));
     connect(ui->outputFolderPushButton, SIGNAL(clicked()), this, SLOT(setOutputFolder()));
 
     settings = new QSettings("DeepLabel", "DeepLabel");
