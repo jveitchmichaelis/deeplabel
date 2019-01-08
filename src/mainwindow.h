@@ -14,7 +14,6 @@
 #include <labelproject.h>
 #include <kittiexporter.h>
 #include <darknetexporter.h>
-#include <concurrent_vector.h>
 #include <algorithm>
 #include <exportdialog.h>
 
@@ -36,8 +35,8 @@ private:
     QPixmap pixmap;
     ImageLabel *currentImage;
     cv::Mat display_image;
-    Concurrency::concurrent_vector<std::pair<cv::Ptr<cv::Tracker>, QString>> trackers;
-    Concurrency::concurrent_vector<std::pair<cv::Mat, BoundingBox>> trackers_camshift;
+    std::vector<std::pair<cv::Ptr<cv::Tracker>, QString>> trackers;
+    std::vector<std::pair<cv::Mat, BoundingBox>> trackers_camshift;
     ExportDialog export_dialog;
 
     enum trackerType {BOOSTING, MIL, KCF, TLD, MEDIANFLOW, GOTURN, MOSSE, CSRT};
@@ -45,7 +44,7 @@ private:
     // Enable tracking boxes in previous frames
     bool track_previous = false;
     bool wrap_index;
-    unsigned int current_index;
+    int current_index;
 
     void initDisplay();
 
@@ -54,7 +53,7 @@ private:
     QString current_imagepath;
     QString current_class;
 
-    unsigned int number_images;
+    int number_images;
     void updateImageList();
     void updateClassList();
     void updateLabels();

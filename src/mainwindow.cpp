@@ -62,8 +62,8 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
     project = new LabelProject(this);
 
-    connect(&export_dialog, SIGNAL(accepted()), this, SLOT(handleExportDialog()));
     export_dialog.setModal(true);
+    connect(&export_dialog, SIGNAL(accepted()), this, SLOT(handleExportDialog()));
 
     settings = new QSettings("DeepLabel", "DeepLabel");
     qDebug() << settings->value("project_folder").toString();
@@ -364,7 +364,7 @@ QRect MainWindow::refineBoundingBox(cv::Mat image, QRect bbox){
     cv::Mat foreground;
     double min_val, max_val;
     cv::minMaxIdx(dist_transform, &min_val, &max_val);
-    int thresh = 0.7*max_val;
+    int thresh = static_cast<int>(0.7*max_val);
     cv::threshold(dist_transform, foreground, thresh, 255,
                           cv::THRESH_BINARY);
 
@@ -384,7 +384,7 @@ QRect MainWindow::refineBoundingBox(cv::Mat image, QRect bbox){
 
     auto region_id = markers.at<int>(cv::Point(markers.cols/2, markers.rows/2));
 
-    for(int i=0; i<markers.total();i++){
+    for(int i=0; i < static_cast<int>(markers.total()); i++){
         if(unknown.at<uchar>(i) == 255){
             markers.at<float>(i) = 0;
         }
@@ -422,11 +422,14 @@ void MainWindow::initTrackersCamShift(){
 
     trackers_camshift.clear();
     auto image = currentImage->getImage();
+    QMutex mutex;
 
     QtConcurrent::blockingMap(bboxes.begin(), bboxes.end(), [&](BoundingBox &bbox)
     {
         auto roi_hist = initCamShift(image, bbox.rect);
+        mutex.lock();
         trackers_camshift.push_back({roi_hist, bbox});
+        mutex.unlock();
     });
 
 }
@@ -440,14 +443,16 @@ void MainWindow::propagateTrackingCamShift(){
         cv::Rect2d bbox = updateCamShift(image, tracker.first, tracker.second.rect);
 
         QRect new_roi;
-        new_roi.setX(bbox.x);
-        new_roi.setY(bbox.y);
-        new_roi.setWidth(bbox.width);
-        new_roi.setHeight(bbox.height);
+        new_roi.setX(static_cast<int>(bbox.x));
+        new_roi.setY(static_cast<int>(bbox.y));
+        new_roi.setWidth(static_cast<int>(bbox.width));
+        new_roi.setHeight(static_cast<int>(bbox.height));
 
         BoundingBox new_bbox;
         new_bbox.rect = new_roi;
         new_bbox.classname = tracker.second.classname;
+
+        refineBoundingBox(image, new_bbox.rect);
 
         project->addLabel(current_imagepath, new_bbox);
 
@@ -461,13 +466,17 @@ void MainWindow::initTrackers(){
 
     trackers.clear();
     auto image = currentImage->getImage();
+    QMutex mutex;
 
     // If we are tracking and we have some labelled boxes already
     QtConcurrent::blockingMap(bboxes.begin(), bboxes.end(), [&](BoundingBox &bbox)
     {
         auto tracker = createTrackerByName(CSRT);
         tracker->init(image, qrect2cv(bbox.rect));
+
+        mutex.lock();
         trackers.push_back({tracker, bbox.classname});
+        mutex.unlock();
     });
 }
 
@@ -484,10 +493,10 @@ void MainWindow::propagateTracking(){
         if( tracker.first->update(currentImage->getImage(), bbox)){
 
             QRect new_roi;
-            new_roi.setX(bbox.x);
-            new_roi.setY(bbox.y);
-            new_roi.setWidth(bbox.width);
-            new_roi.setHeight(bbox.height);
+            new_roi.setX(static_cast<int>(bbox.x));
+            new_roi.setY(static_cast<int>(bbox.y));
+            new_roi.setWidth(static_cast<int>(bbox.width));
+            new_roi.setHeight(static_cast<int>(bbox.height));
 
             BoundingBox new_bbox;
             new_bbox.rect = new_roi;
