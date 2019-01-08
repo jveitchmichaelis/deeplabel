@@ -21,19 +21,21 @@ ExportDialog::ExportDialog(QWidget *parent) :
 
     settings = new QSettings("DeepLabel", "DeepLabel");
 
-    setValidationSplit(settings->value("validation_split_pc", 80).toDouble());
+    setValidationSplit(settings->value("validation_split_pc", 80).toInt());
     toggleShuffle(settings->value("do_shuffle", false).toBool());
 
     if(settings->contains("output_folder")){
-        setOutputFolder(settings->value("output_folder").toString());
-    }else{
-        settings->setValue("output_folder", "");
+        auto path = settings->value("output_folder").toString();
+        if(path != ""){
+            setOutputFolder(path);
+        }
     }
 
     if(settings->contains("names_file")){
-        setNamesFile(settings->value("names_file").toString());
-    }else{
-        settings->setValue("names_file", "");
+        auto path = settings->value("names_file").toString();
+        if(path != ""){
+            setNamesFile();
+         }
     }
 }
 
