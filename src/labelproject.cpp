@@ -523,9 +523,12 @@ int LabelProject::addImageFolder(QString path){
 
         QFileInfo image_info;
 
+        QSqlDatabase::database().transaction();
         foreach(image_info, image_list){
 
             QString image_path = image_info.absoluteFilePath();
+
+
             bool res = addImage(image_path);
 
             if(res){
@@ -535,6 +538,7 @@ int LabelProject::addImageFolder(QString path){
                 qDebug() << "Failed to add image: " << image_path;
             }
         }
+        QSqlDatabase::database().commit();
     }
 
     return number_added;
