@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionInit_Tracking, SIGNAL(triggered(bool)), this, SLOT(initTrackers()));
     connect(ui->actionPropagate_Tracking, SIGNAL(triggered(bool)), this, SLOT(propagateTracking()));
     connect(ui->propagateCheckBox, SIGNAL(clicked(bool)), this, SLOT(toggleAutoPropagate(bool)));
+    connect(ui->refineTrackingCheckbox, SIGNAL(clicked(bool)), this, SLOT(toggleRefineTracking(bool)));
 
     connect(ui->nextUnlabelledButton, SIGNAL(clicked(bool)), this, SLOT(nextUnlabelled()));
 
@@ -48,6 +49,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionWrap_images, SIGNAL(triggered(bool)), this, SLOT(enableWrap(bool)));
     connect(ui->actionExport, SIGNAL(triggered(bool)), this, SLOT(launchExportDialog()));
 
+    connect(ui->actionRefine_boxes, SIGNAL(triggered(bool)), this, SLOT(refineBoxes()));
+
     auto prev_shortcut = ui->actionPreviousImage->shortcuts();
     prev_shortcut.append(QKeySequence("Left"));
     ui->actionPreviousImage->setShortcuts(prev_shortcut);
@@ -72,6 +75,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::toggleAutoPropagate(bool state){
     track_previous = state;
+}
+
+void MainWindow::toggleRefineTracking(bool state){
+    refine_on_propagate = state;
 }
 
 cv::Ptr<cv::Tracker> MainWindow::createTrackerByName(trackerType type)
@@ -211,6 +218,12 @@ void MainWindow::removeLabel(BoundingBox bbox){
     updateLabels();
 }
 
+void MainWindow::updateLabel(BoundingBox old_bbox, BoundingBox new_bbox){
+    project->removeLabel(current_imagepath, old_bbox);
+    project->addLabel(current_imagepath, new_bbox);
+    updateLabels();
+}
+
 void MainWindow::removeImage(){
     if (QMessageBox::Yes == QMessageBox::question(this,
                                                   tr("Remove Image"),
@@ -322,11 +335,17 @@ cv::Rect2i MainWindow::updateCamShift(cv::Mat image, cv::Mat roiHist, QRect bbox
     return rotated_rect.boundingRect();
 }
 
-QRect MainWindow::refineBoundingBox(cv::Mat image, QRect bbox){
-    // Simple connected components refinement - debug only for now.
-
-    QMargins margins(5,5,5,5);
+QRect MainWindow::refineBoundingBoxSimple(cv::Mat image, QRect bbox, int margin, bool debug_save){
+    QMargins margins(margin, margin, margin, margin);
     bbox += margins;
+
+    // Clamp to within image - note zero-indexed so boundary is width-1 etc.
+
+    bbox.setTop(std::max(bbox.top(), 0));
+    bbox.setBottom(std::min(bbox.bottom(),image.rows-1));
+    bbox.setLeft(std::max(bbox.left(), 0));
+    bbox.setRight(std::min(bbox.right(), image.cols-1));
+
     auto roi = image(qrect2cv(bbox));
 
     // First we need to do foreground/background segmentation
@@ -335,8 +354,60 @@ QRect MainWindow::refineBoundingBox(cv::Mat image, QRect bbox){
     cv::Mat roi_thresh;
     cv::threshold(roi, roi_thresh, 0, 255, cv::THRESH_OTSU|cv::THRESH_BINARY);
 
-    cv::imwrite("roi.png", roi);
-    cv::imwrite("roi_thresh.png", roi_thresh);
+    if(debug_save) cv::imwrite("roi.png", roi);
+    if(debug_save) cv::imwrite("roi_thresh.png", roi_thresh);
+
+    std::vector<std::vector<cv::Point>> contours;
+    cv::Mat hierarchy;
+    cv::findContours(roi_thresh, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+    for(auto &contour : contours){
+
+        if(static_cast<int>(cv::contourArea(contour)) == roi.rows*roi.cols){
+            qDebug() << "Contour encloses all!";
+        }
+
+        //cv::drawContours(markers, {contour}, 0, {0,0,255});
+        auto contour_bound = cv::boundingRect(contour);
+        cv::rectangle(roi, contour_bound, {0,0,255});
+    }
+
+    if(debug_save) cv::imwrite("roi_contours.png", roi);
+
+    QRect new_box;
+
+    if(contours.size() > 0){
+        auto contour_bound = cv::boundingRect(contours.at(0));
+        new_box.setX(bbox.x()+contour_bound.x);
+        new_box.setY(bbox.y()+contour_bound.y);
+        new_box.setWidth(contour_bound.width);
+        new_box.setHeight(contour_bound.height);
+    }
+
+    return new_box;
+}
+
+QRect MainWindow::refineBoundingBox(cv::Mat image, QRect bbox, int margin, bool debug_save){
+    // Simple connected components refinement - debug only for now.
+
+    QMargins margins(margin, margin, margin, margin);
+    bbox += margins;
+
+    bbox.setTop(std::max(0, std::min(image.rows, bbox.top())));
+    bbox.setBottom(std::max(0, std::min(image.rows, bbox.top())));
+    bbox.setLeft(std::max(0, std::min(image.cols, bbox.left())));
+    bbox.setRight(std::max(0, std::min(image.cols, bbox.right())));
+
+    auto roi = image(qrect2cv(bbox));
+
+    // First we need to do foreground/background segmentation
+
+    // Threshold input, 1 == good
+    cv::Mat roi_thresh;
+    cv::threshold(roi, roi_thresh, 0, 255, cv::THRESH_OTSU|cv::THRESH_BINARY);
+
+    if(debug_save) cv::imwrite("roi.png", roi);
+    if(debug_save) cv::imwrite("roi_thresh.png", roi_thresh);
 
     auto kernel_size = cv::Size(3,3);
     int iterations = 2;
@@ -351,7 +422,7 @@ QRect MainWindow::refineBoundingBox(cv::Mat image, QRect bbox){
     cv::Mat background;
     cv::dilate(opening, background, structure, anchor, iterations);
 
-    cv::imwrite("background.png", background);
+    if(debug_save) cv::imwrite("background.png", background);
 
     // Foreground area
     cv::Mat dist_transform;
@@ -359,7 +430,7 @@ QRect MainWindow::refineBoundingBox(cv::Mat image, QRect bbox){
     int mask_size = 5;
     cv::distanceTransform(opening, dist_transform, dist_labels, cv::DIST_L2, mask_size);
 
-    cv::imwrite("distance.png", dist_transform);
+    if(debug_save) cv::imwrite("distance.png", dist_transform);
 
     cv::Mat foreground;
     double min_val, max_val;
@@ -369,52 +440,66 @@ QRect MainWindow::refineBoundingBox(cv::Mat image, QRect bbox){
                           cv::THRESH_BINARY);
 
     foreground.convertTo(foreground, CV_8UC1);
-    cv::imwrite("foreground.png", foreground);
+    if(debug_save) cv::imwrite("foreground.png", foreground);
 
 
     // Unknown region
     cv::Mat unknown;
     cv::subtract(background, foreground, unknown, cv::noArray(), CV_8UC1);
 
-    cv::imwrite("unknown.png", unknown);
+    if(debug_save) cv::imwrite("unknown.png", unknown);
 
     cv::Mat markers;
     cv::connectedComponents(foreground, markers, 8, CV_32SC1);
     markers += 1;
 
-    auto region_id = markers.at<int>(cv::Point(markers.cols/2, markers.rows/2));
+    int region_id = markers.at<int>(cv::Point(markers.cols/2, markers.rows/2));
+    qDebug() << region_id;
 
     for(int i=0; i < static_cast<int>(markers.total()); i++){
         if(unknown.at<uchar>(i) == 255){
-            markers.at<float>(i) = 0;
+            markers.at<int>(i) = 0;
         }
     }
 
-    cv::imwrite("markers.png", markers);
+    if(debug_save) cv::imwrite("markers.png", markers);
 
     if(roi.channels() == 1) cv::cvtColor(roi, roi, cv::COLOR_GRAY2BGR);
     cv::watershed(roi, markers);
 
     markers.convertTo(markers, CV_8UC1);
     cv::threshold(markers, markers, 0, 255, cv::THRESH_OTSU);
-    cv::imwrite("watershed.png", markers);
+    if(debug_save) cv::imwrite("watershed.png", markers);
 
     std::vector<std::vector<cv::Point>> contours;
     cv::Mat hierarchy;
     cv::findContours(markers, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);
 
     cv::cvtColor(markers, markers, cv::COLOR_GRAY2BGR);
+
+    cv::Rect contour_bound;
     for(auto &contour : contours){
+
+        if(static_cast<int>(cv::contourArea(contour)) == roi.rows*roi.cols){
+            qDebug() << "Contour encloses all!";
+        }
+
         //cv::drawContours(markers, {contour}, 0, {0,0,255});
-        auto contour_bound = cv::boundingRect(contour);
+        contour_bound = cv::boundingRect(contour);
         cv::rectangle(markers, contour_bound, {0,0,255});
     }
 
-    cv::imwrite("contours.png", markers);
+    if(debug_save) cv::imwrite("contours.png", markers);
+    QRect new_box;
 
-    // Size consistency?
+    if(contours.size() == 1){
+        new_box.setX(bbox.x()+contour_bound.x);
+        new_box.setY(bbox.y()+contour_bound.y);
+        new_box.setWidth(contour_bound.width);
+        new_box.setHeight(contour_bound.height);
+    }
 
-    return QRect();
+    return new_box;
 }
 
 void MainWindow::initTrackersCamShift(){
@@ -431,6 +516,22 @@ void MainWindow::initTrackersCamShift(){
         trackers_camshift.push_back({roi_hist, bbox});
         mutex.unlock();
     });
+
+}
+
+void MainWindow::refineBoxes(){
+
+    auto bboxes = currentImage->getBoundingBoxes();
+    const auto image = currentImage->getImage();
+
+    for(auto &bbox : bboxes){
+        auto updated = refineBoundingBoxSimple(image, bbox.rect, 5, true);
+
+        auto new_bbox = bbox;
+        new_bbox.rect = updated;
+
+        if(!updated.size().isEmpty()) updateLabel(bbox, new_bbox);
+    }
 
 }
 
@@ -451,8 +552,6 @@ void MainWindow::propagateTrackingCamShift(){
         BoundingBox new_bbox;
         new_bbox.rect = new_roi;
         new_bbox.classname = tracker.second.classname;
-
-        refineBoundingBox(image, new_bbox.rect);
 
         project->addLabel(current_imagepath, new_bbox);
 
@@ -489,8 +588,9 @@ void MainWindow::propagateTracking(){
     QtConcurrent::blockingMap(trackers.begin(), trackers.end(), [&](auto&& tracker)
     {
         cv::Rect2d bbox;
+        auto image = currentImage->getImage();
 
-        if( tracker.first->update(currentImage->getImage(), bbox)){
+        if( tracker.first->update(image, bbox)){
 
             QRect new_roi;
             new_roi.setX(static_cast<int>(bbox.x));
@@ -501,6 +601,9 @@ void MainWindow::propagateTracking(){
             BoundingBox new_bbox;
             new_bbox.rect = new_roi;
             new_bbox.classname = tracker.second;
+
+            if(refine_on_propagate)
+                refineBoundingBoxSimple(image, new_bbox.rect);
 
             project->addLabel(current_imagepath, new_bbox);
         }

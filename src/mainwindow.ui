@@ -220,8 +220,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>581</width>
-         <height>543</height>
+         <width>576</width>
+         <height>531</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2"/>
@@ -243,10 +243,10 @@
        <string>Navigation</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_4">
-       <item row="0" column="0">
-        <widget class="QLabel" name="imageIndexLabel">
+       <item row="3" column="0" colspan="3">
+        <widget class="QPushButton" name="nextUnlabelledButton">
          <property name="text">
-          <string>Image: 0/0</string>
+          <string>Next unlabelled</string>
          </property>
         </widget>
        </item>
@@ -260,16 +260,6 @@
          </property>
          <property name="minimum">
           <number>1</number>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0" colspan="2">
-        <widget class="QCheckBox" name="propagateCheckBox">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>Propagate label on next image</string>
          </property>
         </widget>
        </item>
@@ -304,6 +294,23 @@
          </property>
         </widget>
        </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="imageIndexLabel">
+         <property name="text">
+          <string>Image: 0/0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0" colspan="2">
+        <widget class="QCheckBox" name="propagateCheckBox">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Propagate label on next image</string>
+         </property>
+        </widget>
+       </item>
        <item row="2" column="1" colspan="2">
         <widget class="QPushButton" name="changeImageButton">
          <property name="text">
@@ -311,10 +318,10 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="0" colspan="3">
-        <widget class="QPushButton" name="nextUnlabelledButton">
+       <item row="5" column="0">
+        <widget class="QCheckBox" name="refineTrackingCheckbox">
          <property name="text">
-          <string>Next unlabelled</string>
+          <string>Refine after tracking</string>
          </property>
         </widget>
        </item>
@@ -329,7 +336,7 @@
      <x>0</x>
      <y>0</y>
      <width>899</width>
-     <height>17</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -383,6 +390,7 @@
    <addaction name="actionSelect_Tool"/>
    <addaction name="actionInit_Tracking"/>
    <addaction name="actionPropagate_Tracking"/>
+   <addaction name="actionRefine_boxes"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionPreviousImage">
@@ -515,6 +523,14 @@
    </property>
    <property name="text">
     <string>Export labels</string>
+   </property>
+  </action>
+  <action name="actionRefine_boxes">
+   <property name="text">
+    <string>Refine boxes</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
   </action>
  </widget>

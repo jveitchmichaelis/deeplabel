@@ -43,6 +43,7 @@ private:
 
     // Enable tracking boxes in previous frames
     bool track_previous = false;
+    bool refine_on_propagate = false;
     bool wrap_index;
     int current_index;
 
@@ -89,12 +90,17 @@ private slots:
     cv::Rect2d qrect2cv(QRect rect);
     void initTrackers();
     void toggleAutoPropagate(bool state);
+    void toggleRefineTracking(bool state);
     void nextUnlabelled();
-    QRect refineBoundingBox(cv::Mat image, QRect bbox);
+    QRect refineBoundingBox(cv::Mat image, QRect bbox, int margin=5, bool debug_save=false);
+    QRect refineBoundingBoxSimple(cv::Mat image, QRect bbox, int margin=5, bool debug_save=false);
     cv::Rect2i updateCamShift(cv::Mat image, cv::Mat roiHist, QRect bbox);
     cv::Mat initCamShift(cv::Mat image, QRect bbox);
     void initTrackersCamShift();
     void propagateTrackingCamShift();
+    void updateLabel(BoundingBox old_bbox, BoundingBox new_bbox);
+    void refineBoxes();
+
 
 signals:
     void selectedClass(QString);
