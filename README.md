@@ -16,9 +16,25 @@ A typical workflow for DeepLabel is:
 2. Add a folder of images, or manually select images to add
 3. Load in a class list, or manually add classes
 4. Label the images
-5. Export data in the desired format (e.g. KITTI, Pascal VOC)
+5. Export data in the desired format
 
-Currently only KITTI format is supported, but this should change shortly.
+## Data export
+
+Currently you can export in either KITTI format (for Nvidia DIGITS) or in the YOLO format for darknet. I hope to add support for VOC and COCO style labels shortly.
+
+KITTI requires frames to be numerically labelled, so when you export, a duplicate copy of your database will be created. DeepLabel can also split your data into train and validation sets.
+
+Since the labelling metadata is in the sqlite database, it should be fairly easy to write a Python script (or whatever) to convert the output to your preferred system.
+
+Augmentation is coming soon!
+
+## Bounding box tracking and refinement
+
+DeepLabel supports multi-threaded object tracking for quickly labelling video sequences. Simply label the first frame, initialise the tracker and select "propagate on next image". The software will initialise a tracker for each bounding box and attempt to track it in the next frame. If tracking is lost, you can re-label the offending image, restart the tracker and keep going. In this way, you can quickly label thousands of images in minutes.
+
+DeepLabel also supports bounding box refinement using some simple thresholding and contour segmentation techniques. This was designed for labelling thermal infrared images, but it should work on colour images too. It works best if the object has a high contrast. It will also probably fail if you have two overlapping objects that look very similar.
+
+An experimental foreground/background segmenter is being tested, but it seems to be a bit overenthusiastic right now.
 
 Installation
 --
@@ -68,14 +84,8 @@ DeepLabel uses a simple relational database with the following schema:
 	CREATE TABLE classes (class_id INTEGER PRIMARY KEY ASC, name varchar(32))
 	CREATE TABLE images (image_id INTEGER PRIMARY KEY ASC, path varchar(256))
 	CREATE TABLE labels (label_id INTEGER PRIMARY KEY ASC, image_id int, class_id int, x int, y int, width int, height int)
-	
+
 These fields are the bare minimum and more may be added later (see note on descriptors above). It may also be useful to include metadata about images for statistics purposes.
-
-#### Export format
-
-Currently KITTI formatting is provided in-software. I hope to add others e.g. VOC or yolo in the future.
-
-Since the labelling metadata is in the sqlite database, it should be fairly easy to write a Python script (or whatever) to convert the output to your preferred system.
 
 #### License
 
