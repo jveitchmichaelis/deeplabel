@@ -34,7 +34,7 @@ ExportDialog::ExportDialog(QWidget *parent) :
     if(settings->contains("names_file")){
         auto path = settings->value("names_file").toString();
         if(path != ""){
-            setNamesFile();
+            setNamesFile(path);
          }
     }
 }
