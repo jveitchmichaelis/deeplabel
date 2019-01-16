@@ -43,7 +43,9 @@ Clone the repo, open the pro file in Qt Creator and build. Deployment is automat
 
 It's recommended that you use Qt5, but Qt4 will probably work. You need to have Qt's SQL extensions installed.
 
-This is mostly a pure Qt project, but there are some limitations to what Qt can do with images. In particular, scaling sucks (even with `Qt::SmoothTransform`). Qt's image reader is also not particularly robust, so OpenCV is used there. OpenCV is also used for image augmentation. On OS X it's expected that you have `pkg-config` installed to handle dependencies.
+This is mostly a pure Qt project, but there are some limitations to what Qt can do with images. In particular, scaling sucks (even with `Qt::SmoothTransform`). Qt's image reader is also not particularly robust, so OpenCV is used there. OpenCV is also used for image augmentation. On OS X or Linux it's expected that you have `pkg-config` installed to handle dependencies.
+
+You need to compile OpenCV with contrib (`-DOPENCV_EXTRA_MODULES_PATH`)in order to enable tracking.
 
 `madeployqt` is automatically run after compilation, and on OS X will build a `.dmg` file. This does have the irritating side effect of linking and copying every `dylib` OpenCV has to offer so feel free to dig into the package and delete some of the dylibs that you don't need. This is a tradeoff between output file size and convenience. The main dependencies are `opencv_core`, `opencv_imgcodecs`, and `opencv_imgproc`. Unfortunately `core` and `imgproc` are by far the largest library files...
 
