@@ -28,8 +28,14 @@ macx|unix{
 message("Unix")
 CONFIG += link_pkgconfig
 
+packagesExist(opencv4) {
+    PKGCONFIG += opencv4
+}else{
+    PKGCONFIG += opencv
+}
+
 # Make sure you compile OpenCV with OPENCV_GENERATE_PKGCONFIG
-PKGCONFIG += opencv4
+
 }
 
 win32{
