@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = DeepLabel
 TEMPLATE = app
 
-CONFIG += c++17
+CONFIG += c++14 #Qt will ignore anything higher at the moment
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -24,18 +24,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-macx|unix{
-message("Unix")
-CONFIG += link_pkgconfig
-
-packagesExist(opencv4) {
-    PKGCONFIG += opencv4
-}else{
-    PKGCONFIG += opencv
+macx{
+message("Mac")
+PKG_CONFIG = /usr/local/bin/pkg-config
+QMAKE_CXXFLAGS += -mmacosx-version-min=10.10
 }
 
-# Make sure you compile OpenCV with OPENCV_GENERATE_PKGCONFIG
-
+unix|macx{
+CONFIG += link_pkgconfig
+PKGCONFIG += opencv4
 }
 
 win32{
@@ -117,8 +114,8 @@ CONFIG( debug, debug|release ) {
 
 # Use += instead of = if you use multiple QMAKE_POST_LINKs
 win32 {
-    #QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET}
+    QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET}
 }
 macx {
-    #QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET} -dmg
+    QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET} -dmg
 }
