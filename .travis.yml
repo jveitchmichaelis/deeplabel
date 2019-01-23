@@ -3,13 +3,10 @@ language: cpp
 os:
     - osx
 
-addons:
-  homebrew:
-    packages:
-    - qt
-    - opencv@4
-    
 before_install:
+    - /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    - brew update
+    - brew install qt opencv
     - brew link qt --force
     
 script:
