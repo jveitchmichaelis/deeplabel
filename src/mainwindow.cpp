@@ -525,12 +525,14 @@ void MainWindow::refineBoxes(){
     const auto image = currentImage->getImage();
 
     for(auto &bbox : bboxes){
+        auto previous_area = bbox.rect.width()*bbox.rect.height();
         auto updated = refineBoundingBoxSimple(image, bbox.rect, 5, true);
 
         auto new_bbox = bbox;
         new_bbox.rect = updated;
+        auto new_area = new_bbox.rect.width()*new_bbox.rect.height();
 
-        if(!updated.size().isEmpty()) updateLabel(bbox, new_bbox);
+        if(!updated.size().isEmpty() && new_area >= 0.5*previous_area) updateLabel(bbox, new_bbox);
     }
 
 }
