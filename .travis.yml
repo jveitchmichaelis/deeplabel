@@ -8,6 +8,9 @@ addons:
     packages:
     - qt
     - opencv
+
+before_install:
+    - brew link qt --force
     
 script:
     - qmake -makefile -o Makefile DeepLabel.pro
