@@ -1,0 +1,14 @@
+language: cpp
+
+os:
+    - osx
+
+addons:
+  homebrew:
+    packages:
+    - qt
+    - opencv
+    
+script:
+    - qmake -makefile -o Makefile DeepLabel.pro
+    - make -j4
