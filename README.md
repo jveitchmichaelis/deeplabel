@@ -1,5 +1,6 @@
 # DeepLabel
 
+[![Build Status](https://travis-ci.org/jveitchmichaelis/deeplabel.svg?branch=master)](https://travis-ci.org/jveitchmichaelis/deeplabel)
 
 ![Deeplabel Interface](gui_example.png)
 
