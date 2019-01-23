@@ -7,8 +7,8 @@ addons:
   homebrew:
     packages:
     - qt
-    - opencv
-
+    - opencv@4
+    
 before_install:
     - brew link qt --force
     
