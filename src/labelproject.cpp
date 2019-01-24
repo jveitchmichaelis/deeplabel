@@ -311,6 +311,28 @@ bool LabelProject::getLabels(int image_id, QList<BoundingBox> &bboxes){
     return res;
 }
 
+bool LabelProject::removeLabels(QString fileName){
+    int image_id = getImageId(fileName);
+
+    bool res = false;
+
+    if(image_id > 0){
+        QSqlQuery query(db);
+
+        query.prepare("DELETE FROM labels WHERE (image_id = :image_id)");
+        query.bindValue(":image_id", image_id);
+
+        res = query.exec();
+
+        if(!res){
+            qDebug() << "Error: " << query.lastError();
+        }
+
+    }
+
+    return res;
+}
+
 bool LabelProject::removeLabel(QString fileName, BoundingBox bbox){
     /*!
      * Remove a label given an absolute path  (\a fileName) and the bounding box  (\a bbox). Returns false
