@@ -3,7 +3,9 @@
 [![Build Status](https://travis-ci.org/jveitchmichaelis/deeplabel.svg?branch=master)](https://travis-ci.org/jveitchmichaelis/deeplabel)
 
 
-DeepLabel is a cross-platform tool for annotating images with labelled bounding boxes. A typical use-case for the program is labelling ground truth data for object-detection machine learning applications.
+DeepLabel is a cross-platform tool for annotating images with labelled bounding boxes. A typical use-case for the program is labelling ground truth data for object-detection machine learning applications. DeepLabel runs as a standalone app and compiles on Windows, Linux and Mac.
+
+Ready made binaries for Windows and OS X are on the release page. It is recommended that you build for Linux yourself.
 
 ![Deeplabel Interface](gui_example.png)
 
@@ -41,15 +43,58 @@ An experimental foreground/background segmenter is being tested, but it seems to
 Installation
 --
 
-Clone the repo, open the pro file in Qt Creator and build. Deployment is automatic on Windows and OS X.
-
 It's recommended that you use Qt5, but Qt4 will probably work. You need to have Qt's SQL extensions installed.
 
-This is mostly a pure Qt project, but there are some limitations to what Qt can do with images. In particular, scaling sucks (even with `Qt::SmoothTransform`). Qt's image reader is also not particularly robust, so OpenCV is used there. OpenCV is also used for image augmentation. On OS X or Linux it's expected that you have `pkg-config` installed to handle dependencies.
+** OpenCV Requirements **
 
-You need to compile OpenCV with contrib (`-DOPENCV_EXTRA_MODULES_PATH`)in order to enable tracking.
+This is mostly a pure Qt project, but there are some limitations to what Qt can do with images. In particular, scaling sucks (even with `Qt::SmoothTransform`). Qt's image reader is also not particularly robust, so OpenCV is used there. OpenCV is also used for image augmentation. On OS X or Linux it's expected that you have `pkg-config` installed to handle dependencies. 
 
-`madeployqt` is automatically run after compilation, and on OS X will build a `.dmg` file. This does have the irritating side effect of linking and copying every `dylib` OpenCV has to offer so feel free to dig into the package and delete some of the dylibs that you don't need. This is a tradeoff between output file size and convenience. The main dependencies are `opencv_core`, `opencv_imgcodecs`, and `opencv_imgproc`. Unfortunately `core` and `imgproc` are by far the largest library files...
+You need to compile OpenCV with contrib (`-DOPENCV_EXTRA_MODULES_PATH`) for object tracking. You should also compile with (`-DOPENCV_GENERATE_PKGCONFIG`). Only OpenCV 4+ is supported due to API changes.
+
+``` bash
+git clone https://github.com/opencv/opencv
+git clone https://github.com/opencv/opencv_contrib
+cd opencv && git checkout 4.0.0 && cd ../
+cd opencv_contrib && git checkout 4.0.0 && cd ../
+```
+
+On Mac, Homebrew automatically include pkg-config support and the contrib packages.
+
+**Linux**
+
+Build opencv using your preferred method.
+
+Clone the repository, then:
+
+```bash
+qmake -makefile -o Makefile DeepLabel.pro
+make -j4
+```
+
+**Mac**
+Install dependencies using Homebrew:
+``` bash
+brew install qt opencv
+```
+
+Note that qt is not linked by default, so either force link it (`brew link -f qt`) or follow the post-install instructions to see where qmake is installed.
+
+Clone the repo, open the pro file in Qt Creator and build. Deployment is automatic on Windows and OS X. Alternatively:
+
+```bash
+qmake -makefile -o Makefile DeepLabel.pro
+make -j4
+```
+
+`madeployqt` is automatically run after compilation, and on OS X will build a `.dmg` file. This does have the irritating side effect of linking and copying every `dylib` OpenCV has to offer so feel free to dig into the package and delete some of the dylibs that you don't need. This is a tradeoff between output file size and convenience.
+
+**Windows**
+
+Unfortunately you need to install OpenCV from source, because the official versions don't include the contrib modules (which include tracking algorithms). Or just download a DeepLabel release from here.
+
+Once you've installed OpenCV...(!)
+
+Clone the repo, open the pro file in Qt Creator and modify the paths to your opencv install. Build as normal. Make sure you copy all the OpenCV DLLs after install.
 
 Usage
 --
