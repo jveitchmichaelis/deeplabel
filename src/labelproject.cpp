@@ -319,6 +319,7 @@ bool LabelProject::removeLabels(QString fileName){
      * Remove all labels from an image given an absolute path to the image (\a fileName).
      */
     int image_id = getImageId(fileName);
+
     bool res = false;
 
     if(image_id > 0){

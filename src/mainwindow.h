@@ -78,7 +78,7 @@ private slots:
     void addLabel(BoundingBox bbox);
     void removeLabel(BoundingBox bbox);
     void updateLabel(BoundingBox old_bbox, BoundingBox new_bbox);
-
+    void removeLabelsFromImage();
     void setDrawMode(void);
     void setSelectMode(void);
 

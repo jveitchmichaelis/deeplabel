@@ -213,7 +213,12 @@ void MainWindow::removeImage(){
         updateImageList();
         updateDisplay();
     }
+}
 
+void MainWindow::removeLabelsFromImage(){
+    project->removeLabels(current_imagepath);
+    updateImageList();
+    updateDisplay();
 }
 
 void MainWindow::removeClass(){
@@ -268,6 +273,12 @@ QRect MainWindow::refineBoundingBoxSimple(cv::Mat image, QRect bbox, int margin,
 
     // Threshold input, 1 == good
     cv::Mat roi_thresh;
+
+    // Convert colour images to grayscale for thresholding
+    if(roi.channels() == 3){
+        cv::cvtColor(roi, roi, cv::COLOR_BGR2GRAY);
+    }
+
     cv::threshold(roi, roi_thresh, 0, 255, cv::THRESH_OTSU|cv::THRESH_BINARY);
 
     if(debug_save) cv::imwrite("roi.png", roi);
