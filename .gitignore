@@ -1,2 +1,7 @@
 build/
 *.pro.user*
+Makefile
+ui_*
+.moc
+.obj
+*.stash

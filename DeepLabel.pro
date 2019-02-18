@@ -27,12 +27,24 @@ DEFINES += QT_DEPRECATED_WARNINGS
 macx{
 message("Mac")
 PKG_CONFIG = /usr/local/bin/pkg-config
-QMAKE_CXXFLAGS += -mmacosx-version-min=10.10
+QMAKE_CXXFLAGS += -mmacosx-version-min=10.12
+
+# Build without FFMPEG unless you want a lot of pain later
+#CONFIG += link_pkgconfig
+#PKGCONFIG += opencv4
+
+# If you use pkg-config, *everything* gets linked. Wasteful.
+INCLUDEPATH += /usr/local/include/opencv4
+LIBS += -L/usr/local/opt/opencv/lib/
+LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lopencv_tracking -lopencv_video
 }
 
-unix|macx{
-CONFIG += link_pkgconfig
-PKGCONFIG += opencv4
+unix:!macx{
+message("Linux")
+#CONFIG += link_pkgconfig
+#PKGCONFIG += opencv4
+INCLUDEPATH += /usr/local/include/opencv4
+LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lopencv_tracking -lopencv_video
 }
 
 win32{
@@ -117,5 +129,5 @@ win32 {
     QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET}
 }
 macx {
-    QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET} -dmg
+    QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET}
 }
