@@ -166,6 +166,7 @@ bool LabelProject::classInDB(QString className){
 
     if(!res){
         qDebug() << "Error: " << query.lastError();
+        return false;
     }else{
         return query.next();
     }
