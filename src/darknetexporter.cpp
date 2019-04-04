@@ -132,7 +132,7 @@ bool DarknetExporter::saveImage(cv::Mat &image, const QString output, const doub
     if(scale_x > 0 && scale_y > 0)
         cv::resize(image, image, cv::Size(), scale_x, scale_y);
 
-        std::vector<int> compression_params;
+    std::vector<int> compression_params;
 
     // Png compression - maximum is super slow
     // TODO: add support to adjust this

@@ -170,6 +170,8 @@ bool LabelProject::classInDB(QString className){
     }else{
         return query.next();
     }
+
+    return false;
 }
 
 bool LabelProject::imageInDB(QString fileName){
@@ -307,6 +309,30 @@ bool LabelProject::getLabels(int image_id, QList<BoundingBox> &bboxes){
 
             bboxes.append(new_bbox);
         }
+    }
+
+    return res;
+}
+
+bool LabelProject::removeLabels(QString fileName){
+    /*!
+     * Remove all labels from an image given an absolute path to the image (\a fileName).
+     */
+    int image_id = getImageId(fileName);
+    bool res = false;
+
+    if(image_id > 0){
+        QSqlQuery query(db);
+
+        query.prepare("DELETE FROM labels WHERE (image_id = :image_id)");
+        query.bindValue(":image_id", image_id);
+
+        res = query.exec();
+
+        if(!res){
+            qDebug() << "Error: " << query.lastError();
+        }
+
     }
 
     return res;

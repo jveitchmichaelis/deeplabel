@@ -40,6 +40,7 @@ public:
     bool getLabels(QString fileName, QList<BoundingBox> &bboxes);
     bool getLabels(int imageId, QList<BoundingBox> &bboxes);
     bool removeLabel(QString fileName, BoundingBox bbox);
+    bool removeLabels(QString fileName);
     bool updateLabel(QString fileName, BoundingBox bbox);
 
     bool setOccluded(QString fileName, BoundingBox bbox, int occluded);

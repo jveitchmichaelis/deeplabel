@@ -75,20 +75,22 @@ VPATH = "$$_PRO_FILE_PWD_/src"
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    src/labelproject.cpp \
-    src/imagelabel.cpp \
-    src/kittiexporter.cpp \
-    src/darknetexporter.cpp \
-    src/exportdialog.cpp
+        labelproject.cpp \
+        imagelabel.cpp \
+        kittiexporter.cpp \
+        darknetexporter.cpp \
+        exportdialog.cpp \
+        multitracker.cpp
 
 HEADERS += \
         mainwindow.h \
-    src/labelproject.h \
-    src/imagelabel.h \
-    src/boundingbox.h \
-    src/kittiexporter.h \
-    src/darknetexporter.h \
-    src/exportdialog.h
+        labelproject.h \
+        imagelabel.h \
+        boundingbox.h \
+        kittiexporter.h \
+        darknetexporter.h \
+        exportdialog.h \
+        multitracker.h
 
 FORMS += \
         mainwindow.ui \
