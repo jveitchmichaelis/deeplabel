@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(selectedClass(QString)), currentImage, SLOT(setClassname(QString)));
     connect(currentImage, SIGNAL(newLabel(BoundingBox)), this, SLOT(addLabel(BoundingBox)));
     connect(currentImage, SIGNAL(removeLabel(BoundingBox)), this, SLOT(removeLabel(BoundingBox)));
+    connect(ui->removeImageLabelsButton, SIGNAL(clicked(bool)), this, SLOT(removeImageLabels()));
 
     connect(ui->removeClassButton, SIGNAL(clicked(bool)), this, SLOT(removeClass()));
     connect(ui->removeImageButton, SIGNAL(clicked(bool)), this, SLOT(removeImage()));
@@ -217,7 +218,6 @@ void MainWindow::removeImage(){
 
 void MainWindow::removeLabelsFromImage(){
     project->removeLabels(current_imagepath);
-    updateImageList();
     updateDisplay();
 }
 
