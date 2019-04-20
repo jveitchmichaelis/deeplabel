@@ -108,13 +108,17 @@ void ExportDialog::checkOK(){
 
     // If output folder exists
     if(!QDir(output_folder).exists() || output_folder != ""){
+        qDebug() << "Output folder doesn't exist";
         return;
     }
 
     if(ui->exportSelectComboBox->currentText() == "Darknet"){
         // If we're using darknet, check the names
         // file exists and contains something
-        if(!QFile::exists(names_file)) return;
+        if(!QFile::exists(names_file)){
+            qDebug() << "Names file doesn't exist";
+            return;
+        }
 
         QStringList class_list;
         QFile fh(names_file);
@@ -128,7 +132,10 @@ void ExportDialog::checkOK(){
             }
         }
 
-        if(class_list.size() == 0) return;
+        if(class_list.size() == 0){
+            qDebug() << "No classes?";
+            return;
+        }
     }
 }
 

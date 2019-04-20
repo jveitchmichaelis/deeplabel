@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QSettings>
+#include <QtDebug>
 
 namespace Ui {
 class ExportDialog;
