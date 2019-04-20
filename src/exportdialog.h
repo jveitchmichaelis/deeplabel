@@ -35,7 +35,7 @@ private slots:
 
 private:
     Ui::ExportDialog *ui;
-    void checkOK();
+    bool checkOK();
 
     QSettings *settings;
 
