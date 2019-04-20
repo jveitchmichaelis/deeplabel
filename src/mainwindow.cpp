@@ -16,6 +16,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionNextImage, SIGNAL(triggered(bool)), this, SLOT(nextImage()));
     connect(ui->actionPreviousImage, SIGNAL(triggered(bool)), this, SLOT(previousImage()));
 
+    connect(ui->actionDetect_Objects, SIGNAL(triggered(bool)), this, SLOT(detectObjects()));
+
     connect(ui->addClassButton, SIGNAL(clicked(bool)), this, SLOT(addClass()));
     connect(ui->newClassText, SIGNAL(editingFinished()), this, SLOT(addClass()));
 
@@ -34,7 +36,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(selectedClass(QString)), currentImage, SLOT(setClassname(QString)));
     connect(currentImage, SIGNAL(newLabel(BoundingBox)), this, SLOT(addLabel(BoundingBox)));
     connect(currentImage, SIGNAL(removeLabel(BoundingBox)), this, SLOT(removeLabel(BoundingBox)));
-    connect(ui->
 
     connect(ui->removeClassButton, SIGNAL(clicked(bool)), this, SLOT(removeClass()));
     connect(ui->removeImageButton, SIGNAL(clicked(bool)), this, SLOT(removeImage()));
@@ -72,6 +73,31 @@ MainWindow::MainWindow(QWidget *parent) :
     settings = new QSettings("DeepLabel", "DeepLabel");
     qDebug() << settings->value("project_folder").toString();
 
+    initDetector();
+}
+
+void MainWindow::initDetector(){
+    auto names_file = "./coco.names";
+    auto cfg_file = "./yolov3.cfg";
+    auto model_file = "./yolov3.weights";
+    detector.loadDarknet(names_file, cfg_file, model_file);
+
+    qDebug() << "Loaded network";
+}
+
+void MainWindow::detectObjects(){
+
+    qDebug() << "Running detector";
+    auto image = cv::imread(current_imagepath.toStdString(), cv::IMREAD_UNCHANGED|cv::IMREAD_ANYDEPTH);
+
+    detected_objects.clear();
+    auto new_boxes = detector.infer(image);
+
+    for(auto &box : new_boxes){
+        detected_objects.push_back(box);
+    }
+
+    updateLabels();
 }
 
 void MainWindow::toggleAutoPropagate(bool state){
@@ -117,6 +143,7 @@ void MainWindow::enableWrap(bool enable){
 
 void MainWindow::changeImage(){
     current_index = ui->imageNumberSpinbox->value()-1;
+    detected_objects.clear();
     updateDisplay();
 }
 
@@ -158,6 +185,11 @@ void MainWindow::updateLabels(){
     project->getLabels(current_imagepath, bboxes);
     ui->instanceCountLabel->setNum(bboxes.size());
     currentImage->setBoundingBoxes(bboxes);
+
+    // Add possible bounding boxes too
+    if(detected_objects.size() > 0){
+        currentImage->setPotentialBoundingBoxes(detected_objects);
+    }
 }
 
 void MainWindow::updateImageList(){

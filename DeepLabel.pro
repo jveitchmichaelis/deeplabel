@@ -40,9 +40,9 @@ message("Windows")
 INCLUDEPATH += "C:/Users/Josh/Code/opencv/build/install/include"
 LIBS += -L"C:/Users/Josh/Code/opencv/build/install/x64/vc15/lib"
 CONFIG(debug, debug|release) {
-LIBS += -lopencv_core400d -lopencv_highgui400d -lopencv_imgproc400d -lopencv_imgcodecs400d -lopencv_tracking400d -lopencv_video400d
+LIBS += -lopencv_core400d -lopencv_highgui400d -lopencv_imgproc400d -lopencv_imgcodecs400d -lopencv_tracking400d -lopencv_video400d -lopencv_dnn400d
 }else{
-LIBS += -lopencv_core400 -lopencv_highgui400 -lopencv_imgproc400 -lopencv_imgcodecs400 -lopencv_tracking400 -lopencv_video400
+LIBS += -lopencv_core400 -lopencv_highgui400 -lopencv_imgproc400 -lopencv_imgcodecs400 -lopencv_tracking400 -lopencv_video400 -lopencv_dnn400
 }
 }
 
@@ -67,7 +67,8 @@ SOURCES += \
     src/imagelabel.cpp \
     src/kittiexporter.cpp \
     src/darknetexporter.cpp \
-    src/exportdialog.cpp
+    src/exportdialog.cpp \
+    src/detection/detectoropencv.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -76,7 +77,8 @@ HEADERS += \
     src/boundingbox.h \
     src/kittiexporter.h \
     src/darknetexporter.h \
-    src/exportdialog.h
+    src/exportdialog.h \
+    src/detection/detectoropencv.h
 
 FORMS += \
         mainwindow.ui \

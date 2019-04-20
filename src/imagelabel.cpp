@@ -189,6 +189,11 @@ void ImageLabel::setBoundingBoxes(QList<BoundingBox> input_bboxes){
     drawBoundingBoxes();
 }
 
+void ImageLabel::setPotentialBoundingBoxes(QList<BoundingBox> input_bboxes){
+    bboxes = input_bboxes;
+    drawBoundingBoxes();
+}
+
 void ImageLabel::drawBoundingBoxes(QPoint location){
     pix = base_pixmap;
     scaledPixmap();

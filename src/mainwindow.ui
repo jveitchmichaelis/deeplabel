@@ -227,8 +227,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>576</width>
-         <height>531</height>
+         <width>581</width>
+         <height>543</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2"/>
@@ -343,7 +343,7 @@
      <x>0</x>
      <y>0</y>
      <width>899</width>
-     <height>20</height>
+     <height>17</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -398,6 +398,7 @@
    <addaction name="actionInit_Tracking"/>
    <addaction name="actionPropagate_Tracking"/>
    <addaction name="actionRefine_boxes"/>
+   <addaction name="actionDetect_Objects"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionPreviousImage">
@@ -538,6 +539,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionDetect_Objects">
+   <property name="text">
+    <string>Detect Objects</string>
    </property>
   </action>
  </widget>

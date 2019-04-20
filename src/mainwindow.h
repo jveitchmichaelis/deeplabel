@@ -17,6 +17,8 @@
 #include <algorithm>
 #include <exportdialog.h>
 
+#include <detection/detectoropencv.h>
+
 namespace Ui {
 class MainWindow;
 }
@@ -59,7 +61,10 @@ private:
     void updateClassList();
     void updateLabels();
 
+    QList<BoundingBox> detected_objects;
+
     QSettings* settings;
+    DetectorOpenCV detector;
 
 private slots:
     void openProject(void);
@@ -83,6 +88,7 @@ private slots:
     void handleExportDialog();
     void histogram(const cv::Mat &image, cv::Mat &hist);
     QImage convert16(const cv::Mat &source);
+    void detectObjects();
 
 
     // Tracking
@@ -101,7 +107,7 @@ private slots:
     void propagateTrackingCamShift();
     void updateLabel(BoundingBox old_bbox, BoundingBox new_bbox);
     void refineBoxes();
-
+    void initDetector();
 
 signals:
     void selectedClass(QString);

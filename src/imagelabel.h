@@ -43,6 +43,7 @@ public slots:
     void setPixmap ( QPixmap & );
     void setImage(cv::Mat &image){this->image = image;}
     void setBoundingBoxes(QList<BoundingBox> input_bboxes);
+    void setPotentialBoundingBoxes(QList<BoundingBox> input_bboxes);
     void setClassname(QString classname){current_classname = classname;}
     void addLabel(QRect rect, QString classname);
 
