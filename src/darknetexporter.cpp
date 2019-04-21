@@ -107,7 +107,7 @@ void DarknetExporter::writeLabels(const cv::Mat &image, const QString label_file
 
             // Check if this label exists in the database
             if(id_map.find(label.classname.toLower()) == id_map.end()){
-                qDebug() << "Couldn't find this label in the names file";
+                qDebug() << "Couldn't find this label in the names file: " << label.classname.toLower();
                 continue;
             }
 
