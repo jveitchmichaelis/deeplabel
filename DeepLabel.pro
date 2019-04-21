@@ -27,12 +27,24 @@ DEFINES += QT_DEPRECATED_WARNINGS
 macx{
 message("Mac")
 PKG_CONFIG = /usr/local/bin/pkg-config
-QMAKE_CXXFLAGS += -mmacosx-version-min=10.10
+QMAKE_CXXFLAGS += -mmacosx-version-min=10.12
+
+# Build without FFMPEG unless you want a lot of pain later
+#CONFIG += link_pkgconfig
+#PKGCONFIG += opencv4
+
+# If you use pkg-config, *everything* gets linked. Wasteful.
+INCLUDEPATH += /usr/local/include/opencv4
+LIBS += -L/usr/local/opt/opencv/lib/
+LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lopencv_tracking -lopencv_video
 }
 
-unix|macx{
-CONFIG += link_pkgconfig
-PKGCONFIG += opencv4
+unix:!macx{
+message("Linux")
+#CONFIG += link_pkgconfig
+#PKGCONFIG += opencv4
+INCLUDEPATH += /usr/local/include/opencv4
+LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lopencv_tracking -lopencv_video
 }
 
 win32{
@@ -63,22 +75,24 @@ VPATH = "$$_PRO_FILE_PWD_/src"
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    src/labelproject.cpp \
-    src/imagelabel.cpp \
-    src/kittiexporter.cpp \
-    src/darknetexporter.cpp \
-    src/exportdialog.cpp \
-    src/detection/detectoropencv.cpp
+        labelproject.cpp \
+        imagelabel.cpp \
+        kittiexporter.cpp \
+        darknetexporter.cpp \
+        exportdialog.cpp \
+        multitracker.cpp \
+        detection/detectoropencv.cpp
 
 HEADERS += \
         mainwindow.h \
-    src/labelproject.h \
-    src/imagelabel.h \
-    src/boundingbox.h \
-    src/kittiexporter.h \
-    src/darknetexporter.h \
-    src/exportdialog.h \
-    src/detection/detectoropencv.h
+        labelproject.h \
+        imagelabel.h \
+        boundingbox.h \
+        kittiexporter.h \
+        darknetexporter.h \
+        exportdialog.h \
+        multitracker.h \
+        detection/detectoropencv.h
 
 FORMS += \
         mainwindow.ui \
@@ -96,19 +110,19 @@ isEmpty(TARGET_EXT) {
     TARGET_CUSTOM_EXT = $${TARGET_EXT}
 }
 
-win32 {
-    DEPLOY_COMMAND = windeployqt
-}
-macx {
-    DEPLOY_COMMAND = macdeployqt
-}
-
 CONFIG( debug, debug|release ) {
     # debug
     DEPLOY_TARGET = $$shell_quote($$shell_path($${OUT_PWD}/debug/$${TARGET}$${TARGET_CUSTOM_EXT}))
 } else {
     # release
     DEPLOY_TARGET = $$shell_quote($$shell_path($${OUT_PWD}/release/$${TARGET}$${TARGET_CUSTOM_EXT}))
+}
+
+win32 {
+    DEPLOY_COMMAND = windeployqt
+}
+macx {
+    DEPLOY_COMMAND = macdeployqt
 }
 
 #  # Uncomment the following line to help debug the deploy command when running qmake
@@ -119,5 +133,5 @@ win32 {
     QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET}
 }
 macx {
-    QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET} -dmg
+    QMAKE_POST_LINK = $${DEPLOY_COMMAND} $${DEPLOY_TARGET}
 }

@@ -166,6 +166,7 @@ bool LabelProject::classInDB(QString className){
 
     if(!res){
         qDebug() << "Error: " << query.lastError();
+        return false;
     }else{
         return query.next();
     }
@@ -312,6 +313,9 @@ bool LabelProject::getLabels(int image_id, QList<BoundingBox> &bboxes){
 }
 
 bool LabelProject::removeLabels(QString fileName){
+    /*!
+     * Remove all labels from an image given an absolute path to the image (\a fileName).
+     */
     int image_id = getImageId(fileName);
 
     bool res = false;

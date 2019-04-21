@@ -7,15 +7,14 @@
 #include <QDialog>
 #include <QSettings>
 #include <QTemporaryDir>
-#include <QtConcurrent/qtconcurrentmap.h>
 #include <opencv2/opencv.hpp>
-#include <opencv2/tracking.hpp>
 #include <imagelabel.h>
 #include <labelproject.h>
 #include <kittiexporter.h>
 #include <darknetexporter.h>
 #include <algorithm>
 #include <exportdialog.h>
+#include <multitracker.h>
 
 #include <detection/detectoropencv.h>
 
@@ -37,11 +36,8 @@ private:
     QPixmap pixmap;
     ImageLabel *currentImage;
     cv::Mat display_image;
-    std::vector<std::pair<cv::Ptr<cv::Tracker>, QString>> trackers;
-    std::vector<std::pair<cv::Mat, BoundingBox>> trackers_camshift;
     ExportDialog export_dialog;
-
-    enum trackerType {BOOSTING, MIL, KCF, TLD, MEDIANFLOW, GOTURN, MOSSE, CSRT};
+    MultiTracker *multitracker;
 
     // Enable tracking boxes in previous frames
     bool track_previous = false;
@@ -67,47 +63,48 @@ private:
     DetectorOpenCV detector;
 
 private slots:
+
+    void updateDisplay(void);
+
     void openProject(void);
     void newProject(void);
+
     void addClass(void);
+    void removeClass(void);
+
     void addImages(void);
     void addImageFolder(void);
     void nextImage(void);
     void previousImage(void);
-    void updateDisplay(void);
+    void removeImage(void);
+    void removeImageLabels(void);
+    void changeImage(void);
+
     void addLabel(BoundingBox bbox);
     void removeLabel(BoundingBox bbox);
-    void removeClass(void);
     void removeLabelsFromImage();
-    void removeImage(void);
+    void updateLabel(BoundingBox old_bbox, BoundingBox new_bbox);
     void setDrawMode(void);
     void setSelectMode(void);
-    void changeImage(void);
+
     void enableWrap(bool enable);
     void launchExportDialog();
     void handleExportDialog();
-    void histogram(const cv::Mat &image, cv::Mat &hist);
+
     QImage convert16(const cv::Mat &source);
     void detectObjects();
 
-
     // Tracking
-    void propagateTracking();
-    cv::Ptr<cv::Tracker> createTrackerByName(trackerType type);
-    cv::Rect2d qrect2cv(QRect rect);
     void initTrackers();
+    void updateTrackers();
     void toggleAutoPropagate(bool state);
     void toggleRefineTracking(bool state);
     void nextUnlabelled();
     QRect refineBoundingBox(cv::Mat image, QRect bbox, int margin=5, bool debug_save=false);
     QRect refineBoundingBoxSimple(cv::Mat image, QRect bbox, int margin=5, bool debug_save=false);
-    cv::Rect2i updateCamShift(cv::Mat image, cv::Mat roiHist, QRect bbox);
-    cv::Mat initCamShift(cv::Mat image, QRect bbox);
-    void initTrackersCamShift();
-    void propagateTrackingCamShift();
-    void updateLabel(BoundingBox old_bbox, BoundingBox new_bbox);
     void refineBoxes();
     void initDetector();
+
 
 signals:
     void selectedClass(QString);

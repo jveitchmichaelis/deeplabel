@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->newClassText, SIGNAL(editingFinished()), this, SLOT(addClass()));
 
     connect(ui->actionInit_Tracking, SIGNAL(triggered(bool)), this, SLOT(initTrackers()));
-    connect(ui->actionPropagate_Tracking, SIGNAL(triggered(bool)), this, SLOT(propagateTracking()));
+    connect(ui->actionPropagate_Tracking, SIGNAL(triggered(bool)), this, SLOT(updateTrackers()));
     connect(ui->propagateCheckBox, SIGNAL(clicked(bool)), this, SLOT(toggleAutoPropagate(bool)));
     connect(ui->refineTrackingCheckbox, SIGNAL(clicked(bool)), this, SLOT(toggleRefineTracking(bool)));
 
@@ -36,9 +36,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(selectedClass(QString)), currentImage, SLOT(setClassname(QString)));
     connect(currentImage, SIGNAL(newLabel(BoundingBox)), this, SLOT(addLabel(BoundingBox)));
     connect(currentImage, SIGNAL(removeLabel(BoundingBox)), this, SLOT(removeLabel(BoundingBox)));
+    connect(ui->removeImageLabelsButton, SIGNAL(clicked(bool)), this, SLOT(removeImageLabels()));
 
     connect(ui->removeClassButton, SIGNAL(clicked(bool)), this, SLOT(removeClass()));
     connect(ui->removeImageButton, SIGNAL(clicked(bool)), this, SLOT(removeImage()));
+    connect(ui->removeImageLabelsButton, SIGNAL(clicked(bool)), this, SLOT(removeImageLabels()));
 
     ui->actionDraw_Tool->setChecked(true);
     connect(ui->actionDraw_Tool, SIGNAL(triggered(bool)), this, SLOT(setDrawMode()));
@@ -73,7 +75,8 @@ MainWindow::MainWindow(QWidget *parent) :
     settings = new QSettings("DeepLabel", "DeepLabel");
     qDebug() << settings->value("project_folder").toString();
 
-    initDetector();
+    multitracker = new MultiTrackerCV(this);
+    reinterpret_cast<MultiTrackerCV *>(multitracker)->setTrackerType(CSRT);
 }
 
 void MainWindow::initDetector(){
@@ -86,6 +89,8 @@ void MainWindow::initDetector(){
 }
 
 void MainWindow::detectObjects(){
+
+    initDetector();
 
     qDebug() << "Running detector";
     auto image = cv::imread(current_imagepath.toStdString(), cv::IMREAD_UNCHANGED|cv::IMREAD_ANYDEPTH);
@@ -106,34 +111,6 @@ void MainWindow::toggleAutoPropagate(bool state){
 
 void MainWindow::toggleRefineTracking(bool state){
     refine_on_propagate = state;
-}
-
-cv::Ptr<cv::Tracker> MainWindow::createTrackerByName(trackerType type)
-{
-  using namespace cv;
-  using namespace std;
-
-  Ptr<Tracker> tracker;
-  if (type == BOOSTING)
-    tracker = TrackerBoosting::create();
-  else if (type == MIL)
-    tracker = TrackerMIL::create();
-  else if (type == KCF)
-    tracker = TrackerKCF::create();
-  else if (type == TLD)
-    tracker = TrackerTLD::create();
-  else if (type == MEDIANFLOW)
-    tracker = TrackerMedianFlow::create();
-  else if (type == GOTURN)
-    tracker = TrackerGOTURN::create();
-  else if (type == MOSSE)
-    tracker = TrackerMOSSE::create();
-  else if (type == CSRT)
-    tracker = TrackerCSRT::create();
-  else {
-    cout << "Incorrect tracker specified";
-  }
-  return tracker;
 }
 
 void MainWindow::enableWrap(bool enable){
@@ -251,6 +228,11 @@ void MainWindow::removeLabel(BoundingBox bbox){
     updateLabels();
 }
 
+void MainWindow::removeImageLabels(){
+    project->removeLabels(current_imagepath);
+    updateLabels();
+}
+
 void MainWindow::updateLabel(BoundingBox old_bbox, BoundingBox new_bbox){
     project->removeLabel(current_imagepath, old_bbox);
     project->addLabel(current_imagepath, new_bbox);
@@ -297,10 +279,6 @@ void MainWindow::initDisplay(){
     }
 }
 
-cv::Rect2d MainWindow::qrect2cv(QRect rect){
-    return cv::Rect2d(rect.x(), rect.y(), rect.width(),rect.height());
-}
-
 void MainWindow::nextUnlabelled(){
     int n = project->getNextUnlabelled(current_imagepath);
 
@@ -310,68 +288,7 @@ void MainWindow::nextUnlabelled(){
     }
 }
 
-cv::Mat MainWindow::initCamShift(cv::Mat image, QRect bbox){
-    auto roi = image(qrect2cv(bbox));
 
-    if(roi.channels() == 1){
-    cv::cvtColor(roi, roi, cv::COLOR_GRAY2BGR);
-    cv::cvtColor(roi, roi, cv::COLOR_BGR2HSV);
-    }else if(roi.channels() == 3){
-        cv::cvtColor(roi, roi, cv::COLOR_BGR2HSV);
-    }else{
-        // What the hell kind of 2 channel image is this?
-        return cv::Mat();
-    }
-
-    // Generate histogram
-    auto lowScalar = cv::Scalar(30,30,0);
-    auto highScalar = cv::Scalar(180,180,180);
-
-    cv::Mat mask;;
-    cv::inRange(roi, lowScalar, highScalar, mask);
-
-    cv::Mat roiHist;
-
-    int histSize = 256;
-    float range[] = { 0, 180 }; //the upper boundary is exclusive
-    const float* histRange = { range };
-
-    bool uniform = true;
-    bool accumulate = true;
-
-    cv::calcHist( &roi, 1, nullptr, mask, roiHist, 1, &histSize, &histRange, uniform, accumulate);
-    cv::normalize(roiHist, roiHist, 0, 255, cv::NORM_MINMAX);
-
-    return roiHist;
-
-}
-
-cv::Rect2i MainWindow::updateCamShift(cv::Mat image, cv::Mat roiHist, QRect bbox){
-    auto rect = qrect2cv(bbox);
-    auto roi = image(rect);
-
-    if(roi.channels() == 1){
-    cv::cvtColor(roi, roi, cv::COLOR_GRAY2BGR);
-    cv::cvtColor(roi, roi, cv::COLOR_BGR2HSV);
-    }else if(roi.channels() == 3){
-        cv::cvtColor(roi, roi, cv::COLOR_BGR2HSV);
-    }else{
-        // What the hell kind of 2 channel image is this?
-        return cv::Rect();
-    }
-
-    auto rectInt = cv::Rect2i(rect);
-
-    cv::Mat backProjection;
-    float range[] = { 0, 180 }; //the upper boundary is exclusive
-    const float* histRange = { range };
-    cv::calcBackProject(&image, 1, nullptr, roiHist, backProjection, &histRange);
-
-    auto termcrit = cv::TermCriteria(cv::TermCriteria::EPS|cv::TermCriteria::COUNT, 10, 1);
-    auto rotated_rect = cv::CamShift(backProjection, rectInt, termcrit);
-
-    return rotated_rect.boundingRect();
-}
 
 QRect MainWindow::refineBoundingBoxSimple(cv::Mat image, QRect bbox, int margin, bool debug_save){
     QMargins margins(margin, margin, margin, margin);
@@ -546,22 +463,6 @@ QRect MainWindow::refineBoundingBox(cv::Mat image, QRect bbox, int margin, bool 
     return new_box;
 }
 
-void MainWindow::initTrackersCamShift(){
-    auto bboxes = currentImage->getBoundingBoxes();
-
-    trackers_camshift.clear();
-    auto image = currentImage->getImage();
-    QMutex mutex;
-
-    QtConcurrent::blockingMap(bboxes.begin(), bboxes.end(), [&](BoundingBox &bbox)
-    {
-        auto roi_hist = initCamShift(image, bbox.rect);
-        mutex.lock();
-        trackers_camshift.push_back({roi_hist, bbox});
-        mutex.unlock();
-    });
-
-}
 
 void MainWindow::refineBoxes(){
 
@@ -581,79 +482,23 @@ void MainWindow::refineBoxes(){
 
 }
 
-void MainWindow::propagateTrackingCamShift(){
-
-    const auto image = currentImage->getImage();
-
-    QtConcurrent::blockingMap(trackers_camshift.begin(), trackers_camshift.end(), [&](auto&& tracker)
-    {
-        cv::Rect2d bbox = updateCamShift(image, tracker.first, tracker.second.rect);
-
-        QRect new_roi;
-        new_roi.setX(static_cast<int>(bbox.x));
-        new_roi.setY(static_cast<int>(bbox.y));
-        new_roi.setWidth(static_cast<int>(bbox.width));
-        new_roi.setHeight(static_cast<int>(bbox.height));
-
-        BoundingBox new_bbox;
-        new_bbox.rect = new_roi;
-        new_bbox.classname = tracker.second.classname;
-
-        project->addLabel(current_imagepath, new_bbox);
-
-    });
-
-    updateLabels();
+void MainWindow::initTrackers(void){
+    multitracker->init(currentImage->getImage(), currentImage->getBoundingBoxes());
 }
 
-void MainWindow::initTrackers(){
-    auto bboxes = currentImage->getBoundingBoxes();
-
-    trackers.clear();
-    auto image = currentImage->getImage();
-    QMutex mutex;
-
-    // If we are tracking and we have some labelled boxes already
-    QtConcurrent::blockingMap(bboxes.begin(), bboxes.end(), [&](BoundingBox &bbox)
-    {
-        auto tracker = createTrackerByName(CSRT);
-        tracker->init(image, qrect2cv(bbox.rect));
-
-        mutex.lock();
-        trackers.push_back({tracker, bbox.classname});
-        mutex.unlock();
-    });
-}
-
-void MainWindow::propagateTracking(){
+void MainWindow::updateTrackers(void){
 
     // If there are no labels, and we're tracking the previous frame
     // propagate the bounding boxes. Otherwise we assume that the
     // current labels are the correct ones and should override.
 
-    QtConcurrent::blockingMap(trackers.begin(), trackers.end(), [&](auto&& tracker)
-    {
-        cv::Rect2d bbox;
-        auto image = currentImage->getImage();
+    multitracker->update(currentImage->getImage());
 
-        if( tracker.first->update(image, bbox)){
+    auto new_bboxes = multitracker->getBoxes();
 
-            QRect new_roi;
-            new_roi.setX(static_cast<int>(bbox.x));
-            new_roi.setY(static_cast<int>(bbox.y));
-            new_roi.setWidth(static_cast<int>(bbox.width));
-            new_roi.setHeight(static_cast<int>(bbox.height));
-
-            BoundingBox new_bbox;
-            new_bbox.rect = new_roi;
-            new_bbox.classname = tracker.second;
-
-            if(refine_on_propagate)
-                refineBoundingBoxSimple(image, new_bbox.rect);
-
-            project->addLabel(current_imagepath, new_bbox);
-        }
-    });
+    for(auto &new_bbox : new_bboxes){
+        project->addLabel(current_imagepath, new_bbox);
+    }
 
     updateLabels();
 }
@@ -675,7 +520,7 @@ void MainWindow::nextImage(){
     updateDisplay();
 
     // Only auto-propagtae if we've enabled it and there are no boxes in the image already.
-    if(track_previous && currentImage->getBoundingBoxes().size() == 0) propagateTracking();
+    if(track_previous && currentImage->getBoundingBoxes().size() == 0) updateTrackers();
 }
 
 void MainWindow::previousImage(){
@@ -780,17 +625,6 @@ void MainWindow::updateDisplay(){
         ui->sizeLabel->setText(QString("%1 kB").arg(image_info.size() / 1000));
         ui->dimensionsLabel->setText(QString("(%1, %2) px").arg(pixmap.width()).arg(pixmap.height()));
     }
-}
-
-void MainWindow::histogram(const cv::Mat &image, cv::Mat &hist){
-    int histSize = 256;
-    float range[] = { 0, 256 }; //the upper boundary is exclusive
-    const float* histRange = { range };
-
-    bool uniform = true;
-    bool accumulate = true;
-
-    calcHist( &image, 1, nullptr, cv::Mat(), hist, 1, &histSize, &histRange, uniform, accumulate);
 }
 
 void MainWindow::newProject()

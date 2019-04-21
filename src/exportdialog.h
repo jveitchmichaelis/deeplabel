@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QSettings>
+#include <QtDebug>
 
 namespace Ui {
 class ExportDialog;
@@ -34,7 +35,7 @@ private slots:
 
 private:
     Ui::ExportDialog *ui;
-    void checkOK();
+    bool checkOK();
 
     QSettings *settings;
 

@@ -35,23 +35,29 @@ bool DarknetExporter::setOutputFolder(const QString folder){
 
     output_folder = folder;
 
-    train_folder = QDir::cleanPath(output_folder + "/train");
-    val_folder = QDir::cleanPath(output_folder + "/val");
+    //Make output folder if it doesn't exist
+    if (!QDir(output_folder).exists()){
+        qDebug() << "Making output folder" << output_folder;
+        QDir().mkpath(output_folder);
+    }
+
+    //Make the training and validation folders
+    train_folder = QDir::cleanPath(output_folder+"/train");
+    if (!QDir(train_folder).exists()){
+        qDebug() << "Making training folder" << train_folder;
+        QDir().mkpath(train_folder);
+    }
+
+    val_folder = QDir::cleanPath(output_folder+"/val");
+    if (!QDir(val_folder).exists()){
+        qDebug() << "Making validation folder" << val_folder;
+        QDir().mkpath(val_folder);
+    }
 
     train_label_folder = QDir::cleanPath(train_folder);
     train_image_folder = QDir::cleanPath(train_folder);
     val_label_folder = QDir::cleanPath(val_folder);
     val_image_folder = QDir::cleanPath(val_folder);
-
-    QDir(output_folder).mkpath(train_label_folder);
-    QDir(output_folder).mkpath(train_image_folder);
-    QDir(output_folder).mkpath(val_label_folder);
-    QDir(output_folder).mkpath(val_image_folder);
-
-    if(!QDir(train_label_folder).exists()) return false;
-    if(!QDir(train_image_folder).exists()) return false;
-    if(!QDir(val_label_folder).exists()) return false;
-    if(!QDir(val_image_folder).exists()) return false;
 
     return true;
 
@@ -101,6 +107,7 @@ void DarknetExporter::writeLabels(const cv::Mat &image, const QString label_file
 
             // Check if this label exists in the database
             if(id_map.find(label.classname.toLower()) == id_map.end()){
+                qDebug() << "Couldn't find this label in the names file: " << label.classname.toLower();
                 continue;
             }
 
@@ -132,7 +139,7 @@ bool DarknetExporter::saveImage(cv::Mat &image, const QString output, const doub
     if(scale_x > 0 && scale_y > 0)
         cv::resize(image, image, cv::Size(), scale_x, scale_y);
 
-        std::vector<int> compression_params;
+    std::vector<int> compression_params;
 
     // Png compression - maximum is super slow
     // TODO: add support to adjust this
