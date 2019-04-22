@@ -81,7 +81,8 @@ SOURCES += \
         darknetexporter.cpp \
         exportdialog.cpp \
         multitracker.cpp \
-        detection/detectoropencv.cpp
+        detection/detectoropencv.cpp \
+    detection/detectorsetupdialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -92,11 +93,13 @@ HEADERS += \
         darknetexporter.h \
         exportdialog.h \
         multitracker.h \
-        detection/detectoropencv.h
+        detection/detectoropencv.h \
+    detection/detectorsetupdialog.h
 
 FORMS += \
         mainwindow.ui \
-    exportdialog.ui
+    exportdialog.ui \
+    detection/detectorsetupdialog.ui
 
 # Deploy apps in OS X and Windows
 isEmpty(TARGET_EXT) {

@@ -373,10 +373,17 @@
     </property>
     <addaction name="actionWrap_images"/>
    </widget>
+   <widget class="QMenu" name="menuDetection">
+    <property name="title">
+     <string>Detection</string>
+    </property>
+    <addaction name="actionDetectorSettings"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuImages"/>
    <addaction name="menuClasses"/>
    <addaction name="menuNavigation"/>
+   <addaction name="menuDetection"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <property name="movable">
@@ -544,6 +551,11 @@
   <action name="actionDetect_Objects">
    <property name="text">
     <string>Detect Objects</string>
+   </property>
+  </action>
+  <action name="actionDetectorSettings">
+   <property name="text">
+    <string>Settings</string>
    </property>
   </action>
  </widget>

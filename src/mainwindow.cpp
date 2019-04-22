@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionNextImage, SIGNAL(triggered(bool)), this, SLOT(nextImage()));
     connect(ui->actionPreviousImage, SIGNAL(triggered(bool)), this, SLOT(previousImage()));
 
+    ui->actionDetect_Objects->setEnabled(false);
     connect(ui->actionDetect_Objects, SIGNAL(triggered(bool)), this, SLOT(detectObjects()));
 
     connect(ui->addClassButton, SIGNAL(clicked(bool)), this, SLOT(addClass()));
@@ -55,6 +56,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->actionRefine_boxes, SIGNAL(triggered(bool)), this, SLOT(refineBoxes()));
 
+    connect(ui->actionDetectorSettings, SIGNAL(triggered(bool)), this, SLOT(setupDetector()));
+
     auto prev_shortcut = ui->actionPreviousImage->shortcuts();
     prev_shortcut.append(QKeySequence("Left"));
     ui->actionPreviousImage->setShortcuts(prev_shortcut);
@@ -79,21 +82,27 @@ MainWindow::MainWindow(QWidget *parent) :
     reinterpret_cast<MultiTrackerCV *>(multitracker)->setTrackerType(CSRT);
 }
 
-void MainWindow::initDetector(){
-    auto names_file = "./coco.names";
-    auto cfg_file = "./yolov3.cfg";
-    auto model_file = "./yolov3.weights";
-    detector.loadDarknet(names_file, cfg_file, model_file);
+void MainWindow::setupDetector(){
 
-    qDebug() << "Loaded network";
+    ui->actionDetect_Objects->setEnabled(false);
+    DetectorSetupDialog detection_dialog;
+    detection_dialog.exec();
+
+    if(detection_dialog.result() != QDialog::Accepted ) return;
+
+    auto names_file = detection_dialog.getNames().toStdString();
+    auto cfg_file = detection_dialog.getCfg().toStdString();
+    auto weight_file = detection_dialog.getWeights().toStdString();
+
+    detector.loadDarknet(names_file, cfg_file, weight_file);
+    ui->actionDetect_Objects->setEnabled(true);
 }
 
 void MainWindow::detectObjects(){
 
-    initDetector();
-
-    qDebug() << "Running detector";
     auto image = cv::imread(current_imagepath.toStdString(), cv::IMREAD_UNCHANGED|cv::IMREAD_ANYDEPTH);
+
+    if(image.empty()) return;
 
     detected_objects.clear();
     auto new_boxes = detector.infer(image);
