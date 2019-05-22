@@ -24,13 +24,28 @@ A typical workflow for DeepLabel is:
 
 ## Data export
 
-Currently you can export in either KITTI format (for Nvidia DIGITS) or in the YOLO format for darknet. I hope to add support for VOC and COCO style labels shortly.
+Currently you can export in:
 
-KITTI requires frames to be numerically labelled, so when you export, a duplicate copy of your database will be created. DeepLabel can also split your data into train and validation sets.
+* KITTI format (for Nvidia DIGITS)
+* YOLO format for darknet
+* Pascal VOC format for e.g. Tensorflow
 
-Since the labelling metadata is in the sqlite database, it should be fairly easy to write a Python script (or whatever) to convert the output to your preferred system.
+Deeplabel treats your data as "golden" and does not make any attempt to modify it directly. This is a safe approach to avoid accidental corruption of a dataset that you spent months collating. As such, when you export labels, a copy of your data will be created with associated label files. For example, KITTI requires frames to be numerically labelled. In the future, augmentation may also be added, which is another reason to **not** modify your existing images.
 
-Augmentation is coming soon!
+When exporting to darknet, you should specify an existing "names" file so that your output labels have consistent class IDs. Similarly, when you export to Pascal VOC, you have the option of exporting a label map file which maps class IDs to labels. This file is quite easy to generate yourself (and you may already have it). The format is:
+
+```
+{
+item {
+  name: some_class
+  id: 1
+  displayname: some_class
+}
+```
+
+DeepLabel will split your data into train and validation sets, you can choose what fraction to use (you can set 0% or 100% if you just want a test or validation set).
+
+Since the labelling metadata is in the sqlite database, it should be fairly easy to write a Python script (or whatever) to convert the output to your preferred system. Many frameworks will accept Pascal VOC formatted data, so that's a good start.
 
 ## Bounding box tracking and refinement
 
