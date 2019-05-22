@@ -271,8 +271,6 @@ void MainWindow::nextUnlabelled(){
     }
 }
 
-
-
 QRect MainWindow::refineBoundingBoxSimple(cv::Mat image, QRect bbox, int margin, bool debug_save){
     QMargins margins(margin, margin, margin, margin);
     bbox += margins;

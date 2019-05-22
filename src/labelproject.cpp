@@ -467,19 +467,19 @@ bool LabelProject::removeClass(QString className){
 }
 
 int LabelProject::getNextUnlabelled(QString fileName){
-    int image_id = getImageId(fileName);
 
     // Lazy - optimise this later.
     QList<QString> images;
     getImageList(images);
-    int num_images = images.size();
 
+    int i = images.indexOf(fileName);
     QList<BoundingBox> bboxes;
-    for(int i=image_id; i < num_images; i++){
-        bboxes.clear();
-        getLabels(i, bboxes);
 
-        if(bboxes.size() == 0) return i;
+    for(i += 1; i < images.size(); i++){
+        bboxes.clear();
+        getLabels(images.at(i), bboxes);
+
+        if(bboxes.size() == 0) return i+1;
     }
 
     return -1;
