@@ -101,7 +101,7 @@ FORMS += \
     src/exportdialog.ui \
     src/imagedisplay.ui
 
-include(QtAwesome/QtAwesome.pri)
+include(QtAwesome/QtAwesome/QtAwesome.pri)
 
 # Deploy apps in OS X and Windows
 isEmpty(TARGET_EXT) {

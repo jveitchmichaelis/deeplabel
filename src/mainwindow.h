@@ -22,6 +22,8 @@
 #include <multitracker.h>
 #include <imagedisplay.h>
 
+#include <QtAwesome.h>
+
 namespace Ui {
 class MainWindow;
 }

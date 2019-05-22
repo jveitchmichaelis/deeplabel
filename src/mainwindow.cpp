@@ -76,6 +76,19 @@ MainWindow::MainWindow(QWidget *parent) :
     multitracker = new MultiTrackerCV(this);
     reinterpret_cast<MultiTrackerCV *>(multitracker)->setTrackerType(CSRT);
 
+    QtAwesome* awesome = new QtAwesome(qApp);
+    awesome->initFontAwesome();
+
+    QVariantMap options;
+    options.insert( "color" , QColor(30,30,30) );
+    options.insert( "scale-factor", 0.7 );
+
+    ui->actionPreviousImage->setIcon(awesome->icon(fa::arrowleft, options));
+    ui->actionNextImage->setIcon(awesome->icon(fa::arrowright, options));
+    ui->actionSelect_Tool->setIcon(awesome->icon(fa::mousepointer, options));
+    ui->actionDraw_Tool->setIcon(awesome->icon(fa::pencilsquareo, options));
+    //ui->actionInit_Tracking->setIcon(awesome->icon(fa::objectungroup, options));
+
 }
 
 void MainWindow::toggleAutoPropagate(bool state){

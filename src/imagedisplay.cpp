@@ -22,6 +22,13 @@ ImageDisplay::ImageDisplay(QWidget *parent) :
     connect(ui->zoomOutButton, SIGNAL(clicked()), this, SLOT(zoomOut()));
     connect(ui->zoomSpinBox, SIGNAL(valueChanged(int)), this, SLOT(scaleImage()));
 
+    QtAwesome* awesome = new QtAwesome( qApp );
+    awesome->initFontAwesome();
+
+    ui->zoomInButton->setIcon(awesome->icon(fa::searchplus));
+    ui->zoomOutButton->setIcon(awesome->icon(fa::searchminus));
+    ui->resetZoomButton->setIcon(awesome->icon(fa::home));
+
     updateDisplay();
 }
 

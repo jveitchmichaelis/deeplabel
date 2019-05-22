@@ -7,6 +7,7 @@
 #include <QTemporaryDir>
 #include <QApplication>
 
+#include <QtAwesome.h>
 #include <opencv2/opencv.hpp>
 #include <imagelabel.h>
 
