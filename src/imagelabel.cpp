@@ -250,9 +250,9 @@ bool ImageLabel::scaleContents(void){
 
 void ImageLabel::drawLabel(QPoint location){
 
-    if(scale_factor != 1.0){
-        scaledPixmap();
-    }else{
+    scaledPixmap();
+
+    if(scale_factor == 1.0){
         scaled_pixmap = base_pixmap;
     }
 
