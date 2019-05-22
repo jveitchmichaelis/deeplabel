@@ -97,9 +97,11 @@ HEADERS += \
     src/pascalvocexporter.h
 
 FORMS += \
-        mainwindow.ui \
-    exportdialog.ui \
+        src/mainwindow.ui \
+    src/exportdialog.ui \
     src/imagedisplay.ui
+
+include(QtAwesome/QtAwesome.pri)
 
 # Deploy apps in OS X and Windows
 isEmpty(TARGET_EXT) {
