@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionNew_Project, SIGNAL(triggered(bool)), this, SLOT(newProject()));
     connect(ui->actionOpen_Project, SIGNAL(triggered(bool)), this, SLOT(openProject()));
 
+    connect(ui->actionAdd_video, SIGNAL(triggered(bool)), this, SLOT(addVideo()));
     connect(ui->actionAdd_image, SIGNAL(triggered(bool)), this, SLOT(addImages()));
     connect(ui->actionAdd_image_folder, SIGNAL(triggered(bool)), this, SLOT(addImageFolder()));
 
@@ -26,31 +27,30 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->nextUnlabelledButton, SIGNAL(clicked(bool)), this, SLOT(nextUnlabelled()));
 
-    currentImage = new ImageLabel(this);
-    ui->scrollAreaWidgetContents->layout()->setAlignment(Qt::AlignHCenter);
-    ui->scrollAreaWidgetContents->layout()->setAlignment(Qt::AlignVCenter);
-    ui->scrollAreaWidgetContents->layout()->addWidget(currentImage);
+    display = new ImageDisplay;
+    ui->imageDisplayLayout->addWidget(display);
+    currentImage = display->getImageLabel();
+
 
     connect(this, SIGNAL(selectedClass(QString)), currentImage, SLOT(setClassname(QString)));
     connect(currentImage, SIGNAL(newLabel(BoundingBox)), this, SLOT(addLabel(BoundingBox)));
     connect(currentImage, SIGNAL(removeLabel(BoundingBox)), this, SLOT(removeLabel(BoundingBox)));
-    connect(ui->removeImageLabelsButton, SIGNAL(clicked(bool)), this, SLOT(removeImageLabels()));
+    connect(ui->actionDraw_Tool, SIGNAL(triggered(bool)), currentImage, SLOT(setDrawMode()));
+    connect(ui->actionSelect_Tool, SIGNAL(triggered(bool)), currentImage, SLOT(setSelectMode()));
+    connect(ui->classComboBox, SIGNAL(currentIndexChanged(QString)), currentImage, SLOT(setClassname(QString)));
+    connect(display, SIGNAL(image_loaded()), this, SLOT(updateImageInfo()));
 
     connect(ui->removeClassButton, SIGNAL(clicked(bool)), this, SLOT(removeClass()));
     connect(ui->removeImageButton, SIGNAL(clicked(bool)), this, SLOT(removeImage()));
     connect(ui->removeImageLabelsButton, SIGNAL(clicked(bool)), this, SLOT(removeImageLabels()));
 
     ui->actionDraw_Tool->setChecked(true);
-    connect(ui->actionDraw_Tool, SIGNAL(triggered(bool)), this, SLOT(setDrawMode()));
-    connect(ui->actionSelect_Tool, SIGNAL(triggered(bool)), this, SLOT(setSelectMode()));
 
-    connect(ui->classComboBox, SIGNAL(currentIndexChanged(QString)), currentImage, SLOT(setClassname(QString)));
     connect(ui->changeImageButton, SIGNAL(clicked(bool)), this, SLOT(changeImage()));
     connect(ui->imageNumberSpinbox, SIGNAL(editingFinished()), this, SLOT(changeImage()));
 
     connect(ui->actionWrap_images, SIGNAL(triggered(bool)), this, SLOT(enableWrap(bool)));
     connect(ui->actionExport, SIGNAL(triggered(bool)), this, SLOT(launchExportDialog()));
-
     connect(ui->actionRefine_boxes, SIGNAL(triggered(bool)), this, SLOT(refineBoxes()));
 
     auto prev_shortcut = ui->actionPreviousImage->shortcuts();
@@ -90,7 +90,6 @@ void MainWindow::enableWrap(bool enable){
     wrap_index = enable;
 }
 
-
 void MainWindow::changeImage(){
     current_index = ui->imageNumberSpinbox->value()-1;
     updateDisplay();
@@ -114,7 +113,6 @@ void MainWindow::openProject()
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Project"),
                                                     openDir,
                                                     tr("Label database (*.lbldb)"));
-
 
     if(fileName != ""){
         settings->setValue("project_folder", QFileInfo(fileName).absoluteDir().absolutePath());
@@ -162,7 +160,8 @@ void MainWindow::updateClassList(){
 
     QString classname;
     foreach(classname, classes){
-        ui->classComboBox->addItem(classname);
+        if(classname != "")
+            ui->classComboBox->addItem(classname);
     }
 
     if(classes.size() > 0){
@@ -188,6 +187,7 @@ void MainWindow::addClass(){
 
 void MainWindow::addLabel(BoundingBox bbox){
     project->addLabel(current_imagepath, bbox);
+    updateLabels();
 }
 
 void MainWindow::removeLabel(BoundingBox bbox){
@@ -196,8 +196,13 @@ void MainWindow::removeLabel(BoundingBox bbox){
 }
 
 void MainWindow::removeImageLabels(){
-    project->removeLabels(current_imagepath);
-    updateLabels();
+    if (QMessageBox::Yes == QMessageBox::question(this,
+                                                  tr("Remove Labels"),
+                                                  QString("Really delete all labels for this image?"))){;
+        project->removeLabels(current_imagepath);
+        updateLabels();
+        updateDisplay();
+    }
 }
 
 void MainWindow::updateLabel(BoundingBox old_bbox, BoundingBox new_bbox){
@@ -216,17 +221,16 @@ void MainWindow::removeImage(){
     }
 }
 
-void MainWindow::removeLabelsFromImage(){
-    project->removeLabels(current_imagepath);
-    updateDisplay();
-}
-
 void MainWindow::removeClass(){
+    current_class = ui->classComboBox->currentText();
+
     if (QMessageBox::Yes == QMessageBox::question(this,
-                                                  tr("Remove Image"),
-                                                  tr("Really delete class and associated labels?"))){
+                                                  tr("Remove Class"),
+                                                  QString("Really delete all \"%1\" labels from your entire dataset?")
+                                                    .arg(current_class))){;
         project->removeClass(current_class);
         updateClassList();
+        updateDisplay();
     }
 }
 
@@ -429,7 +433,6 @@ QRect MainWindow::refineBoundingBox(cv::Mat image, QRect bbox, int margin, bool 
     return new_box;
 }
 
-
 void MainWindow::refineBoxes(){
 
     auto bboxes = currentImage->getBoundingBoxes();
@@ -506,91 +509,30 @@ void MainWindow::previousImage(){
     updateDisplay();
 }
 
-QImage MainWindow::convert16(const cv::Mat &source){
-    short* pSource = reinterpret_cast<short*>(source.data);
-
-    QImage dest(source.cols, source.rows, QImage::Format_Grayscale8);
-    int pixelCounts = dest.width() * dest.height();
-
-    double minval, maxval;
-    cv::minMaxIdx(source, &minval, &maxval);
-    double range = maxval-minval;
-    double scale_factor = 255.0/range;
-
-    uchar* pDest = dest.bits();
-
-    for (int i = 0; i < pixelCounts; i++)
-    {
-        uchar value = static_cast<uchar>((*(pSource) - minval)*scale_factor);
-        *(pDest++) = value;
-        pSource++;
-   }
-
-   return dest;
-}
-
 void MainWindow::updateDisplay(){
 
     if(images.size() == 0){
-        QPixmap pixmap = QPixmap::fromImage(QImage());
-        currentImage->setPixmap(pixmap);
         return;
     }
 
     current_imagepath = images.at(current_index);
-    pixmap.load(current_imagepath);
+    display->setImagePath(current_imagepath);
+
+    updateLabels();
 
     ui->imageProgressBar->setValue(current_index+1);
     ui->imageNumberSpinbox->setValue(current_index+1);
     ui->imageIndexLabel->setText(QString("%1/%2").arg(current_index+1).arg(number_images));
 
-    auto image = cv::imread(current_imagepath.toStdString(), cv::IMREAD_UNCHANGED|cv::IMREAD_ANYDEPTH);
+}
 
-    if(image.empty()){
-        qDebug() << "Failed to load image " << current_imagepath;
-        return;
-    }
-
-    display_image = image.clone();
-
-    if(image.elemSize() == 2){
-        // Filthy hack because Qt sucks...
-        QTemporaryDir dir;
-        if (dir.isValid()) {
-            convert16(display_image).save(dir.path()+"/temp.png");
-            pixmap.load(dir.path()+"/temp.png");
-        }
-    }else{
-        // Default to single channel 8-bit image
-        QImage::Format format = QImage::Format_Grayscale8;
-
-        if(display_image.channels() == 3){
-            cv::cvtColor(display_image, display_image, cv::COLOR_BGR2RGB);
-            format = QImage::Format_RGB888;
-        }else if (display_image.channels() == 4){
-            cv::cvtColor(display_image, display_image, cv::COLOR_BGRA2RGBA);
-            format = QImage::Format_RGBA8888;
-        }
-
-        pixmap.fromImage(QImage(display_image.data, display_image.cols, display_image.rows, display_image.step, format));
-    }
-
-    if(pixmap.isNull()){
-        qDebug() << "Null pixmap?";
-    }else{
-
-        currentImage->setImage(image);
-        currentImage->setPixmap(pixmap);
-
-        updateLabels();
-
-        auto image_info = QFileInfo(current_imagepath);
-        ui->imageBitDepthLabel->setText(QString("%1 bit").arg(image.elemSize() * 8));
-        ui->filenameLabel->setText(image_info.fileName());
-        ui->filetypeLabel->setText(image_info.completeSuffix());
-        ui->sizeLabel->setText(QString("%1 kB").arg(image_info.size() / 1000));
-        ui->dimensionsLabel->setText(QString("(%1, %2) px").arg(pixmap.width()).arg(pixmap.height()));
-    }
+void MainWindow::updateImageInfo(void){
+    auto image_info = QFileInfo(current_imagepath);
+    ui->imageBitDepthLabel->setText(QString("%1 bit").arg(currentImage->getImage().elemSize() * 8));
+    ui->filenameLabel->setText(image_info.fileName());
+    ui->filetypeLabel->setText(image_info.completeSuffix());
+    ui->sizeLabel->setText(QString("%1 kB").arg(image_info.size() / 1000));
+    ui->dimensionsLabel->setText(QString("(%1, %2) px").arg(currentImage->getImage().cols).arg(currentImage->getImage().rows));
 }
 
 void MainWindow::newProject()
@@ -607,6 +549,42 @@ void MainWindow::newProject()
     updateDisplay();
 
     return;
+}
+
+void MainWindow::addVideo(void){
+    QString openDir = QDir::homePath();
+    QStringList video_filenames = QFileDialog::getOpenFileNames(this, tr("Select video(s)"),
+                                                    openDir);
+
+
+    QString output_folder = QFileDialog::getExistingDirectory(this, "Output folder", openDir);
+
+    if(video_filenames.size() != 0){
+        QString path;
+
+        QDialog video_load_progress(this);
+        video_load_progress.setModal(true);
+        video_load_progress.show();
+
+        auto bar = new QProgressBar();
+        bar->setMaximum(video_filenames.size());
+
+        video_load_progress.setLayout(new QVBoxLayout());
+
+        video_load_progress.layout()->addWidget(bar);
+        int i=0;
+
+        foreach(path, video_filenames){
+            project->addAsset(path);
+            bar->setValue(i++);
+        }
+
+        video_load_progress.close();
+
+        updateImageList();
+        updateDisplay();
+    }
+
 }
 
 void MainWindow::addImages(void){
@@ -631,7 +609,7 @@ void MainWindow::addImages(void){
         int i=0;
 
         foreach(path, image_filenames){
-            project->addImage(path);
+            project->addAsset(path);
             bar->setValue(i++);
         }
 

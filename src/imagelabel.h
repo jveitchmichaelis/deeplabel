@@ -27,12 +27,13 @@ class ImageLabel : public QLabel
 {
     Q_OBJECT
 public:
-    explicit ImageLabel(QWidget *parent = 0);
+    explicit ImageLabel(QWidget *parent = nullptr);
     virtual int heightForWidth( int width ) const;
     virtual QSize sizeHint() const;
-    QPixmap scaledPixmap();
+    void setScaledContents(bool scale_factor);
     QList<BoundingBox> getBoundingBoxes(){return bboxes;}
-    cv::Mat getImage(){return image;}
+    cv::Mat getImage(void){return image;}
+    bool scaleContents(void);
 
 signals:
     void newLabel(BoundingBox);
@@ -43,19 +44,20 @@ public slots:
     void setPixmap ( QPixmap & );
     void setImage(cv::Mat &image){this->image = image;}
     void setBoundingBoxes(QList<BoundingBox> input_bboxes);
-    void setClassname(QString classname){current_classname = classname;}
+    void setClassname(QString classname);
     void addLabel(QRect rect, QString classname);
+    void zoom(double factor);
 
     void setDrawMode();
     void setDrawDragMode();
     void setSelectMode();
 
     void resizeEvent(QResizeEvent *);
-
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void keyPressEvent(QKeyEvent *event);
+
 
 private:
     cv::Mat image;
@@ -63,13 +65,15 @@ private:
     QPixmap base_pixmap;
     QPixmap scaled_pixmap;
     QString current_classname;
+    bool shouldScaleContents = false;
 
     QList<BoundingBox> bboxes;
     BoundingBox selected_bbox;
     void drawBoundingBox(BoundingBox bbox);
     void drawBoundingBox(BoundingBox bbox, QColor colour);
-    void drawBoundingBoxes(QPoint location = QPoint());
-
+    void drawLabel(QPoint location = QPoint());
+    QPoint getScaledImageLocation(QPoint location);
+    QPixmap scaledPixmap(void);
 
     QRect clip(QRect bbox);
 
@@ -83,12 +87,13 @@ private:
     int bbox_width = 0;
     int bbox_height = 0;
 
-    float scale_x;
-    float scale_y;
+    double scale_factor = 1.0;
+    double zoom_factor = 1.0;
 
     int scaled_width;
     int scaled_height;
 
+    void drawBoundingBoxes(QPoint location);
 };
 
 #endif // IMAGELABEL_H

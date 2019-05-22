@@ -15,6 +15,7 @@
 #include <QMessageBox>
 
 #include <boundingbox.h>
+#include <opencv2/opencv.hpp>
 
 class LabelProject : public QObject
 {
@@ -31,7 +32,8 @@ public:
     bool classInDB(QString classname);
 
     int addImageFolder(QString path);
-    bool addImage(QString fileName);
+    bool addAsset(QString fileName);
+    bool addVideo(QString fileName, QString outputFolder);
     bool getImageList(QList<QString> &images);
     bool removeImage(QString fileName);
     bool imageInDB(QString fileName);

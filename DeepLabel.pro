@@ -52,9 +52,9 @@ message("Windows")
 INCLUDEPATH += "C:/Users/Josh/Code/opencv/build/install/include"
 LIBS += -L"C:/Users/Josh/Code/opencv/build/install/x64/vc15/lib"
 CONFIG(debug, debug|release) {
-LIBS += -lopencv_core400d -lopencv_highgui400d -lopencv_imgproc400d -lopencv_imgcodecs400d -lopencv_tracking400d -lopencv_video400d
+LIBS += -lopencv_core400d -lopencv_highgui400d -lopencv_imgproc400d -lopencv_imgcodecs400d -lopencv_tracking400d -lopencv_video400d -lopencv_videoio400d
 }else{
-LIBS += -lopencv_core400 -lopencv_highgui400 -lopencv_imgproc400 -lopencv_imgcodecs400 -lopencv_tracking400 -lopencv_video400
+LIBS += -lopencv_core400 -lopencv_highgui400 -lopencv_imgproc400 -lopencv_imgcodecs400 -lopencv_tracking400 -lopencv_video400 -lopencv_videoio400
 }
 }
 
@@ -80,7 +80,8 @@ SOURCES += \
         kittiexporter.cpp \
         darknetexporter.cpp \
         exportdialog.cpp \
-        multitracker.cpp
+        multitracker.cpp \
+    src/imagedisplay.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -90,11 +91,13 @@ HEADERS += \
         kittiexporter.h \
         darknetexporter.h \
         exportdialog.h \
-        multitracker.h
+        multitracker.h \
+    src/imagedisplay.h
 
 FORMS += \
         mainwindow.ui \
-    exportdialog.ui
+    exportdialog.ui \
+    src/imagedisplay.ui
 
 # Deploy apps in OS X and Windows
 isEmpty(TARGET_EXT) {

@@ -7,6 +7,8 @@
 #include <QDialog>
 #include <QSettings>
 #include <QTemporaryDir>
+#include <QScrollArea>
+
 #include <opencv2/opencv.hpp>
 #include <imagelabel.h>
 #include <labelproject.h>
@@ -15,6 +17,7 @@
 #include <algorithm>
 #include <exportdialog.h>
 #include <multitracker.h>
+#include <imagedisplay.h>
 
 namespace Ui {
 class MainWindow;
@@ -31,11 +34,11 @@ public:
 private:
     Ui::MainWindow *ui;
     LabelProject *project;
-    QPixmap pixmap;
     ImageLabel *currentImage;
-    cv::Mat display_image;
     ExportDialog export_dialog;
     MultiTracker *multitracker;
+    QScrollArea *imageScrollArea;
+    ImageDisplay *display;
 
     // Enable tracking boxes in previous frames
     bool track_previous = false;
@@ -67,26 +70,25 @@ private slots:
     void addClass(void);
     void removeClass(void);
 
+    void addVideo(void);
     void addImages(void);
     void addImageFolder(void);
     void nextImage(void);
     void previousImage(void);
     void removeImage(void);
-    void removeImageLabels(void);
     void changeImage(void);
 
     void addLabel(BoundingBox bbox);
     void removeLabel(BoundingBox bbox);
     void updateLabel(BoundingBox old_bbox, BoundingBox new_bbox);
-    void removeLabelsFromImage();
+    void removeImageLabels(void);
+
     void setDrawMode(void);
     void setSelectMode(void);
 
     void enableWrap(bool enable);
     void launchExportDialog();
     void handleExportDialog();
-
-    QImage convert16(const cv::Mat &source);
 
     // Tracking
     void initTrackers();
@@ -100,6 +102,7 @@ private slots:
 
 
 
+    void updateImageInfo();
 signals:
     void selectedClass(QString);
 

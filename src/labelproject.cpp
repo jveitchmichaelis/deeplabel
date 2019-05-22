@@ -170,8 +170,6 @@ bool LabelProject::classInDB(QString className){
     }else{
         return query.next();
     }
-
-    return false;
 }
 
 bool LabelProject::imageInDB(QString fileName){
@@ -194,10 +192,35 @@ bool LabelProject::imageInDB(QString fileName){
     return false;
 }
 
-bool LabelProject::addImage(QString fileName)
+/*
+bool LabelProject::addVideo(QString fileName, QString outputFolder){
+    auto video = cv::VideoCapture(fileName.toStdString());
+
+    QString base_name = QFileInfo(fileName).baseName();
+    QDir dir(outputFolder);
+
+    cv::Mat frame;
+    int frame_count = 0;
+    bool res = true;
+
+    while(video.read(frame)){
+        QString output_name = QString("%1_%2.png").arg(base_name).arg(frame_count++, 6, 10, QChar('0'));
+
+        output_name = dir.absoluteFilePath(output_name);
+        cv::imwrite(output_name.toStdString(), frame);
+    }
+
+    video.release();
+
+    res = addImageFolder(outputFolder);
+
+    return res;
+}*/
+
+bool LabelProject::addAsset(QString fileName)
 {
     /*!
-     * Add an image to the database, given an absolute path to the image (\a fileName). Returns false if the file doesn't exist or if the query failed.
+     * Add an asset to the database, given an absolute path to the image or video (\a fileName). Returns false if the file doesn't exist or if the query failed.
      */
     bool res = false;
 
@@ -557,7 +580,7 @@ int LabelProject::addImageFolder(QString path){
             QString image_path = image_info.absoluteFilePath();
 
 
-            bool res = addImage(image_path);
+            bool res = addAsset(image_path);
 
             if(res){
                 number_added++;
