@@ -651,7 +651,6 @@ void MainWindow::handleExportDialog(){
     if(export_dialog.getExporter() == "Kitti"){
         KittiExporter exporter(project);
         exporter.moveToThread(export_thread);
-
         exporter.setOutputFolder(export_dialog.getOutputFolder());
         exporter.splitData(export_dialog.getValidationSplit(), export_dialog.getShuffle());
         exporter.process();
@@ -662,6 +661,13 @@ void MainWindow::handleExportDialog(){
         exporter.setOutputFolder(export_dialog.getOutputFolder());
         exporter.splitData(export_dialog.getValidationSplit(), export_dialog.getShuffle());
         exporter.process();
+    }else if(export_dialog.getExporter() == "Pascal VOC"){
+        PascalVocExporter exporter(project);
+        exporter.moveToThread(export_thread);
+        exporter.setOutputFolder(export_dialog.getOutputFolder());
+        exporter.splitData(export_dialog.getValidationSplit(), export_dialog.getShuffle());
+        exporter.process(export_dialog.getCreateLabelMap());
+
     }
 }
 

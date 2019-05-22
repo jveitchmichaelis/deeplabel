@@ -141,19 +141,17 @@ bool ExportDialog::checkOK(){
     return true;
 }
 
+bool ExportDialog::getCreateLabelMap(void){
+    return ui->labelMapCheckbox->isChecked();
+}
+
 void ExportDialog::toggleExporter(){
 
     current_exporter = ui->exportSelectComboBox->currentText();
 
-    if(current_exporter == "Darknet"){
-        ui->namesFileLineEdit->setEnabled(true);
-        ui->namesFilePushButton->setEnabled(true);
-    }else{
-        ui->namesFileLineEdit->setEnabled(false);
-        ui->namesFilePushButton->setEnabled(false);
-    }
-
-
+    ui->namesFileLineEdit->setEnabled(current_exporter == "Darknet");
+    ui->namesFilePushButton->setEnabled(current_exporter == "Darknet");
+    ui->labelMapCheckbox->setEnabled(current_exporter == "Pascal VOC");
 
     checkOK();
 }

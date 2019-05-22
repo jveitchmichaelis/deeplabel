@@ -25,6 +25,7 @@ public:
     QString getNamesFile(){return names_file; }
     int getShuffle(){return do_shuffle; }
     float getValidationSplit(){return static_cast<float>(validation_split_pc)/100; }
+    bool getCreateLabelMap();
 
 private slots:
     void setNamesFile(QString path="");

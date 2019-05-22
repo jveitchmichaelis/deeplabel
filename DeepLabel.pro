@@ -81,7 +81,8 @@ SOURCES += \
         darknetexporter.cpp \
         exportdialog.cpp \
         multitracker.cpp \
-    src/imagedisplay.cpp
+    src/imagedisplay.cpp \
+    src/pascalvocexporter.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -92,7 +93,8 @@ HEADERS += \
         darknetexporter.h \
         exportdialog.h \
         multitracker.h \
-    src/imagedisplay.h
+    src/imagedisplay.h \
+    src/pascalvocexporter.h
 
 FORMS += \
         mainwindow.ui \

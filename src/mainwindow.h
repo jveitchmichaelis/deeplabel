@@ -12,8 +12,11 @@
 #include <opencv2/opencv.hpp>
 #include <imagelabel.h>
 #include <labelproject.h>
+
 #include <kittiexporter.h>
 #include <darknetexporter.h>
+#include <pascalvocexporter.h>
+
 #include <algorithm>
 #include <exportdialog.h>
 #include <multitracker.h>
