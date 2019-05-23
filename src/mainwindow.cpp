@@ -587,7 +587,6 @@ void MainWindow::addVideo(void){
         asset_load_progress.show();
         QtConcurrent::run(project, &LabelProject::addVideo, video_filename, output_folder);
     }
-
 }
 
 void MainWindow::videoFinished(void){
@@ -675,6 +674,13 @@ void MainWindow::handleExportDialog(){
         exporter.setOutputFolder(export_dialog.getOutputFolder());
         exporter.splitData(export_dialog.getValidationSplit(), export_dialog.getShuffle());
         exporter.process(export_dialog.getCreateLabelMap());
+
+    }else if(export_dialog.getExporter() == "COCO"){
+        CocoExporter exporter(project);
+        exporter.moveToThread(export_thread);
+        exporter.setOutputFolder(export_dialog.getOutputFolder());
+        exporter.splitData(export_dialog.getValidationSplit(), export_dialog.getShuffle());
+        exporter.process();
 
     }
 }

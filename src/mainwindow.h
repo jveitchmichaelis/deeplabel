@@ -18,6 +18,7 @@
 #include <kittiexporter.h>
 #include <darknetexporter.h>
 #include <pascalvocexporter.h>
+#include <cocoexporter.h>
 
 #include <algorithm>
 #include <exportdialog.h>
