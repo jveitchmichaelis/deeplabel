@@ -10,6 +10,7 @@
 #include <QSqlError>
 #include <QMutex>
 #include <QMutexLocker>
+#include <QThread>
 
 #include <QDebug>
 #include <QMessageBox>
@@ -25,15 +26,12 @@ public:
     ~LabelProject();
     bool loadDatabase(QString fileName);
     bool createDatabase(QString fileName);
-
     bool addClass(QString className);
     bool getClassList(QList<QString> &classes);
     bool removeClass(QString className);
     bool classInDB(QString classname);
-
-    int addImageFolder(QString path);
     bool addAsset(QString fileName);
-    bool addVideo(QString fileName, QString outputFolder);
+    void addVideo(QString fileName, QString outputFolder);
     bool getImageList(QList<QString> &images);
     bool removeImage(QString fileName);
     bool imageInDB(QString fileName);
@@ -52,16 +50,24 @@ public:
     //QString getClassName(int classId);
     int getImageId(QString fileName);
     int getClassId(QString className);
+    void assignThread(QThread* thread);
 
 signals:
+    void finished();
+
+    void video_split_finished(QString);
+    void load_finished();
+    void load_progress(int);
 
 public slots:
-
+    int addImageFolder(QString path);
+    void cancelLoad();
 
 private:
     QSqlDatabase db;
     QMutex mutex;
     bool checkDatabase();
+    bool should_cancel;
 
 };
 

@@ -349,12 +349,6 @@
     <addaction name="actionAdd_image_folder"/>
     <addaction name="actionAdd_video"/>
    </widget>
-   <widget class="QMenu" name="menuClasses">
-    <property name="title">
-     <string>Classes</string>
-    </property>
-    <addaction name="actionAdd_class"/>
-   </widget>
    <widget class="QMenu" name="menuNavigation">
     <property name="title">
      <string>Navigation</string>
@@ -363,7 +357,6 @@
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuImages"/>
-   <addaction name="menuClasses"/>
    <addaction name="menuNavigation"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">

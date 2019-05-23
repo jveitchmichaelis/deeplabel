@@ -65,7 +65,19 @@ MainWindow::MainWindow(QWidget *parent) :
 #ifdef WIN32
     ui->imageProgressBar->setStyleSheet("QProgressBar::chunk {background-color: #3add36; width: 1px;}");
 #endif
-    project = new LabelProject(this);
+
+    project = new LabelProject;
+    //QThread *project_thread = new QThread;
+    //project->assignThread(project_thread);
+
+    asset_load_progress.setWindowTitle("Loading...");
+    asset_load_progress.setLayout(new QVBoxLayout());
+    auto bar = new QProgressBar();
+    asset_load_progress.layout()->addWidget(bar);
+    connect(project, SIGNAL(load_progress(int)), bar, SLOT(setValue(int)));
+    connect(project, SIGNAL(load_finished()), this, SLOT(videoFinished()));
+    connect(&asset_load_progress, SIGNAL(rejected()), project, SLOT(cancelLoad()));
+    asset_load_progress.setModal(true);
 
     export_dialog.setModal(true);
     connect(&export_dialog, SIGNAL(accepted()), this, SLOT(handleExportDialog()));
@@ -85,9 +97,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->actionPreviousImage->setIcon(awesome->icon(fa::arrowleft, options));
     ui->actionNextImage->setIcon(awesome->icon(fa::arrowright, options));
-    ui->actionSelect_Tool->setIcon(awesome->icon(fa::mousepointer, options));
+    ui->actionSelect_Tool->setIcon(awesome->icon(fa::handpointero, options));
     ui->actionDraw_Tool->setIcon(awesome->icon(fa::pencilsquareo, options));
     //ui->actionInit_Tracking->setIcon(awesome->icon(fa::objectungroup, options));
+
+    resize(QGuiApplication::primaryScreen()->availableSize() * 3 / 5);
 
 }
 
@@ -564,38 +578,21 @@ void MainWindow::newProject()
 
 void MainWindow::addVideo(void){
     QString openDir = QDir::homePath();
-    QStringList video_filenames = QFileDialog::getOpenFileNames(this, tr("Select video(s)"),
+    QString video_filename = QFileDialog::getOpenFileName(this, tr("Select video"),
                                                     openDir);
-
 
     QString output_folder = QFileDialog::getExistingDirectory(this, "Output folder", openDir);
 
-    if(video_filenames.size() != 0){
-        QString path;
-
-        QDialog video_load_progress(this);
-        video_load_progress.setModal(true);
-        video_load_progress.show();
-
-        auto bar = new QProgressBar();
-        bar->setMaximum(video_filenames.size());
-
-        video_load_progress.setLayout(new QVBoxLayout());
-
-        video_load_progress.layout()->addWidget(bar);
-        int i=0;
-
-        foreach(path, video_filenames){
-            project->addAsset(path);
-            bar->setValue(i++);
-        }
-
-        video_load_progress.close();
-
-        updateImageList();
-        updateDisplay();
+    if(video_filename != ""){
+        asset_load_progress.show();
+        QtConcurrent::run(project, &LabelProject::addVideo, video_filename, output_folder);
     }
 
+}
+
+void MainWindow::videoFinished(void){
+    updateImageList();
+    updateDisplay();
 }
 
 void MainWindow::addImages(void){

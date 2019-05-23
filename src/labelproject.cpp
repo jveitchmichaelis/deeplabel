@@ -2,7 +2,15 @@
 
 LabelProject::LabelProject(QObject *parent) : QObject(parent)
 {
+    connect(this, SIGNAL(video_split_finished(QString)), this, SLOT(addImageFolder(QString)));
+}
 
+void LabelProject::assignThread(QThread *thread) {
+  this->moveToThread(thread);
+  connect(this, SIGNAL(finished()), thread, SLOT(quit()));
+  connect(this, SIGNAL(finished()), this, SLOT(deleteLater()));
+  connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+  thread->start();
 }
 
 bool LabelProject::loadDatabase(QString fileName)
@@ -192,30 +200,48 @@ bool LabelProject::imageInDB(QString fileName){
     return false;
 }
 
-/*
-bool LabelProject::addVideo(QString fileName, QString outputFolder){
-    auto video = cv::VideoCapture(fileName.toStdString());
+void LabelProject::cancelLoad(){
+    should_cancel = true;
+}
+
+void LabelProject::addVideo(QString fileName, QString outputFolder){
+    cv::VideoCapture video(fileName.toStdString());
 
     QString base_name = QFileInfo(fileName).baseName();
     QDir dir(outputFolder);
 
     cv::Mat frame;
     int frame_count = 0;
+    int n_frames = video.get(cv::CAP_PROP_FRAME_COUNT);
     bool res = true;
 
-    while(video.read(frame)){
-        QString output_name = QString("%1_%2.png").arg(base_name).arg(frame_count++, 6, 10, QChar('0'));
+    if(!video.isOpened()){
+        qDebug() << "Failed to open" << fileName;
+    }
+
+    should_cancel = false;
+    while(!should_cancel){
+
+        video.read(frame);
+        if(frame.empty()) break;
+
+        QString output_name = QString("%1_%2.jpg").arg(base_name).arg(frame_count++, 6, 10, QChar('0'));
 
         output_name = dir.absoluteFilePath(output_name);
         cv::imwrite(output_name.toStdString(), frame);
+
+        qDebug() << output_name;
+
+        emit load_progress((100*frame_count)/n_frames);
+
     }
 
     video.release();
 
-    res = addImageFolder(outputFolder);
+    emit video_split_finished(outputFolder);
 
-    return res;
-}*/
+    return;
+}
 
 bool LabelProject::addAsset(QString fileName)
 {
@@ -468,7 +494,6 @@ bool LabelProject::removeClass(QString className){
 
 int LabelProject::getNextUnlabelled(QString fileName){
 
-    // Lazy - optimise this later.
     QList<QString> images;
     getImageList(images);
 
@@ -588,9 +613,14 @@ int LabelProject::addImageFolder(QString path){
             }else{
                 qDebug() << "Failed to add image: " << image_path;
             }
+
+            emit load_progress((100*number_added)/image_list.size());
+
         }
         QSqlDatabase::database().commit();
     }
+
+    emit load_finished();
 
     return number_added;
 
@@ -631,4 +661,6 @@ LabelProject::~LabelProject()
     if(db.isOpen()){
         db.close();
     }
+
+    emit finished();
 }

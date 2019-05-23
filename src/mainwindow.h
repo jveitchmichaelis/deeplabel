@@ -8,6 +8,8 @@
 #include <QSettings>
 #include <QTemporaryDir>
 #include <QScrollArea>
+#include <QScreen>
+#include <QtConcurrent>
 
 #include <opencv2/opencv.hpp>
 #include <imagelabel.h>
@@ -44,6 +46,7 @@ private:
     MultiTracker *multitracker;
     QScrollArea *imageScrollArea;
     ImageDisplay *display;
+    QDialog asset_load_progress;
 
     // Enable tracking boxes in previous frames
     bool track_previous = false;
@@ -108,6 +111,7 @@ private slots:
 
 
     void updateImageInfo();
+    void videoFinished();
 signals:
     void selectedClass(QString);
 
