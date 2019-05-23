@@ -56,16 +56,22 @@ DeepLabel also supports bounding box refinement using some simple thresholding a
 
 An experimental foreground/background segmenter is being tested, but it seems to be a bit overenthusiastic right now.
 
+## Video support
+
+DeepLabel currently supports videos by a brute force route. You can load in a video which will be automatically split into JPEG frames and then loaded into your label database. Currently the entire video will be loaded, though in the future functionality will likely be similar to VOTT with frame skip options and no need to split the video beforehand. Note that when dealing with videos you will typically need to export them as separate frames anyway.
+
+Any video format that OpenCV (and its backends) can open should work.
+
 Installation
 --
 
 It's recommended that you use Qt5, but Qt4 will probably work. You need to have Qt's SQL extensions installed.
 
-** OpenCV Requirements **
+**OpenCV Requirements**
 
 This is mostly a pure Qt project, but there are some limitations to what Qt can do with images. In particular, scaling sucks (even with `Qt::SmoothTransform`). Qt's image reader is also not particularly robust, so OpenCV is used there. OpenCV is also used for image augmentation. On OS X or Linux it's expected that you have `pkg-config` installed to handle dependencies. 
 
-You need to compile OpenCV with contrib (`-DOPENCV_EXTRA_MODULES_PATH`) for object tracking. You should also compile with (`-DOPENCV_GENERATE_PKGCONFIG`). Only OpenCV 4+ is supported due to API changes.
+You need to compile OpenCV with contrib (`-DOPENCV_EXTRA_MODULES_PATH`) for object tracking. You should also compile with (`-DOPENCV_GENERATE_PKGCONFIG`). Only OpenCV 4+ is supported due to API changes. Make sure you checkout the same tagged release for the main repository and the contrib repository.
 
 ``` bash
 git clone https://github.com/opencv/opencv
@@ -106,7 +112,7 @@ make -j4
 
 **Windows**
 
-Unfortunately you need to install OpenCV from source, because the official versions don't include the contrib modules (which include tracking algorithms). Or just download a DeepLabel release from here.
+Unfortunately you need to install OpenCV from source, because the official binary releases don't include the contrib modules (which include tracking algorithms and DNN support). Or just download a DeepLabel release from [here](https://github.com/jveitchmichaelis/deeplabel/releases).
 
 Once you've installed OpenCV...(!)
 
