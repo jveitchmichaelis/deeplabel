@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QDir>
+#include <QDirIterator>
 
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -62,7 +63,7 @@ signals:
 public slots:
     int addImageFolder(QString path);
     void cancelLoad();
-
+    void addFolderRecursive(QString path_filter);
 private:
     QSqlDatabase db;
     QMutex mutex;

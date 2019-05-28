@@ -149,7 +149,7 @@
         </property>
         <property name="maximumSize">
          <size>
-          <width>300</width>
+          <width>350</width>
           <height>16777215</height>
          </size>
         </property>
@@ -157,10 +157,34 @@
          <string>Navigation</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_4">
-         <item row="3" column="0" colspan="3">
-          <widget class="QPushButton" name="nextUnlabelledButton">
+         <item row="0" column="0">
+          <widget class="QLabel" name="imageIndexLabel">
            <property name="text">
-            <string>Next unlabelled</string>
+            <string>Image: 0/0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0" colspan="2">
+          <widget class="QCheckBox" name="propagateCheckBox">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>Track labels</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1" colspan="2">
+          <widget class="QPushButton" name="changeImageButton">
+           <property name="text">
+            <string>Jump to image</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QCheckBox" name="refineTrackingCheckbox">
+           <property name="text">
+            <string>Refine after tracking</string>
            </property>
           </widget>
          </item>
@@ -208,34 +232,17 @@
            </property>
           </widget>
          </item>
-         <item row="4" column="0" colspan="2">
-          <widget class="QCheckBox" name="propagateCheckBox">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
+         <item row="4" column="1">
+          <widget class="QPushButton" name="nextUnlabelledButton">
            <property name="text">
-            <string>Propagate label on next image</string>
+            <string>Next Unlabelled</string>
            </property>
           </widget>
          </item>
-         <item row="5" column="0">
-          <widget class="QCheckBox" name="refineTrackingCheckbox">
+         <item row="4" column="2">
+          <widget class="QPushButton" name="pushButton">
            <property name="text">
-            <string>Refine after tracking</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1" colspan="2">
-          <widget class="QPushButton" name="changeImageButton">
-           <property name="text">
-            <string>Jump to image</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="imageIndexLabel">
-           <property name="text">
-            <string>Image: 0/0</string>
+            <string>Next Unseen</string>
            </property>
           </widget>
          </item>
@@ -347,6 +354,7 @@
     </property>
     <addaction name="actionAdd_image"/>
     <addaction name="actionAdd_image_folder"/>
+    <addaction name="actionAdd_image_folders"/>
     <addaction name="actionAdd_video"/>
    </widget>
    <widget class="QMenu" name="menuNavigation">
@@ -354,6 +362,9 @@
      <string>Navigation</string>
     </property>
     <addaction name="actionWrap_images"/>
+    <addaction name="separator"/>
+    <addaction name="actionJump_forward"/>
+    <addaction name="actionJump_backward"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuImages"/>
@@ -524,6 +535,37 @@
   <action name="actionAdd_video">
    <property name="text">
     <string>Add video(s)</string>
+   </property>
+  </action>
+  <action name="actionAdd_image_folders">
+   <property name="text">
+    <string>Add image folders</string>
+   </property>
+  </action>
+  <action name="actionJump_forward">
+   <property name="text">
+    <string>Jump forward</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Right</string>
+   </property>
+  </action>
+  <action name="actionJump_backward">
+   <property name="text">
+    <string>Jump backward</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Left</string>
+   </property>
+  </action>
+  <action name="actionNext_Image">
+   <property name="text">
+    <string>Next Image</string>
+   </property>
+  </action>
+  <action name="actionPrevious_Image">
+   <property name="text">
+    <string>Previous Image</string>
    </property>
   </action>
  </widget>

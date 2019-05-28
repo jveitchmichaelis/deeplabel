@@ -5,6 +5,7 @@
 #include <QThread>
 #include <QFileDialog>
 #include <QDialog>
+#include <QDialogButtonBox>
 #include <QSettings>
 #include <QTemporaryDir>
 #include <QScrollArea>
@@ -82,6 +83,7 @@ private slots:
     void addVideo(void);
     void addImages(void);
     void addImageFolder(void);
+    void addImageFolders();
     void nextImage(void);
     void previousImage(void);
     void removeImage(void);
@@ -113,6 +115,9 @@ private slots:
 
     void updateImageInfo();
     void videoFinished();
+    void jumpForward(int n = 10);
+    void jumpBackward(int n = 10);
+
 signals:
     void selectedClass(QString);
 

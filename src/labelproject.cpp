@@ -103,13 +103,52 @@ bool LabelProject::createDatabase(QString fileName)
     res &= query.exec("CREATE table classes (class_id INTEGER PRIMARY KEY ASC, "
                "name varchar(32))");
     res &= query.exec("CREATE table labels (label_id INTEGER PRIMARY KEY ASC, "
-               "image_id int, class_id int, x int, y int, width int, height int)");
+               "image_id int, class_id int, x int, y int, width int, height int, automatic int)");
 
     if(!res){
         qDebug() << "Error: " << query.lastError();
     }
 
     return checkDatabase();
+}
+
+void LabelProject::addFolderRecursive(QString path_filter){
+    /*!
+     * Search for (and add) all subfolders that match \a path_filter, which
+     * can include * wildcards.
+     */
+
+    // Start at the root directory in the path.
+    path_filter = QDir(path_filter).absolutePath();
+    QRegExp rx(path_filter);
+    rx.setPatternSyntax(QRegExp::Wildcard);
+
+    // Find the first instance of a *
+    int first_wildcard = path_filter.indexOf('*');
+    auto pre_wildcard = path_filter.mid(0, first_wildcard);
+
+    // Get the top level folder
+    int last_separator = pre_wildcard.lastIndexOf(QDir::separator());
+    auto top_level_folder = pre_wildcard.mid(0, last_separator);
+
+    // Recurse into this folder and find all subdirectories
+    QDirIterator it(top_level_folder, QDir::Dirs, QDirIterator::Subdirectories);
+    QList<QString> subfolders;
+    while (it.hasNext()) {
+        auto subfolder = QDir(it.next()).canonicalPath();
+
+        if (rx.exactMatch(subfolder)){
+            subfolders.append(subfolder);
+        }
+    }
+
+    subfolders.removeDuplicates();
+    subfolders.sort();
+
+    for(auto &subfolder : subfolders){
+        addImageFolder(subfolder);
+    }
+
 }
 
 bool LabelProject::getImageList(QList<QString> &images)
@@ -164,6 +203,9 @@ bool LabelProject::getClassList(QList<QString> &classes)
 }
 
 bool LabelProject::classInDB(QString className){
+    /*!
+     * Returns true if \a className is in the database
+     */
     bool res = false;
     QSqlQuery query(db);
     query.prepare("SELECT * FROM classes WHERe (name)"
@@ -181,6 +223,9 @@ bool LabelProject::classInDB(QString className){
 }
 
 bool LabelProject::imageInDB(QString fileName){
+    /*!
+     * Returns true if \a fileName is in the database
+     */
     bool res = false;
     //IF NOT EXISTS(SELECT * FROM images where (path) = (:PATH))
 
@@ -201,6 +246,9 @@ bool LabelProject::imageInDB(QString fileName){
 }
 
 void LabelProject::cancelLoad(){
+    /*!
+     * Cancel loading a video or processing a folder
+     */
     should_cancel = true;
 }
 
@@ -493,7 +541,9 @@ bool LabelProject::removeClass(QString className){
 }
 
 int LabelProject::getNextUnlabelled(QString fileName){
-
+    /*!
+     * Returns the index of the next unlabelled image, after \a fileName
+     */
     QList<QString> images;
     getImageList(images);
 

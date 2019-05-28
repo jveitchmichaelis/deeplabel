@@ -13,9 +13,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionAdd_video, SIGNAL(triggered(bool)), this, SLOT(addVideo()));
     connect(ui->actionAdd_image, SIGNAL(triggered(bool)), this, SLOT(addImages()));
     connect(ui->actionAdd_image_folder, SIGNAL(triggered(bool)), this, SLOT(addImageFolder()));
+    connect(ui->actionAdd_image_folders, SIGNAL(triggered(bool)), this, SLOT(addImageFolders()));
 
     connect(ui->actionNextImage, SIGNAL(triggered(bool)), this, SLOT(nextImage()));
     connect(ui->actionPreviousImage, SIGNAL(triggered(bool)), this, SLOT(previousImage()));
+    connect(ui->actionJump_forward, SIGNAL(triggered(bool)), this, SLOT(jumpForward()));
+    connect(ui->actionJump_backward, SIGNAL(triggered(bool)), this, SLOT(jumpBackward()));
 
     connect(ui->addClassButton, SIGNAL(clicked(bool)), this, SLOT(addClass()));
     connect(ui->newClassText, SIGNAL(editingFinished()), this, SLOT(addClass()));
@@ -61,6 +64,7 @@ MainWindow::MainWindow(QWidget *parent) :
     next_shortcut.append(QKeySequence("Right"));
     ui->actionNextImage->setShortcuts(next_shortcut);
 
+
     // Override progress bar animation on Windows
 #ifdef WIN32
     ui->imageProgressBar->setStyleSheet("QProgressBar::chunk {background-color: #3add36; width: 1px;}");
@@ -83,7 +87,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&export_dialog, SIGNAL(accepted()), this, SLOT(handleExportDialog()));
 
     settings = new QSettings("DeepLabel", "DeepLabel");
-    qDebug() << settings->value("project_folder").toString();
 
     multitracker = new MultiTrackerCV(this);
     reinterpret_cast<MultiTrackerCV *>(multitracker)->setTrackerType(CSRT);
@@ -119,6 +122,16 @@ void MainWindow::enableWrap(bool enable){
 
 void MainWindow::changeImage(){
     current_index = ui->imageNumberSpinbox->value()-1;
+    updateDisplay();
+}
+
+void MainWindow::jumpForward(int n){
+    current_index = std::min(ui->imageNumberSpinbox->maximum(), ui->imageNumberSpinbox->value()+n);
+    updateDisplay();
+}
+
+void MainWindow::jumpBackward(int n){
+    current_index = std::max(1, ui->imageNumberSpinbox->value()-n);
     updateDisplay();
 }
 
@@ -159,6 +172,27 @@ void MainWindow::updateLabels(){
     project->getLabels(current_imagepath, bboxes);
     ui->instanceCountLabel->setNum(bboxes.size());
     currentImage->setBoundingBoxes(bboxes);
+}
+
+void MainWindow::addImageFolders(void){
+
+    QDialog  image_folder_dialog(this);
+
+    auto path_edit = new QLineEdit();
+    auto ok_button = new QPushButton("Ok");
+
+    image_folder_dialog.setWindowTitle("Folder path (wildcards allowed)");
+    image_folder_dialog.setLayout(new QVBoxLayout());
+    image_folder_dialog.layout()->addWidget(path_edit);
+    image_folder_dialog.layout()->addWidget(ok_button);
+
+    connect(ok_button, SIGNAL(clicked(bool)), &image_folder_dialog, SLOT(accept()));
+
+    image_folder_dialog.exec();
+
+    if(image_folder_dialog.result() == QDialog::Accepted){
+        project->addFolderRecursive(path_edit->text());
+    }
 }
 
 void MainWindow::updateImageList(){
@@ -205,7 +239,7 @@ void MainWindow::updateClassList(){
 void MainWindow::addClass(){
     QString new_class = ui->newClassText->text();
 
-    if(new_class != "" && !classes.contains(new_class)){
+    if(new_class.simplified() != "" && !classes.contains(new_class)){
         project->addClass(new_class);
         ui->newClassText->clear();
         updateClassList();
@@ -474,6 +508,8 @@ void MainWindow::refineBoxes(){
         if(!updated.size().isEmpty() && new_area >= 0.5*previous_area) updateLabel(bbox, new_bbox);
     }
 
+    updateLabels();
+
 }
 
 void MainWindow::initTrackers(void){
@@ -511,10 +547,19 @@ void MainWindow::nextImage(){
         current_index++;
     }
 
+    // Show the new image
     updateDisplay();
 
     // Only auto-propagtae if we've enabled it and there are no boxes in the image already.
-    if(track_previous && currentImage->getBoundingBoxes().size() == 0) updateTrackers();
+    if(track_previous && currentImage->getBoundingBoxes().size() == 0){
+        updateTrackers();
+
+        if(refine_on_propagate){
+            refineBoxes();
+        }
+    }
+
+    updateLabels();
 }
 
 void MainWindow::previousImage(){
@@ -555,6 +600,7 @@ void MainWindow::updateImageInfo(void){
     auto image_info = QFileInfo(current_imagepath);
     ui->imageBitDepthLabel->setText(QString("%1 bit").arg(currentImage->getImage().elemSize() * 8));
     ui->filenameLabel->setText(image_info.fileName());
+    ui->filenameLabel->setToolTip(image_info.fileName());
     ui->filetypeLabel->setText(image_info.completeSuffix());
     ui->sizeLabel->setText(QString("%1 kB").arg(image_info.size() / 1000));
     ui->dimensionsLabel->setText(QString("(%1, %2) px").arg(currentImage->getImage().cols).arg(currentImage->getImage().rows));
@@ -675,13 +721,12 @@ void MainWindow::handleExportDialog(){
         exporter.splitData(export_dialog.getValidationSplit(), export_dialog.getShuffle());
         exporter.process(export_dialog.getCreateLabelMap());
 
-    }else if(export_dialog.getExporter() == "COCO"){
+    }else if(export_dialog.getExporter().startsWith("COCO")){
         CocoExporter exporter(project);
         exporter.moveToThread(export_thread);
         exporter.setOutputFolder(export_dialog.getOutputFolder());
         exporter.splitData(export_dialog.getValidationSplit(), export_dialog.getShuffle());
         exporter.process();
-
     }
 }
 

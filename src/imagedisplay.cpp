@@ -155,7 +155,6 @@ void ImageDisplay::updateDisplay()
 
     // Auto-scale the image to the size of the scrollarea,
     // or leave it full-size
-    resetZoom();
     imageLabel->setScaledContents(fit_to_window);
 
     if(!pixmap.isNull()){
