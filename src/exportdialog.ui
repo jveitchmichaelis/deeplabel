@@ -96,7 +96,7 @@
       <widget class="QComboBox" name="exportSelectComboBox">
        <item>
         <property name="text">
-         <string>COCO</string>
+         <string>COCO (JSON)</string>
         </property>
        </item>
        <item>

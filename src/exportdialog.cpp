@@ -107,8 +107,8 @@ void ExportDialog::setNamesFile(QString path){
 bool ExportDialog::checkOK(){
 
     // If output folder exists
-    if(!QDir(output_folder).exists() || output_folder != ""){
-        qDebug() << "Output folder doesn't exist";
+    if(!QDir(output_folder).exists() || output_folder == ""){
+        qDebug() << "Export output folder doesn't exist";
         return false;
     }
 
