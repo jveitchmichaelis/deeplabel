@@ -11,6 +11,8 @@
 #include <opencv2/opencv.hpp>
 #include <imagelabel.h>
 
+#include <unordered_map>
+
 namespace Ui {
 class ImageDisplay;
 }
@@ -26,18 +28,24 @@ public:
 public slots:
     void setImagePath(QString path);
     ImageLabel* getImageLabel(void){return imageLabel;}
+    void setColourMap(QString map);
 
+    void toggleColourMap(bool enable);
 private:
     cv::Mat display_image;
     QPixmap pixmap;
     Ui::ImageDisplay *ui;
     QString current_imagepath;
-    QImage convert16(const cv::Mat &source);
+    void convert16(cv::Mat &source);
     ImageLabel* imageLabel;
     QScrollArea* scrollArea;
     bool fit_to_window = false;
     double image_scale_factor = 1.0;
+    bool apply_colourmap = true;
+    int colour_map = cv::COLORMAP_MAGMA;
     QImage::Format format = QImage::Format_Grayscale8;
+
+    static std::unordered_map<std::string, int> colour_hashmap;
 
 private slots:
     void loadPixmap();

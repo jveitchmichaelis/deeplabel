@@ -1,6 +1,19 @@
 #include "imagedisplay.h"
 #include "ui_imagedisplay.h"
 
+std::unordered_map<std::string ,int> ImageDisplay::colour_hashmap{
+    { "Cividis", cv::COLORMAP_CIVIDIS },
+    { "Inferno", cv::COLORMAP_INFERNO },
+    { "Magma", cv::COLORMAP_MAGMA },
+    { "Hot", cv::COLORMAP_HOT },
+    { "Bone", cv::COLORMAP_BONE },
+    { "Plasma", cv::COLORMAP_PLASMA },
+    { "Jet", cv::COLORMAP_JET },
+    { "Rainbow", cv::COLORMAP_RAINBOW },
+    { "Ocean", cv::COLORMAP_OCEAN },
+    { "Viridis", cv::COLORMAP_VIRIDIS }
+};
+
 ImageDisplay::ImageDisplay(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ImageDisplay)
@@ -44,27 +57,19 @@ void ImageDisplay::setImagePath(QString path){
     }
 }
 
-QImage ImageDisplay::convert16(const cv::Mat &source){
-    short* pSource = reinterpret_cast<short*>(source.data);
-
-    QImage dest(source.cols, source.rows, QImage::Format_Grayscale8);
-    int pixelCounts = dest.width() * dest.height();
+void ImageDisplay::convert16(cv::Mat &source){
 
     double minval, maxval;
     cv::minMaxIdx(source, &minval, &maxval);
     double range = maxval-minval;
     double scale_factor = 255.0/range;
 
-    uchar* pDest = dest.bits();
+    source.convertTo(source, CV_32FC1);
+    source -= minval;
+    source *= scale_factor;
+    source.convertTo(source, CV_8UC1);
 
-    for (int i = 0; i < pixelCounts; i++)
-    {
-        uchar value = static_cast<uchar>((*(pSource) - minval)*scale_factor);
-        *(pDest++) = value;
-        pSource++;
-   }
-
-   return dest;
+    return;
 }
 
 void ImageDisplay::loadPixmap(){
@@ -81,12 +86,19 @@ void ImageDisplay::loadPixmap(){
     display_image = image.clone();
 
     if(image.elemSize() == 2){
-        // Filthy hack because Qt sucks...
+
+        convert16(display_image);
+
+        if(display_image.channels() == 1 && apply_colourmap){
+            cv::applyColorMap(display_image, display_image, colour_map);
+        }
+
         QTemporaryDir dir;
         if (dir.isValid()) {
-            convert16(display_image).save(dir.path()+"/temp.png");
+            cv::imwrite(dir.path().toStdString()+"/temp.png", display_image);
             pixmap.load(dir.path()+"/temp.png");
         }
+
     }else{
         // Default to single channel 8-bit image
         format = QImage::Format_Grayscale8;
@@ -97,6 +109,10 @@ void ImageDisplay::loadPixmap(){
         }else if (display_image.channels() == 4){
             cv::cvtColor(display_image, display_image, cv::COLOR_BGRA2RGBA);
             format = QImage::Format_RGBA8888;
+        }else if(display_image.channels() == 1 && apply_colourmap){
+            cv::applyColorMap(display_image, display_image, colour_map);
+            //cv::cvtColor(display_image, display_image, cv::COLOR_BGR2RGB);
+            format = QImage::Format_RGB888;
         }
 
         pixmap.fromImage(QImage(display_image.data, display_image.cols, display_image.rows, display_image.step, format));
@@ -105,6 +121,21 @@ void ImageDisplay::loadPixmap(){
     imageLabel->setImage(display_image);
     updateDisplay();
     emit image_loaded();
+}
+
+void ImageDisplay::setColourMap(QString map){
+
+    auto map_str = map.toStdString();
+    if(colour_hashmap.count(map_str)){
+        colour_map = colour_hashmap[map_str];
+        loadPixmap();
+    }
+
+}
+
+void ImageDisplay::toggleColourMap(bool enable){
+    apply_colourmap = enable;
+    loadPixmap();
 }
 
 void ImageDisplay::adjustScrollBar(QScrollBar *scrollBar, double factor)

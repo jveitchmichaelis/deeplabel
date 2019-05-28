@@ -52,6 +52,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->changeImageButton, SIGNAL(clicked(bool)), this, SLOT(changeImage()));
     connect(ui->imageNumberSpinbox, SIGNAL(editingFinished()), this, SLOT(changeImage()));
 
+    connect(ui->colourMapCombo, SIGNAL(currentIndexChanged(QString)), display, SLOT(setColourMap(QString)));
+    connect(ui->colourMapCheckbox, SIGNAL(clicked(bool)), display, SLOT(toggleColourMap(bool)));
+
     connect(ui->actionWrap_images, SIGNAL(triggered(bool)), this, SLOT(enableWrap(bool)));
     connect(ui->actionExport, SIGNAL(triggered(bool)), this, SLOT(launchExportDialog()));
     connect(ui->actionRefine_boxes, SIGNAL(triggered(bool)), this, SLOT(refineBoxes()));
@@ -119,6 +122,7 @@ void MainWindow::setupDetector(void){
 
     detector.loadDarknet(names_file, cfg_file, weight_file);
     ui->actionDetect_Objects->setEnabled(true);
+    ui->actionDetect_project->setEnabled(true);
 }
 
 void MainWindow::detectObjects(){
