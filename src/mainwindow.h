@@ -11,6 +11,7 @@
 #include <QScrollArea>
 #include <QScreen>
 #include <QtConcurrent>
+#include <QProgressDialog>
 
 #include <opencv2/opencv.hpp>
 #include <imagelabel.h>
@@ -42,6 +43,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
 
 private:
     Ui::MainWindow *ui;
@@ -121,7 +123,9 @@ private slots:
     void jumpBackward(int n = 10);
 
     void detectObjects();
+    void detectProject();
     void setupDetector();
+    void setConfidenceThreshold();
 
 signals:
     void selectedClass(QString);

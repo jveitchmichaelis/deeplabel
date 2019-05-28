@@ -24,6 +24,8 @@ public:
                        cv::Scalar colour = cv::Scalar(0,0,255),
                        cv::Scalar font_colour = cv::Scalar(255,255,255));
     std::vector<BoundingBox> infer(cv::Mat image);
+    void setConfidenceThreshold(double thresh){confThreshold = std::max(0.0, thresh);}
+    double getConfidenceThreshold(void){ return confThreshold; }
 private:
 
     void postProcess(cv::Mat& frame, const std::vector<cv::Mat>& outs, std::vector<BoundingBox> &filtered_outputs);

@@ -76,13 +76,14 @@ MainWindow::MainWindow(QWidget *parent) :
     //QThread *project_thread = new QThread;
     //project->assignThread(project_thread);
 
-    asset_load_progress.setWindowTitle("Loading...");
+    //asset_load_progress.setWindowTitle("Loading...");
     asset_load_progress.setLayout(new QVBoxLayout());
     auto bar = new QProgressBar();
     asset_load_progress.layout()->addWidget(bar);
     connect(project, SIGNAL(load_progress(int)), bar, SLOT(setValue(int)));
     connect(project, SIGNAL(load_finished()), this, SLOT(videoFinished()));
     connect(&asset_load_progress, SIGNAL(rejected()), project, SLOT(cancelLoad()));
+    //connect(&asset_load_progress, SIGNAL(rejected()), this, SLOT(cancelLoad()));
     asset_load_progress.setModal(true);
 
     export_dialog.setModal(true);
@@ -107,6 +108,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionDetect_Objects->setIcon(awesome->icon(fa::magic, options));
     ui->actionDetect_Objects->setEnabled(false);
     connect(ui->actionDetect_Objects, SIGNAL(triggered(bool)), this, SLOT(detectObjects()));
+    connect(ui->actionSet_threshold, SIGNAL(triggered(bool)), this, SLOT(setConfidenceThreshold()));
+    detector.setConfidenceThreshold(settings->value("detector_confidence", 0.5).toDouble());
+    connect(ui->actionDetect_project, SIGNAL(triggered(bool)), this, SLOT(detectProject()));
     //ui->actionInit_Tracking->setIcon(awesome->icon(fa::objectungroup, options));
 
     resize(QGuiApplication::primaryScreen()->availableSize() * 3 / 5);
@@ -136,18 +140,106 @@ void MainWindow::detectObjects(){
     if(image.empty()) return;
 
     auto new_boxes = detector.infer(image);
+    auto existing_boxes = currentImage->getBoundingBoxes();
 
     for(auto &box : new_boxes){
         if(!project->classInDB(box.classname)){
             project->addClass(box.classname);
         }
 
-        currentImage->addLabel(box.rect, box.classname);
+        // Strip out boxes which are already in the image
+        // assume detector is deterministic
+        bool exists = false;
+        for(auto &existing : existing_boxes){
+            if(existing.rect == box.rect && existing.classname == box.classname){
+                exists = true;
+            }
+        }
+
+        if(!exists){
+            project->addLabel(current_imagepath, box);
+        }
+
     }
 
     updateClassList();
     updateLabels();
 
+}
+
+void MainWindow::setConfidenceThreshold(void){
+    QDialog  confidence_set_dialog(this);
+
+    auto threshold_spinbox = new QDoubleSpinBox();
+    threshold_spinbox->setMinimum(0);
+    threshold_spinbox->setMaximum(1);
+    threshold_spinbox->setValue(detector.getConfidenceThreshold());
+
+    auto threshold_label = new QLabel("Detection Threshold: ");
+
+    auto ok_button = new QPushButton("Ok");
+
+    confidence_set_dialog.setWindowTitle("Confidence Threshold");
+    confidence_set_dialog.setLayout(new QVBoxLayout());
+    confidence_set_dialog.layout()->addWidget(threshold_label);
+    confidence_set_dialog.layout()->addWidget(threshold_spinbox);
+    confidence_set_dialog.layout()->addWidget(ok_button);
+    confidence_set_dialog.layout()->setSizeConstraint(QLayout::SetFixedSize);
+
+    connect(ok_button, SIGNAL(clicked(bool)), &confidence_set_dialog, SLOT(accept()));
+
+    confidence_set_dialog.exec();
+
+    if(confidence_set_dialog.result() == QDialog::Accepted){
+        detector.setConfidenceThreshold(threshold_spinbox->value());
+        settings->setValue("detector_confidence", detector.getConfidenceThreshold());
+    }
+}
+
+void MainWindow::detectProject(void){
+
+    QProgressDialog progress("Running detector...", "Abort", 0, images.size(), this);
+    progress.setWindowModality(Qt::WindowModal);
+
+    int i = 0;
+    for(auto& image_path : images){
+
+        if (progress.wasCanceled())
+            break;
+
+        auto image = cv::imread(image_path.toStdString(), cv::IMREAD_UNCHANGED|cv::IMREAD_ANYDEPTH);
+
+        if(image.empty()) return;
+
+        auto new_boxes = detector.infer(image);
+        QList<BoundingBox> existing_boxes;
+        project->getLabels(image_path, existing_boxes);
+
+        for(auto &box : new_boxes){
+            if(!project->classInDB(box.classname)){
+                project->addClass(box.classname);
+            }
+
+            // Strip out boxes which are already in the image
+            // assume detector is deterministic
+            bool exists = false;
+            for(auto &existing : existing_boxes){
+                if(existing.rect == box.rect && existing.classname == box.classname){
+                    exists = true;
+                }
+            }
+
+            if(!exists){
+                project->addLabel(image_path, box);
+            }
+
+        }
+
+        progress.setValue(i++);
+
+    }
+    updateClassList();
+    updateLabels();
 }
 
 void MainWindow::toggleAutoPropagate(bool state){
@@ -222,9 +314,11 @@ void MainWindow::addImageFolders(void){
 
     auto path_edit = new QLineEdit();
     auto ok_button = new QPushButton("Ok");
+    auto path_label = new QLabel("Folder path (wildcards allowed)");
 
-    image_folder_dialog.setWindowTitle("Folder path (wildcards allowed)");
+    image_folder_dialog.setWindowTitle("Add folders");
     image_folder_dialog.setLayout(new QVBoxLayout());
+    image_folder_dialog.layout()->addWidget(path_label);
     image_folder_dialog.layout()->addWidget(path_edit);
     image_folder_dialog.layout()->addWidget(ok_button);
 

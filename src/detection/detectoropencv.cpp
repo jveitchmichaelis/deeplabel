@@ -76,7 +76,7 @@ void DetectorOpenCV::postProcess(cv::Mat& frame, const std::vector<cv::Mat>& out
             // Get the value and location of the maximum score
             minMaxLoc(scores, nullptr, &confidence, nullptr, &classIdPoint);
 
-            if (confidence > confThreshold)
+            if (confidence > 0)
             {
 
                 // Output is a percentage of the frame width/height
@@ -97,10 +97,15 @@ void DetectorOpenCV::postProcess(cv::Mat& frame, const std::vector<cv::Mat>& out
         }
     }
 
+
+    std::vector<int> indices;
+
     // Perform non maximum suppression to eliminate redundant overlapping boxes with
     // lower confidences
-    std::vector<int> indices;
-    cv::dnn::NMSBoxes(boxes, confidences, static_cast<float>(confThreshold), static_cast<float>(nmsThreshold), indices);
+
+    // We set the confidence threshold to zero here, we'll filter the boxes out later.
+    // This lets us provide some feedback to the user if their threshold is too high.
+    cv::dnn::NMSBoxes(boxes, confidences, 0, static_cast<float>(nmsThreshold), indices);
 
     for (size_t i = 0; i < indices.size(); ++i)
     {
@@ -109,26 +114,35 @@ void DetectorOpenCV::postProcess(cv::Mat& frame, const std::vector<cv::Mat>& out
         BoundingBox box;
         cv::Rect rect = boxes.at(idx);
 
-        box.confidence = confidences.at(idx);
+        box.confidence = static_cast<double>(confidences.at(idx));
         box.classid = classIds.at(idx);
-        box.classname = QString::fromStdString(class_names.at(box.classid));
+        box.classname = QString::fromStdString(class_names.at(static_cast<size_t>(box.classid)));
 
-        QPoint top_left = {std::max(0, rect.x), std::max(0, rect.y)};
-        QPoint bottom_right = top_left + QPoint({rect.width, rect.height});
+        if(box.confidence > confThreshold){
 
-        bottom_right.setX(std::min(bottom_right.x(), frame.cols));
-        bottom_right.setY(std::min(bottom_right.y(), frame.rows));
+            // Darknet predicts box centres and half-width/height, so the
+            // box can go outside the image.  Clamp to the image size:
+            QPoint top_left = {std::max(0, rect.x), std::max(0, rect.y)};
+            QPoint bottom_right = top_left + QPoint({rect.width, rect.height});
 
-        box.rect.setBottomRight(bottom_right);
-        box.rect.setTopLeft(top_left);
+            bottom_right.setX(std::min(bottom_right.x(), frame.cols));
+            bottom_right.setY(std::min(bottom_right.y(), frame.rows));
 
-        std::cout << "Found " << box.classname.toStdString()
-                  << " at" << " (" << box.rect.center().x() << ", " << box.rect.center().y()
-                  << "), conf: " << box.confidence
-                  << ", size (" << box.rect.width() << "x" << box.rect.height() << ")"
-                  << std::endl;
+            box.rect.setBottomRight(bottom_right);
+            box.rect.setTopLeft(top_left);
 
-        filtered_boxes.push_back(box);
+            std::cout << "Found " << box.classname.toStdString()
+                      << " at" << " (" << box.rect.center().x() << ", " << box.rect.center().y()
+                      << "), conf: " << box.confidence
+                      << ", size (" << box.rect.width() << "x" << box.rect.height() << ")"
+                      << std::endl;
+
+            filtered_boxes.push_back(box);
+        }else{
+            std::cout << "Detected "
+                      << box.classname.toStdString()
+                      << " with low confidence: " << box.confidence << std::endl;
+        }
 
     }
 
@@ -163,9 +177,6 @@ std::vector<BoundingBox> DetectorOpenCV::infer(cv::Mat image){
         std::vector<cv::Mat> outputs;
         net.forward(outputs, output_names);
 
-        // Remove the bounding boxes with low confidence
-        postProcess(image, outputs, results);
-
         // Put efficiency information. The function getPerfProfile returns the
         // overall time for inference(t) and the timings for each of the layers(in layersTimes)
         std::vector<double> layersTimes;
@@ -173,6 +184,9 @@ std::vector<BoundingBox> DetectorOpenCV::infer(cv::Mat image){
         processing_time = net.getPerfProfile(layersTimes) / freq;
 
         std::cout << "Processed in: " << processing_time << std::endl;
+
+        // Remove the bounding boxes with low confidence
+        postProcess(image, outputs, results);
 
         return results;
 }
