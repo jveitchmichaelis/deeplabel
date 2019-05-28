@@ -2,6 +2,7 @@
 #define LABELPROJECT_H
 
 #include <QObject>
+#include <QApplication>
 #include <QDir>
 #include <QDirIterator>
 
@@ -12,6 +13,7 @@
 #include <QMutex>
 #include <QMutexLocker>
 #include <QThread>
+#include <QProgressDialog>
 
 #include <QDebug>
 #include <QMessageBox>

@@ -777,7 +777,7 @@ void MainWindow::videoFinished(void){
 }
 
 void MainWindow::addImages(void){
-    QString openDir = QDir::homePath();
+    QString openDir = settings->value("data_folder", QDir::homePath()).toString();
     QStringList image_filenames = QFileDialog::getOpenFileNames(this, tr("Select image(s)"),
                                                     openDir,
                                                     tr("JPEG (*.jpg, *.jpeg, *.JPG, *.JPEG);;PNG (*.png, *.PNG);;BMP (*.bmp, *.BMP);;TIFF (*.tif, *.tiff, *.TIF, *.TIFF);;All images (*.jpg, *.jpeg, *.png, *.bmp, *.tiff)"));
@@ -785,24 +785,20 @@ void MainWindow::addImages(void){
     if(image_filenames.size() != 0){
         QString path;
 
-        QDialog image_load_progress(this);
-        image_load_progress.setModal(true);
-        image_load_progress.show();
-
-        auto bar = new QProgressBar();
-        bar->setMaximum(image_filenames.size());
-
-        image_load_progress.setLayout(new QVBoxLayout());
-
-        image_load_progress.layout()->addWidget(bar);
+        QProgressDialog progress("Loading images", "Abort", 0, image_filenames.size(), this);
+        progress.setWindowModality(Qt::WindowModal);
         int i=0;
 
         foreach(path, image_filenames){
+            if(progress.wasCanceled()){
+                break;
+            }
+
             project->addAsset(path);
-            bar->setValue(i++);
+            progress.setValue(i++);
         }
 
-        image_load_progress.close();
+        settings->setValue("data_folder", QDir(image_filenames.at(0)).dirName());
     }
 
     updateImageList();
@@ -812,12 +808,13 @@ void MainWindow::addImages(void){
 }
 
 void MainWindow::addImageFolder(void){
-    QString openDir = QDir::homePath();
+    QString openDir = settings->value("data_folder", QDir::homePath()).toString();
     QString path = QFileDialog::getExistingDirectory(this, tr("Select image folder"),
                                                     openDir);
 
     if(path != ""){
         int number_added = project->addImageFolder(path);
+        settings->setValue("data_folder", path);
         qDebug() << "Added: " << number_added << " images";
     }
 
@@ -825,6 +822,7 @@ void MainWindow::addImageFolder(void){
     if(number_images != 0){
         current_index = 0;
         initDisplay();
+
     }
 
     return;

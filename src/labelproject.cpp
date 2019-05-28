@@ -649,10 +649,18 @@ int LabelProject::addImageFolder(QString path){
         QFileInfo image_info;
 
         QSqlDatabase::database().transaction();
+
+        QProgressDialog progress("Loading images", "Abort", 0, image_list.size(), static_cast<QWidget*>(parent()));
+        progress.setWindowModality(Qt::WindowModal);
+        int i=0;
+
         foreach(image_info, image_list){
 
-            QString image_path = image_info.absoluteFilePath();
+            if(progress.wasCanceled()){
+                break;
+            }
 
+            QString image_path = image_info.absoluteFilePath();
 
             bool res = addAsset(image_path);
 
@@ -663,7 +671,8 @@ int LabelProject::addImageFolder(QString path){
                 qDebug() << "Failed to add image: " << image_path;
             }
 
-            emit load_progress((100*number_added)/image_list.size());
+            progress.setValue(i++);
+            QApplication::processEvents();
 
         }
         QSqlDatabase::database().commit();
