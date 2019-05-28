@@ -147,7 +147,9 @@ bool CocoExporter::processImages(const QString folder, const QString filename, c
             segmentation.append(QString::number(label.rect.bottomLeft().x()));
             segmentation.append(QString::number(label.rect.bottomLeft().y()));
 
-            annotation["segmentation"] = segmentation;
+            QJsonArray segmentation_array;
+            segmentation_array.append(segmentation);
+            annotation["segmentation"] = segmentation_array;
 
             annotation["area"] = label.rect.width()*label.rect.height();
 
@@ -201,5 +203,5 @@ void CocoExporter::process(){
     label_id = 0;
 
     processImages(train_folder, "train", train_set);
-    processImages(val_folder, "test", validation_set);
+    processImages(val_folder, "val", validation_set);
 }
