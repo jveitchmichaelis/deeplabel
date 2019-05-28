@@ -53,7 +53,6 @@ private:
     MultiTracker *multitracker;
     QScrollArea *imageScrollArea;
     ImageDisplay *display;
-    QDialog asset_load_progress;
     DetectorOpenCV detector;
 
     // Enable tracking boxes in previous frames
@@ -118,7 +117,6 @@ private slots:
     void refineBoxes();
 
     void updateImageInfo();
-    void videoFinished();
     void jumpForward(int n = 10);
     void jumpBackward(int n = 10);
 

@@ -73,18 +73,6 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
 
     project = new LabelProject;
-    //QThread *project_thread = new QThread;
-    //project->assignThread(project_thread);
-
-    //asset_load_progress.setWindowTitle("Loading...");
-    asset_load_progress.setLayout(new QVBoxLayout());
-    auto bar = new QProgressBar();
-    asset_load_progress.layout()->addWidget(bar);
-    connect(project, SIGNAL(load_progress(int)), bar, SLOT(setValue(int)));
-    connect(project, SIGNAL(load_finished()), this, SLOT(videoFinished()));
-    connect(&asset_load_progress, SIGNAL(rejected()), project, SLOT(cancelLoad()));
-    //connect(&asset_load_progress, SIGNAL(rejected()), this, SLOT(cancelLoad()));
-    asset_load_progress.setModal(true);
 
     export_dialog.setModal(true);
     connect(&export_dialog, SIGNAL(accepted()), this, SLOT(handleExportDialog()));
@@ -198,11 +186,14 @@ void MainWindow::setConfidenceThreshold(void){
 
 void MainWindow::detectProject(void){
 
-    QProgressDialog progress("Running detector...", "Abort", 0, images.size(), this);
+    QProgressDialog progress("Running detector", "Abort", 0, images.size(), this);
     progress.setWindowModality(Qt::WindowModal);
+    progress.setLabelText("...");
 
     int i = 0;
     for(auto& image_path : images){
+
+        progress.setLabelText(image_path);
 
         if (progress.wasCanceled())
             break;
@@ -237,6 +228,7 @@ void MainWindow::detectProject(void){
 
         progress.setValue(i++);
 
+
     }
     updateClassList();
     updateLabels();
@@ -260,7 +252,7 @@ void MainWindow::changeImage(){
 }
 
 void MainWindow::jumpForward(int n){
-    current_index = std::min(ui->imageNumberSpinbox->maximum(), ui->imageNumberSpinbox->value()+n);
+    current_index = std::min(ui->imageNumberSpinbox->maximum()-1, ui->imageNumberSpinbox->value()+n);
     updateDisplay();
 }
 
@@ -766,14 +758,12 @@ void MainWindow::addVideo(void){
     QString output_folder = QFileDialog::getExistingDirectory(this, "Output folder", openDir);
 
     if(video_filename != ""){
-        asset_load_progress.show();
-        QtConcurrent::run(project, &LabelProject::addVideo, video_filename, output_folder);
+        project->addVideo(video_filename, output_folder);
     }
-}
 
-void MainWindow::videoFinished(void){
     updateImageList();
-    updateDisplay();
+    initDisplay();
+
 }
 
 void MainWindow::addImages(void){
@@ -819,11 +809,7 @@ void MainWindow::addImageFolder(void){
     }
 
     updateImageList();
-    if(number_images != 0){
-        current_index = 0;
-        initDisplay();
-
-    }
+    initDisplay();
 
     return;
 }

@@ -93,6 +93,14 @@ void DetectorOpenCV::postProcess(cv::Mat& frame, const std::vector<cv::Mat>& out
                 confidences.push_back(static_cast<float>(confidence));
                 boxes.push_back(cv::Rect(left, top, width, height));
 
+            }else{
+                if(confidence == 0.0)
+                    continue;
+
+                std::cout << "Detected "
+                          << class_names.at(static_cast<size_t>(classIdPoint.x))
+                          << " with low confidence: " << confidence << std::endl;
+
             }
         }
     }
@@ -105,7 +113,7 @@ void DetectorOpenCV::postProcess(cv::Mat& frame, const std::vector<cv::Mat>& out
 
     // We set the confidence threshold to zero here, we'll filter the boxes out later.
     // This lets us provide some feedback to the user if their threshold is too high.
-    cv::dnn::NMSBoxes(boxes, confidences, 0, static_cast<float>(nmsThreshold), indices);
+    cv::dnn::NMSBoxes(boxes, confidences, static_cast<float>(confThreshold), static_cast<float>(nmsThreshold), indices);
 
     for (size_t i = 0; i < indices.size(); ++i)
     {
@@ -118,31 +126,24 @@ void DetectorOpenCV::postProcess(cv::Mat& frame, const std::vector<cv::Mat>& out
         box.classid = classIds.at(idx);
         box.classname = QString::fromStdString(class_names.at(static_cast<size_t>(box.classid)));
 
-        if(box.confidence > confThreshold){
+        // Darknet predicts box centres and half-width/height, so the
+        // box can go outside the image.  Clamp to the image size:
+        QPoint top_left = {std::max(0, rect.x), std::max(0, rect.y)};
+        QPoint bottom_right = top_left + QPoint({rect.width, rect.height});
 
-            // Darknet predicts box centres and half-width/height, so the
-            // box can go outside the image.  Clamp to the image size:
-            QPoint top_left = {std::max(0, rect.x), std::max(0, rect.y)};
-            QPoint bottom_right = top_left + QPoint({rect.width, rect.height});
+        bottom_right.setX(std::min(bottom_right.x(), frame.cols));
+        bottom_right.setY(std::min(bottom_right.y(), frame.rows));
 
-            bottom_right.setX(std::min(bottom_right.x(), frame.cols));
-            bottom_right.setY(std::min(bottom_right.y(), frame.rows));
+        box.rect.setBottomRight(bottom_right);
+        box.rect.setTopLeft(top_left);
 
-            box.rect.setBottomRight(bottom_right);
-            box.rect.setTopLeft(top_left);
+        std::cout << "Found " << box.classname.toStdString()
+                  << " at" << " (" << box.rect.center().x() << ", " << box.rect.center().y()
+                  << "), conf: " << box.confidence
+                  << ", size (" << box.rect.width() << "x" << box.rect.height() << ")"
+                  << std::endl;
 
-            std::cout << "Found " << box.classname.toStdString()
-                      << " at" << " (" << box.rect.center().x() << ", " << box.rect.center().y()
-                      << "), conf: " << box.confidence
-                      << ", size (" << box.rect.width() << "x" << box.rect.height() << ")"
-                      << std::endl;
-
-            filtered_boxes.push_back(box);
-        }else{
-            std::cout << "Detected "
-                      << box.classname.toStdString()
-                      << " with low confidence: " << box.confidence << std::endl;
-        }
+        filtered_boxes.push_back(box);
 
     }
 

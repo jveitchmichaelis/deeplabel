@@ -266,11 +266,14 @@ void LabelProject::addVideo(QString fileName, QString outputFolder){
         qDebug() << "Failed to open" << fileName;
     }
 
-    should_cancel = false;
-    while(!should_cancel){
+    QProgressDialog progress("...", "Abort", 0, n_frames, static_cast<QWidget*>(parent()));
+    progress.setWindowModality(Qt::WindowModal);
+    progress.setWindowTitle("Loading video");
 
-        video.read(frame);
-        if(frame.empty()) break;
+    while(video.read(frame)){
+
+        if(progress.wasCanceled() || frame.empty())
+            break;
 
         QString output_name = QString("%1_%2.jpg").arg(base_name).arg(frame_count++, 6, 10, QChar('0'));
 
@@ -279,7 +282,8 @@ void LabelProject::addVideo(QString fileName, QString outputFolder){
 
         qDebug() << output_name;
 
-        emit load_progress((100*frame_count)/n_frames);
+        progress.setValue(frame_count);
+        progress.setLabelText(output_name);
 
     }
 
@@ -650,8 +654,9 @@ int LabelProject::addImageFolder(QString path){
 
         QSqlDatabase::database().transaction();
 
-        QProgressDialog progress("Loading images", "Abort", 0, image_list.size(), static_cast<QWidget*>(parent()));
+        QProgressDialog progress("...", "Abort", 0, image_list.size(), static_cast<QWidget*>(parent()));
         progress.setWindowModality(Qt::WindowModal);
+        progress.setWindowTitle("Loading images");
         int i=0;
 
         foreach(image_info, image_list){
@@ -672,6 +677,7 @@ int LabelProject::addImageFolder(QString path){
             }
 
             progress.setValue(i++);
+            progress.setLabelText(image_path);
             QApplication::processEvents();
 
         }
