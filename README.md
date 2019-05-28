@@ -1,7 +1,8 @@
 # DeepLabel
 
-[![Build Status](https://travis-ci.org/jveitchmichaelis/deeplabel.svg?branch=master)](https://travis-ci.org/jveitchmichaelis/deeplabel)
+Mac CI: [![Build Status](https://travis-ci.org/jveitchmichaelis/deeplabel.svg?branch=master)](https://travis-ci.org/jveitchmichaelis/deeplabel)
 
+Download the [latest release](https://github.com/jveitchmichaelis/deeplabel/releases/latest)!
 
 DeepLabel is a cross-platform tool for annotating images with labelled bounding boxes. A typical use-case for the program is labelling ground truth data for object-detection machine learning applications. DeepLabel runs as a standalone app and compiles on Windows, Linux and Mac.
 
@@ -47,6 +48,22 @@ item {
 DeepLabel will split your data into train and validation sets, you can choose what fraction to use (you can set 0% or 100% if you just want a test or validation set).
 
 Since the labelling metadata is in the sqlite database, it should be fairly easy to write a Python script (or whatever) to convert the output to your preferred system. Many frameworks will accept Pascal VOC formatted data, so that's a good start.
+
+## Model inference (automatic tagging)
+
+DeepLabel now supports automatic image tagging from a pre-trained model. A good approach for rapidly tagging thousands of images is to train a "rough" model on a small subset of your data, use that model to tag more data, correct the labels as required, and repeat. Over time, the model will get better and better and you will need to make fewer corrections.
+
+Currently you can load in a Darknet-type model, for example Yolov3, Yolov3-spp and Yolov3-Tiny. You need to provide:
+
+* The model `.cfg` file
+* The model weights
+* A names file
+
+You can then run inference on a single image (the magic wand icon), or an entire project (`Detection->Run on Project`). On a modern CPU, Yolov3 takes around 0.5 seconds to tag a full HD image. DeepLabel will use OpenCV's OpenCL backend by default (you can select CPU if necessary), which should provide some acceleration on GPUs.
+
+If you're not getting any detections, you can adjust the confidence threshold (`Detection->Set Threshold`).
+
+In the future, support should be added for OpenCV's Tensorflow backend.
 
 ## Bounding box tracking and refinement
 
