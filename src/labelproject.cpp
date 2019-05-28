@@ -261,7 +261,6 @@ void LabelProject::addVideo(QString fileName, QString outputFolder){
     cv::Mat frame;
     int frame_count = 0;
     int n_frames = video.get(cv::CAP_PROP_FRAME_COUNT);
-    bool res = true;
 
     if(!video.isOpened()){
         qDebug() << "Failed to open" << fileName;

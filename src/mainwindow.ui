@@ -366,9 +366,16 @@
     <addaction name="actionJump_forward"/>
     <addaction name="actionJump_backward"/>
    </widget>
+   <widget class="QMenu" name="menuDetection">
+    <property name="title">
+     <string>Detection</string>
+    </property>
+    <addaction name="actionSetup_detector"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuImages"/>
    <addaction name="menuNavigation"/>
+   <addaction name="menuDetection"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <property name="movable">
@@ -390,6 +397,7 @@
    <addaction name="actionInit_Tracking"/>
    <addaction name="actionPropagate_Tracking"/>
    <addaction name="actionRefine_boxes"/>
+   <addaction name="actionDetect_Objects"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionPreviousImage">
@@ -566,6 +574,16 @@
   <action name="actionPrevious_Image">
    <property name="text">
     <string>Previous Image</string>
+   </property>
+  </action>
+  <action name="actionSetup_detector">
+   <property name="text">
+    <string>Setup detector</string>
+   </property>
+  </action>
+  <action name="actionDetect_Objects">
+   <property name="text">
+    <string>Detect Objects</string>
    </property>
   </action>
  </widget>

@@ -56,6 +56,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionExport, SIGNAL(triggered(bool)), this, SLOT(launchExportDialog()));
     connect(ui->actionRefine_boxes, SIGNAL(triggered(bool)), this, SLOT(refineBoxes()));
 
+    connect(ui->actionSetup_detector, SIGNAL(triggered(bool)), this, SLOT(setupDetector()));
+
     auto prev_shortcut = ui->actionPreviousImage->shortcuts();
     prev_shortcut.append(QKeySequence("Left"));
     ui->actionPreviousImage->setShortcuts(prev_shortcut);
@@ -88,7 +90,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     settings = new QSettings("DeepLabel", "DeepLabel");
 
-    multitracker = new MultiTrackerCV(this);
+    multitracker = new MultiTrackerCV();
     reinterpret_cast<MultiTrackerCV *>(multitracker)->setTrackerType(CSRT);
 
     QtAwesome* awesome = new QtAwesome(qApp);
@@ -102,9 +104,49 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionNextImage->setIcon(awesome->icon(fa::arrowright, options));
     ui->actionSelect_Tool->setIcon(awesome->icon(fa::handpointero, options));
     ui->actionDraw_Tool->setIcon(awesome->icon(fa::pencilsquareo, options));
+    ui->actionDetect_Objects->setIcon(awesome->icon(fa::magic, options));
+    ui->actionDetect_Objects->setEnabled(false);
+    connect(ui->actionDetect_Objects, SIGNAL(triggered(bool)), this, SLOT(detectObjects()));
     //ui->actionInit_Tracking->setIcon(awesome->icon(fa::objectungroup, options));
 
     resize(QGuiApplication::primaryScreen()->availableSize() * 3 / 5);
+
+}
+
+void MainWindow::setupDetector(void){
+
+    ui->actionDetect_Objects->setEnabled(false);
+    DetectorSetupDialog detection_dialog;
+    detection_dialog.exec();
+
+    if(detection_dialog.result() != QDialog::Accepted ) return;
+
+    auto names_file = detection_dialog.getNames().toStdString();
+    auto cfg_file = detection_dialog.getCfg().toStdString();
+    auto weight_file = detection_dialog.getWeights().toStdString();
+
+    detector.loadDarknet(names_file, cfg_file, weight_file);
+    ui->actionDetect_Objects->setEnabled(true);
+}
+
+void MainWindow::detectObjects(){
+
+    auto image = cv::imread(current_imagepath.toStdString(), cv::IMREAD_UNCHANGED|cv::IMREAD_ANYDEPTH);
+
+    if(image.empty()) return;
+
+    auto new_boxes = detector.infer(image);
+
+    for(auto &box : new_boxes){
+        if(!project->classInDB(box.classname)){
+            project->addClass(box.classname);
+        }
+
+        currentImage->addLabel(box.rect, box.classname);
+    }
+
+    updateClassList();
+    updateLabels();
 
 }
 

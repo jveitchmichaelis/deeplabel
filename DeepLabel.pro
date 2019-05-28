@@ -52,9 +52,9 @@ message("Windows")
 INCLUDEPATH += "C:/Users/Josh/Code/opencv/build/install/include"
 LIBS += -L"C:/Users/Josh/Code/opencv/build/install/x64/vc15/lib"
 CONFIG(debug, debug|release) {
-LIBS += -lopencv_core400d -lopencv_highgui400d -lopencv_imgproc400d -lopencv_imgcodecs400d -lopencv_tracking400d -lopencv_video400d -lopencv_videoio400d
+LIBS += -lopencv_core400d -lopencv_highgui400d -lopencv_imgproc400d -lopencv_imgcodecs400d -lopencv_tracking400d -lopencv_video400d -lopencv_videoio400d -lopencv_dnn400d
 }else{
-LIBS += -lopencv_core400 -lopencv_highgui400 -lopencv_imgproc400 -lopencv_imgcodecs400 -lopencv_tracking400 -lopencv_video400 -lopencv_videoio400
+LIBS += -lopencv_core400 -lopencv_highgui400 -lopencv_imgproc400 -lopencv_imgcodecs400 -lopencv_tracking400 -lopencv_video400 -lopencv_videoio400 -lopencv_dnn400
 }
 }
 
@@ -83,7 +83,9 @@ SOURCES += \
         multitracker.cpp \
     src/cocoexporter.cpp \
     src/imagedisplay.cpp \
-    src/pascalvocexporter.cpp
+    src/pascalvocexporter.cpp \
+    detection/detectoropencv.cpp \
+    detection/detectorsetupdialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -96,12 +98,15 @@ HEADERS += \
         multitracker.h \
     src/cocoexporter.h \
     src/imagedisplay.h \
-    src/pascalvocexporter.h
+    src/pascalvocexporter.h \
+    detection/detectoropencv.h \
+    detection/detectorsetupdialog.h
 
 FORMS += \
         src/mainwindow.ui \
     src/exportdialog.ui \
-    src/imagedisplay.ui
+    src/imagedisplay.ui \
+    detection/detectorsetupdialog.ui
 
 include(QtAwesome/QtAwesome/QtAwesome.pri)
 

@@ -21,6 +21,9 @@
 #include <pascalvocexporter.h>
 #include <cocoexporter.h>
 
+#include <detection/detectoropencv.h>
+#include <detection/detectorsetupdialog.h>
+
 #include <algorithm>
 #include <exportdialog.h>
 #include <multitracker.h>
@@ -49,6 +52,7 @@ private:
     QScrollArea *imageScrollArea;
     ImageDisplay *display;
     QDialog asset_load_progress;
+    DetectorOpenCV detector;
 
     // Enable tracking boxes in previous frames
     bool track_previous = false;
@@ -111,12 +115,13 @@ private slots:
     QRect refineBoundingBoxSimple(cv::Mat image, QRect bbox, int margin=5, bool debug_save=false);
     void refineBoxes();
 
-
-
     void updateImageInfo();
     void videoFinished();
     void jumpForward(int n = 10);
     void jumpBackward(int n = 10);
+
+    void detectObjects();
+    void setupDetector();
 
 signals:
     void selectedClass(QString);
