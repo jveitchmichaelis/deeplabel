@@ -25,7 +25,11 @@ public:
                        cv::Scalar font_colour = cv::Scalar(255,255,255));
     std::vector<BoundingBox> infer(cv::Mat image);
     void setConfidenceThreshold(double thresh){confThreshold = std::max(0.0, thresh);}
-    double getConfidenceThreshold(void){ return confThreshold; }
+    double getConfidenceThreshold(void){ return confThreshold;}
+    void setTarget(int target);
+    void setChannels(int channels);
+    int getChannels(void){return input_channels;}
+
 private:
 
     void postProcess(cv::Mat& frame, const std::vector<cv::Mat>& outs, std::vector<BoundingBox> &filtered_outputs);
@@ -38,6 +42,8 @@ private:
     double nmsThreshold = 0.4;  // Non-maximum suppression threshold
     int input_width = 416;        // Width of network's input image
     int input_height = 416;       // Height of network's input image
+    int input_channels = 3;
+    int preferable_target = cv::dnn::DNN_TARGET_OPENCL;
 
     std::vector<std::string> class_names;
     std::vector<std::string> output_names;

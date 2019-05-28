@@ -22,6 +22,13 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout">
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_7">
+       <property name="text">
+        <string>Target</string>
+       </property>
+      </widget>
+     </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
@@ -36,77 +43,81 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="0" colspan="3">
+     <item row="4" column="0" colspan="4">
       <widget class="QLabel" name="label_5">
        <property name="text">
-        <string>Network Parameters:</string>
+        <string>Loaded Network Parameters:</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="cfgPathLineEdit"/>
-     </item>
-     <item row="0" column="2">
+     <item row="0" column="3">
       <widget class="QToolButton" name="cfgPathButton">
        <property name="text">
         <string>...</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="2">
-      <widget class="QToolButton" name="weightPathButton">
-       <property name="text">
-        <string>...</string>
-       </property>
-      </widget>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="cfgPathLineEdit"/>
      </item>
-     <item row="6" column="0">
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="weightPathLineEdit"/>
+     </item>
+     <item row="7" column="0">
       <widget class="QLabel" name="label_6">
        <property name="text">
         <string>Channels</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="weightPathLineEdit"/>
-     </item>
-     <item row="5" column="0">
-      <widget class="QLabel" name="label_3">
+     <item row="1" column="3">
+      <widget class="QToolButton" name="weightPathButton">
        <property name="text">
-        <string>Image Height</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <widget class="QLabel" name="imageWidthLabel">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>Image Width</string>
+        <string>...</string>
        </property>
       </widget>
      </item>
      <item row="6" column="1">
-      <widget class="QLabel" name="imageChannelsLabel">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="1">
       <widget class="QLabel" name="imageHeightLabel">
        <property name="text">
         <string/>
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
-      <widget class="QLineEdit" name="namesPathLineEdit"/>
+     <item row="5" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Image Width</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Image Height</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QLabel" name="imageWidthLabel">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="1">
+      <widget class="QLabel" name="imageChannelsLabel">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="3">
+      <widget class="QToolButton" name="namesPathButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
      </item>
      <item row="2" column="0">
       <widget class="QLabel" name="label_10">
@@ -115,11 +126,26 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="2">
-      <widget class="QToolButton" name="namesPathButton">
-       <property name="text">
-        <string>...</string>
-       </property>
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="namesPathLineEdit"/>
+     </item>
+     <item row="3" column="1">
+      <widget class="QComboBox" name="targetComboBox">
+       <item>
+        <property name="text">
+         <string>OpenCL</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>OpenCL FP16</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>CPU</string>
+        </property>
+       </item>
       </widget>
      </item>
     </layout>

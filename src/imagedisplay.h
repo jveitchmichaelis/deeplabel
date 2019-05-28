@@ -28,15 +28,18 @@ public:
 public slots:
     void setImagePath(QString path);
     ImageLabel* getImageLabel(void){return imageLabel;}
+    int getBitDepth(void){return bit_depth;}
     void setColourMap(QString map);
 
     void toggleColourMap(bool enable);
+    cv::Mat getOriginalImage();
 private:
     cv::Mat display_image;
+    cv::Mat original_image;
     QPixmap pixmap;
     Ui::ImageDisplay *ui;
     QString current_imagepath;
-    void convert16(cv::Mat &source);
+    void convert16(cv::Mat &source, double minval=-1, double maxval=-1);
     ImageLabel* imageLabel;
     QScrollArea* scrollArea;
     bool fit_to_window = false;
@@ -44,6 +47,7 @@ private:
     bool apply_colourmap = true;
     int colour_map = cv::COLORMAP_MAGMA;
     QImage::Format format = QImage::Format_Grayscale8;
+    int bit_depth = 8;
 
     static std::unordered_map<std::string, int> colour_hashmap;
 

@@ -23,13 +23,21 @@ void DetectorOpenCV::readNamesFile(std::string class_file){
     }
 }
 
+void DetectorOpenCV::setChannels(int channels){
+    input_channels = channels;
+}
+
+void DetectorOpenCV::setTarget(int target){
+    preferable_target = target;
+}
+
 void DetectorOpenCV::loadDarknet(std::string names_file, std::string cfg_file, std::string model_file){
     // Load the network
     readNamesFile(names_file);
 
     net = cv::dnn::readNetFromDarknet(cfg_file, model_file);
     net.setPreferableBackend(cv::dnn::DNN_BACKEND_OPENCV);
-    net.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
+    net.setPreferableTarget(preferable_target);
 
     getOutputClassNames();
 }

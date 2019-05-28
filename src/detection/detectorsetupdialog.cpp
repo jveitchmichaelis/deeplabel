@@ -173,6 +173,16 @@ void DetectorSetupDialog::setWeightsFile(void){
     checkForm();
 }
 
+int DetectorSetupDialog::getTarget(void){
+    if(ui->targetComboBox->currentText() == "CPU"){
+        return cv::dnn::DNN_TARGET_CPU;
+    }else if(ui->targetComboBox->currentText() == "OpenCL"){
+        return cv::dnn::DNN_TARGET_OPENCL;
+    }else if(ui->targetComboBox->currentText() == "OpenCL FP16"){
+        return cv::dnn::DNN_TARGET_OPENCL_FP16;
+    }
+}
+
 void DetectorSetupDialog::setNamesFile(void){
 
     QString filter = tr("Names (*.names)");

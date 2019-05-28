@@ -44,7 +44,6 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-
 private:
     Ui::MainWindow *ui;
     LabelProject *project;
@@ -120,7 +119,8 @@ private slots:
     void jumpForward(int n = 10);
     void jumpBackward(int n = 10);
 
-    void detectObjects();
+    void detectObjects(cv::Mat &image, QString image_path);
+    void detectCurrentImage();
     void detectProject();
     void setupDetector();
     void setConfidenceThreshold();

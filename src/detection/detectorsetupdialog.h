@@ -8,6 +8,8 @@
 #include <QtDebug>
 #include <QDir>
 
+#include <opencv2/dnn.hpp>
+
 namespace Ui {
 class DetectorSetupDialog;
 }
@@ -24,6 +26,7 @@ public:
     QString getNames(void){return darknet_names_file;}
     QString getWeights(void){return darknet_weight_file;}
     QString getCfg(void){return darknet_cfg_file;}
+    int getTarget();
     ~DetectorSetupDialog();
 
 private slots:

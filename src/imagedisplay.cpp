@@ -57,10 +57,12 @@ void ImageDisplay::setImagePath(QString path){
     }
 }
 
-void ImageDisplay::convert16(cv::Mat &source){
+void ImageDisplay::convert16(cv::Mat &source, double minval, double maxval){
 
-    double minval, maxval;
-    cv::minMaxIdx(source, &minval, &maxval);
+    if(minval < 0 || maxval < 0){
+        cv::minMaxIdx(source, &minval, &maxval);
+    }
+
     double range = maxval-minval;
     double scale_factor = 255.0/range;
 
@@ -72,27 +74,33 @@ void ImageDisplay::convert16(cv::Mat &source){
     return;
 }
 
+cv::Mat ImageDisplay::getOriginalImage(void){
+    return original_image;
+}
+
 void ImageDisplay::loadPixmap(){
 
     pixmap.load(current_imagepath);
 
-    auto image = cv::imread(current_imagepath.toStdString(), cv::IMREAD_UNCHANGED|cv::IMREAD_ANYDEPTH);
+    original_image = cv::imread(current_imagepath.toStdString(), cv::IMREAD_UNCHANGED|cv::IMREAD_ANYDEPTH);
 
-    if(image.empty()){
+    if(original_image.empty()){
         qDebug() << "Failed to load image " << current_imagepath;
         return;
     }
 
-    display_image = image.clone();
+    display_image = original_image.clone();
 
-    if(image.elemSize() == 2){
+    if(original_image.elemSize() == 2){
 
         convert16(display_image);
+        bit_depth = 16;
 
         if(display_image.channels() == 1 && apply_colourmap){
             cv::applyColorMap(display_image, display_image, colour_map);
         }
 
+        // Still no idea why we can't just load the data into the pixmap.
         QTemporaryDir dir;
         if (dir.isValid()) {
             cv::imwrite(dir.path().toStdString()+"/temp.png", display_image);
@@ -102,16 +110,18 @@ void ImageDisplay::loadPixmap(){
     }else{
         // Default to single channel 8-bit image
         format = QImage::Format_Grayscale8;
+        bit_depth = 8;
 
         if(display_image.channels() == 3){
             cv::cvtColor(display_image, display_image, cv::COLOR_BGR2RGB);
             format = QImage::Format_RGB888;
+            bit_depth = 24;
         }else if (display_image.channels() == 4){
             cv::cvtColor(display_image, display_image, cv::COLOR_BGRA2RGBA);
             format = QImage::Format_RGBA8888;
+            bit_depth = 32;
         }else if(display_image.channels() == 1 && apply_colourmap){
             cv::applyColorMap(display_image, display_image, colour_map);
-            //cv::cvtColor(display_image, display_image, cv::COLOR_BGR2RGB);
             format = QImage::Format_RGB888;
         }
 

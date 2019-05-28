@@ -98,7 +98,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionDraw_Tool->setIcon(awesome->icon(fa::pencilsquareo, options));
     ui->actionDetect_Objects->setIcon(awesome->icon(fa::magic, options));
     ui->actionDetect_Objects->setEnabled(false);
-    connect(ui->actionDetect_Objects, SIGNAL(triggered(bool)), this, SLOT(detectObjects()));
+    connect(ui->actionDetect_Objects, SIGNAL(triggered(bool)), this, SLOT(detectCurrentImage()));
     connect(ui->actionSet_threshold, SIGNAL(triggered(bool)), this, SLOT(setConfidenceThreshold()));
     detector.setConfidenceThreshold(settings->value("detector_confidence", 0.5).toDouble());
     connect(ui->actionDetect_project, SIGNAL(triggered(bool)), this, SLOT(detectProject()));
@@ -120,19 +120,36 @@ void MainWindow::setupDetector(void){
     auto cfg_file = detection_dialog.getCfg().toStdString();
     auto weight_file = detection_dialog.getWeights().toStdString();
 
+    detector.setChannels(detection_dialog.getChannels());
+    detector.setTarget(detection_dialog.getTarget());
     detector.loadDarknet(names_file, cfg_file, weight_file);
     ui->actionDetect_Objects->setEnabled(true);
     ui->actionDetect_project->setEnabled(true);
 }
 
-void MainWindow::detectObjects(){
+void MainWindow::detectCurrentImage(){
+    auto image = display->getOriginalImage();
+    detectObjects(image, current_imagepath);
 
-    auto image = cv::imread(current_imagepath.toStdString(), cv::IMREAD_UNCHANGED|cv::IMREAD_ANYDEPTH);
+    updateClassList();
+    updateLabels();
+}
+
+void MainWindow::detectObjects(cv::Mat &image, QString image_path){
 
     if(image.empty()) return;
 
+    if(image.channels() != detector.getChannels()){
+        qDebug() << "Input channel mismatch. Expecting"
+                 << detector.getChannels()
+                 << "but image has" << image.channels()
+                 << "channels.";
+    }
+
     auto new_boxes = detector.infer(image);
-    auto existing_boxes = currentImage->getBoundingBoxes();
+
+    QList<BoundingBox> existing_boxes;
+    project->getLabels(image_path, existing_boxes);
 
     for(auto &box : new_boxes){
         if(!project->classInDB(box.classname)){
@@ -149,13 +166,10 @@ void MainWindow::detectObjects(){
         }
 
         if(!exists){
-            project->addLabel(current_imagepath, box);
+            project->addLabel(image_path, box);
         }
 
     }
-
-    updateClassList();
-    updateLabels();
 
 }
 
@@ -203,35 +217,9 @@ void MainWindow::detectProject(void){
             break;
 
         auto image = cv::imread(image_path.toStdString(), cv::IMREAD_UNCHANGED|cv::IMREAD_ANYDEPTH);
-
-        if(image.empty()) return;
-
-        auto new_boxes = detector.infer(image);
-        QList<BoundingBox> existing_boxes;
-        project->getLabels(image_path, existing_boxes);
-
-        for(auto &box : new_boxes){
-            if(!project->classInDB(box.classname)){
-                project->addClass(box.classname);
-            }
-
-            // Strip out boxes which are already in the image
-            // assume detector is deterministic
-            bool exists = false;
-            for(auto &existing : existing_boxes){
-                if(existing.rect == box.rect && existing.classname == box.classname){
-                    exists = true;
-                }
-            }
-
-            if(!exists){
-                project->addLabel(image_path, box);
-            }
-
-        }
+        detectObjects(image, image_path);
 
         progress.setValue(i++);
-
 
     }
     updateClassList();
@@ -730,7 +718,7 @@ void MainWindow::updateDisplay(){
 
 void MainWindow::updateImageInfo(void){
     auto image_info = QFileInfo(current_imagepath);
-    ui->imageBitDepthLabel->setText(QString("%1 bit").arg(currentImage->getImage().elemSize() * 8));
+    ui->imageBitDepthLabel->setText(QString("%1 bit").arg(display->getBitDepth()));
     ui->filenameLabel->setText(image_info.fileName());
     ui->filenameLabel->setToolTip(image_info.fileName());
     ui->filetypeLabel->setText(image_info.completeSuffix());
