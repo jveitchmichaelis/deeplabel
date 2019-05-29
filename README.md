@@ -53,15 +53,39 @@ Since the labelling metadata is in the sqlite database, it should be fairly easy
 
 DeepLabel now supports automatic image tagging from a pre-trained model. A good approach for rapidly tagging thousands of images is to train a "rough" model on a small subset of your data, use that model to tag more data, correct the labels as required, and repeat. Over time, the model will get better and better and you will need to make fewer corrections.
 
-Currently you can load in a Darknet-type model, for example Yolov3, Yolov3-spp and Yolov3-Tiny. You need to provide:
+### Supported models
 
-* The model `.cfg` file
-* The model weights
-* A names file
+You can load in a Darknet-type model, for example Yolov3, Yolov3-spp and Yolov3-Tiny or  a Tensorflow model.
+
+Most of the standard Tensorflow models are supported e.g. Faster-RCNN, Mobilenet-SSD. Currently the assumption is that the model ends with a `DetectionOutput` layer. This is an Nx7 sized tensor where `N` is the number of output labels, after non-maximum suppression has been applied (typically 100 for stock models). The columns are `batch id, class id, confidence, box coords`. 
+
+You need to provide:
+
+* The model configuration file (`.cfg, .pbtxt`)
+* The model weights (`.weights, .pb`)
+* A names file (`.names`)
+
+The extension doesn't really matter, but these are the standard ones.
+
+**Note: ensure that your names file corresponds to the expect label IDs that your model outputs. For example, Darknet uses an 80-class file, Tensorflow models often use a 91-class file, MobileNet-SSD outputs labels starting from 1, Faster-RCNN outputs labels starting from 0, etc.**
 
 You can then run inference on a single image (the magic wand icon), or an entire project (`Detection->Run on Project`). On a modern CPU, Yolov3 takes around 0.5 seconds to tag a full HD image. DeepLabel will use OpenCV's OpenCL backend by default (you can select CPU if necessary), which should provide some acceleration on GPUs.
 
-If you're not getting any detections, you can adjust the confidence threshold (`Detection->Set Threshold`).
+If you're not seeing any detections, you can adjust the confidence threshold (`Detection->Set Threshold`). If your detection boxes look right, but the classe labels are wrong, check your names file is correct.
+
+Download Tensorflow models for testing from OpenCV [here](https://github.com/opencv/opencv/wiki/TensorFlow-Object-Detection-API).
+
+### Target
+
+You can run models on CPU or OpenCL. All models will work on CPU. You may see a speed up with OpenCL, but the CPU backend is far more heavily optimised (and typically is better than other framework's CPU performance).
+
+OpenCL support is somewhat experimental and you may get an out-of-memory error (and Deeplabel will unceremoniously crash). Try with CPU if this happens. Typical performance is anywhere from 50 ms for Tiny Yolov3 to a couple of seconds for Faster-RCNN
+
+## 16-bit File Handling
+
+Deeplabel supports 16-bit images and will automatically scale the colours to 8-bit grayscale. 
+
+You can optionally apply a colourmap to a single channel image, which may improve contrast.
 
 In the future, support should be added for OpenCV's Tensorflow backend.
 
