@@ -12,17 +12,35 @@ DetectorSetupDialog::DetectorSetupDialog(QWidget *parent) :
     connect(ui->weightPathButton, SIGNAL(clicked(bool)), this, SLOT(setWeightsFile()));
     connect(ui->weightPathLineEdit, SIGNAL(editingFinished()), this, SLOT(checkForm()));
     connect(ui->namesPathButton, SIGNAL(clicked(bool)), this, SLOT(setNamesFile()));
+    connect(ui->frameworkComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(setFramework()));
+    connect(ui->targetComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(setTarget()));
     connect(ui->namesPathLineEdit, SIGNAL(editingFinished()), this, SLOT(checkForm()));
 
     settings = new QSettings("DeepLabel", "DeepLabel");
 
-    darknet_cfg_file = settings->value("darknet_cfg", "").toString();
-    darknet_weight_file = settings->value("darknet_weights", "").toString();
-    darknet_names_file = settings->value("darknet_names", "").toString();
+    cfg_file = settings->value("model_cfg", "").toString();
+    weight_file = settings->value("model_weights", "").toString();
+    names_file = settings->value("model_names", "").toString();
 
-    image_width = settings->value("darknet_width", 0).toInt();
-    image_height = settings->value("darknet_height", 0).toInt();
-    image_channels = settings->value("darknet_channels", 0).toInt();
+    image_width = settings->value("model_width", 0).toInt();
+    image_height = settings->value("model_height", 0).toInt();
+    image_channels = settings->value("model_channels", 0).toInt();
+
+    framework = static_cast<model_framework>(settings->value("model_framework", 0).toInt());
+    if(framework == FRAMEWORK_DARKNET){
+        ui->frameworkComboBox->setCurrentText("Darknet (YOLO)");
+    }else if(framework == FRAMEWORK_TENSORFLOW){
+        ui->frameworkComboBox->setCurrentText("Tensorflow");
+    }
+
+    target = settings->value("model_target", cv::dnn::DNN_TARGET_CPU).toInt();
+    if(target == cv::dnn::DNN_TARGET_CPU){
+        ui->targetComboBox->setCurrentText("CPU");
+    }else if(target == cv::dnn::DNN_TARGET_OPENCL){
+        ui->targetComboBox->setCurrentText("OpenCL");
+    }else if(target == cv::dnn::DNN_TARGET_OPENCL_FP16){
+        ui->targetComboBox->setCurrentText("OpenCL FP16");
+    }
 
     updateFields();
     checkForm();
@@ -30,9 +48,9 @@ DetectorSetupDialog::DetectorSetupDialog(QWidget *parent) :
 }
 
 void DetectorSetupDialog::updateFields(){
-    ui->cfgPathLineEdit->setText(darknet_cfg_file);
-    ui->weightPathLineEdit->setText(darknet_weight_file);
-    ui->namesPathLineEdit->setText(darknet_names_file);
+    ui->cfgPathLineEdit->setText(cfg_file);
+    ui->weightPathLineEdit->setText(weight_file);
+    ui->namesPathLineEdit->setText(names_file);
 
     ui->imageWidthLabel->setText(QString::number(image_width));
     ui->imageHeightLabel->setText(QString::number(image_height));
@@ -42,88 +60,102 @@ void DetectorSetupDialog::updateFields(){
 void DetectorSetupDialog::checkForm(void){
 
     // Don't bother checking if nothing changed
-    if(darknet_cfg_file == ui->cfgPathLineEdit->text() &&
-       darknet_weight_file == ui->weightPathLineEdit->text() &&
-       darknet_names_file == ui->namesPathLineEdit->text()) return;
+    if(cfg_file == ui->cfgPathLineEdit->text() &&
+       weight_file == ui->weightPathLineEdit->text() &&
+       names_file == ui->namesPathLineEdit->text()) return;
 
     ui->buttonBox->button(QDialogButtonBox::Ok)->setDisabled(true);
 
-    darknet_cfg_file = ui->cfgPathLineEdit->text();
-    darknet_weight_file = ui->weightPathLineEdit->text();
-    darknet_names_file = ui->namesPathLineEdit->text();
+    cfg_file = ui->cfgPathLineEdit->text();
+    weight_file = ui->weightPathLineEdit->text();
+    names_file = ui->namesPathLineEdit->text();
 
-    if(darknet_cfg_file == "") return;
-    if(darknet_weight_file == "") return;
-    if(darknet_names_file == "") return;
+    if(cfg_file == "") return;
+    if(weight_file == "") return;
+    if(names_file == "") return;
 
-    if(!QFile(darknet_cfg_file).exists()){
+    if(!QFile(cfg_file).exists()){
         qDebug() << "Config file doesn't exist";
         return;
     }
 
-    if(!QFile(darknet_weight_file).exists()){
+    if(!QFile(weight_file).exists()){
         qDebug() << "Weight file doesn't exist";
         return;
     }
 
-    if(!QFile(darknet_names_file).exists()){
+    if(!QFile(names_file).exists()){
         qDebug() << "Names file doesn't exist";
         return;
     }
 
-    getParamsFromConfig();
+    if(!getParamsFromConfig())
+        return;
+
+    // At this point, all good.
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
+    settings->setValue("model_width", image_width);
+    settings->setValue("model_height", image_height);
+    settings->setValue("modelchannels", image_channels);
+
+    settings->setValue("model_cfg", cfg_file);
+    settings->setValue("model_weights", weight_file);
+    settings->setValue("model_names", names_file);
 
 }
 
-void DetectorSetupDialog::getParamsFromConfig(void){
+bool DetectorSetupDialog::getParamsFromConfig(void){
 
     qDebug() << "Checking config file";
 
-    QSettings darknet_settings(darknet_cfg_file, QSettings::IniFormat);
+    if(framework == FRAMEWORK_DARKNET){
+        QSettings darknet_settings(cfg_file, QSettings::IniFormat);
 
-    darknet_settings.beginGroup("net");
+        darknet_settings.beginGroup("net");
 
-    auto keys = darknet_settings.childKeys();
+        auto keys = darknet_settings.childKeys();
 
-    if(!darknet_settings.contains("width")){
-        qDebug() << "No width parameter";
-        return;
-    }
-    if(!darknet_settings.contains("height")){
-        qDebug() << "No height parameter";
-        return;
-    }
-    if(!darknet_settings.contains("channels")){
-        qDebug() << "No channels parameter";
-        return;
-    }
+        if(!darknet_settings.contains("width")){
+            qDebug() << "No width parameter";
+            return false;
+        }
+        if(!darknet_settings.contains("height")){
+            qDebug() << "No height parameter";
+            return false;
+        }
+        if(!darknet_settings.contains("channels")){
+            qDebug() << "No channels parameter";
+            return false;
+        }
 
-    auto width = darknet_settings.value("width").toInt();
-    auto height = darknet_settings.value("height").toInt();
-    auto channels = darknet_settings.value("channels").toInt();
+        auto width = darknet_settings.value("width").toInt();
+        auto height = darknet_settings.value("height").toInt();
+        auto channels = darknet_settings.value("channels").toInt();
 
-    darknet_settings.endGroup();
+        darknet_settings.endGroup();
 
-    if(width > 0 && height > 0 && channels > 0){
+        if(width > 0 && height > 0 && channels > 0){
 
-        qDebug() << width << height << channels;
+            qDebug() << width << height << channels;
 
-        image_width = width;
-        image_height = height;
-        image_channels = channels;
+            image_width = width;
+            image_height = height;
+            image_channels = channels;
 
-        settings->setValue("darknet_width", image_width);
-        settings->setValue("darknet_height", image_height);
-        settings->setValue("darknet_channels", image_channels);
+        }else{
+            return false;
+        }
 
-        settings->setValue("darknet_cfg", darknet_cfg_file);
-        settings->setValue("darknet_weights", darknet_weight_file);
-        settings->setValue("darknet_names", darknet_names_file);
+    }else if(framework == FRAMEWORK_TENSORFLOW){
+        // In theory we can parse the .pbtxt file to figure out
+        // the input layer parameters, but that either means bringing in
+        // protobuf or loading the entire network via OpenCV.
 
-        ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
     }
 
     updateFields();
+
+    return true;
 
 }
 
@@ -146,10 +178,19 @@ QString DetectorSetupDialog::openFile(QString title, QString search_path, QStrin
 
 void DetectorSetupDialog::setCfgFile(void){
 
-    QString filter = tr("Config (*.cfg)");
-    QString title = tr("Select darknet config file");
+    QString filter, title;
 
-    auto path = openFile(title, darknet_cfg_file, filter);
+    if(framework == FRAMEWORK_DARKNET){
+        filter = tr("Config (*.cfg)");
+        title = tr("Select darknet config file");
+    }else if(framework == FRAMEWORK_TENSORFLOW){
+        filter = tr("Config (*.pbtxt)");
+        title = tr("Select tensorflow config file");
+    }else{
+        return;
+    }
+
+    auto path = openFile(title, cfg_file, filter);
 
     if(path != ""){
         ui->cfgPathLineEdit->setText(path);
@@ -161,10 +202,19 @@ void DetectorSetupDialog::setCfgFile(void){
 
 void DetectorSetupDialog::setWeightsFile(void){
 
-    QString filter = tr("Weights (*.weights)");
-    QString title = tr("Select darknet weights file");
+    QString filter, title;
 
-    auto path = openFile(title, darknet_weight_file, filter);
+    if(framework == FRAMEWORK_DARKNET){
+        filter = tr("Weights (*.weights)");
+        title = tr("Select darknet weights file");
+    }else if(framework == FRAMEWORK_TENSORFLOW){
+        filter = tr("Config (*.pb)");
+        title = tr("Select tensorflow frozen graph");
+    }else{
+        return;
+    }
+
+    auto path = openFile(title, weight_file, filter);
 
     if(path != ""){
         ui->weightPathLineEdit->setText(path);
@@ -173,14 +223,31 @@ void DetectorSetupDialog::setWeightsFile(void){
     checkForm();
 }
 
-int DetectorSetupDialog::getTarget(void){
-    if(ui->targetComboBox->currentText() == "CPU"){
-        return cv::dnn::DNN_TARGET_CPU;
-    }else if(ui->targetComboBox->currentText() == "OpenCL"){
-        return cv::dnn::DNN_TARGET_OPENCL;
-    }else if(ui->targetComboBox->currentText() == "OpenCL FP16"){
-        return cv::dnn::DNN_TARGET_OPENCL_FP16;
+void DetectorSetupDialog::setFramework(void){
+    if(ui->frameworkComboBox->currentText().startsWith("Darknet")){
+        framework = FRAMEWORK_DARKNET;
+        settings->setValue("model_framework", framework);
+    }else if(ui->frameworkComboBox->currentText().startsWith("Tensorflow")){
+        framework = FRAMEWORK_TENSORFLOW;
+        settings->setValue("model_framework", framework);
     }
+}
+
+void DetectorSetupDialog::setTarget(void){
+    if(ui->targetComboBox->currentText() == "CPU"){
+        target = cv::dnn::DNN_TARGET_CPU;
+        settings->setValue("model_target", target);
+    }else if(ui->targetComboBox->currentText() == "OpenCL"){
+        target = cv::dnn::DNN_TARGET_OPENCL;
+        settings->setValue("model_target", target);
+    }else if(ui->targetComboBox->currentText() == "OpenCL FP16"){
+        target = cv::dnn::DNN_TARGET_OPENCL_FP16;
+        settings->setValue("model_target", target);
+    }
+}
+
+int DetectorSetupDialog::getTarget(void){
+    return target;
 }
 
 void DetectorSetupDialog::setNamesFile(void){
@@ -188,7 +255,7 @@ void DetectorSetupDialog::setNamesFile(void){
     QString filter = tr("Names (*.names)");
     QString title = tr("Select darknet names file");
 
-    auto path = openFile(title, darknet_names_file, filter);
+    auto path = openFile(title, names_file, filter);
 
     if(path != ""){
         ui->namesPathLineEdit->setText(path);

@@ -14,12 +14,15 @@ void DetectorOpenCV::setImageSize(int width, int height){
 
 void DetectorOpenCV::readNamesFile(std::string class_file){
 
+    class_names.clear();
+
     // Load names of classes
     std::ifstream ifs(class_file.c_str());
     std::string line;
+    int i=0;
     while (std::getline(ifs, line)){
         class_names.push_back(line);
-        std::cout << "Added detection class: " << class_names.back() << std::endl;
+        std::cout << "Added detection class: " << i++ << " " << class_names.back() << std::endl;
     }
 }
 
@@ -31,12 +34,14 @@ void DetectorOpenCV::setTarget(int target){
     preferable_target = target;
 }
 
-void DetectorOpenCV::loadDarknet(std::string names_file, std::string cfg_file, std::string model_file){
-    // Load the network
+void DetectorOpenCV::loadNetwork(std::string names_file, std::string cfg_file, std::string model_file){
+    // Load the names
     readNamesFile(names_file);
 
-    net = cv::dnn::readNetFromDarknet(cfg_file, model_file);
-    net.setPreferableBackend(cv::dnn::DNN_BACKEND_OPENCV);
+    // Infer network type automatically
+    net = cv::dnn::readNet(model_file, cfg_file);
+
+    net.setPreferableBackend(cv::dnn::DNN_BACKEND_DEFAULT);
     net.setPreferableTarget(preferable_target);
 
     getOutputClassNames();
@@ -61,6 +66,60 @@ void DetectorOpenCV::getOutputClassNames()
 
 }
 
+void DetectorOpenCV::postProcessTensorflow(cv::Mat& frame, const std::vector<cv::Mat>& outputs, std::vector<BoundingBox> &filtered_boxes){
+    std::vector<int> classIds;
+    std::vector<float> confidences;
+    std::vector<cv::Rect> boxes;
+
+    auto detections = outputs.at(0);
+    const int numDetections = detections.size[2];
+
+    /*
+    std::cout << "Outputs_size: " << detections.total() << std::endl;
+    std::cout << "Number of detections: " << numDetections << std::endl;
+    */
+
+    // batch id, class id, confidence, bbox (x4)
+    detections = detections.reshape(1, detections.total() / 7);
+
+    // There are top-k (= 100 typical) detections, most of which should have
+    // more or less zero confidence.
+    for (int i = 0; i < numDetections; ++i)
+    {
+        float confidence = detections.at<float>(i, 2);
+
+        if (confidence > confThreshold)
+        {
+
+            // Extract the bounding box
+            int classId = static_cast<int>(detections.at<float>(i, 1));
+            int left = static_cast<int>(frame.cols * detections.at<float>(i, 3));
+            int top = static_cast<int>(frame.rows * detections.at<float>(i, 4));
+            int right = static_cast<int>(frame.cols * detections.at<float>(i, 5));
+            int bottom = static_cast<int>(frame.rows * detections.at<float>(i, 6));
+
+            BoundingBox bbox;
+            bbox.rect.setLeft(std::max(0, std::min(left, frame.cols - 1)));
+            bbox.rect.setTop(std::max(0, std::min(top, frame.rows - 1)));
+            bbox.rect.setRight(std::max(0, std::min(right, frame.cols - 1)));
+            bbox.rect.setBottom(std::max(0, std::min(bottom, frame.rows - 1)));
+            bbox.confidence = static_cast<double>(confidence);
+            bbox.classid = classId;
+            bbox.classname = QString::fromStdString(class_names.at(static_cast<size_t>(bbox.classid)));
+
+            std::cout << "Found (" << bbox.classid << ") " << bbox.classname.toStdString()
+                      << " at" << " (" << bbox.rect.center().x() << ", " << bbox.rect.center().y()
+                      << "), conf: " << bbox.confidence
+                      << ", size (" << bbox.rect.width() << "x" << bbox.rect.height() << ")"
+                      << std::endl;
+
+            filtered_boxes.push_back(bbox);
+        }else{
+            //
+        }
+    }
+}
+
 void DetectorOpenCV::postProcess(cv::Mat& frame, const std::vector<cv::Mat>& outputs, std::vector<BoundingBox> &filtered_boxes)
 {
     std::vector<int> classIds;
@@ -68,7 +127,7 @@ void DetectorOpenCV::postProcess(cv::Mat& frame, const std::vector<cv::Mat>& out
     std::vector<cv::Rect> boxes;
 
     // Debug: this should be three because there are three scales that Yolo searches over
-    // std::cout << "Outputs: " << outputs.size() << std::endl;
+    //std::cout << "Outputs: " << outputs.size() << std::endl;
 
     for (size_t i = 0; i < outputs.size(); ++i)
     {
@@ -112,7 +171,6 @@ void DetectorOpenCV::postProcess(cv::Mat& frame, const std::vector<cv::Mat>& out
             }
         }
     }
-
 
     std::vector<int> indices;
 
@@ -159,6 +217,57 @@ void DetectorOpenCV::postProcess(cv::Mat& frame, const std::vector<cv::Mat>& out
 }
 
 std::vector<BoundingBox> DetectorOpenCV::infer(cv::Mat image){
+    if(framework == FRAMEWORK_TENSORFLOW){
+        return inferTensorflow(image);
+    }else if(framework == FRAMEWORK_DARKNET){
+        return inferDarknet(image);
+    }
+
+}
+
+std::vector<BoundingBox> DetectorOpenCV::inferTensorflow(cv::Mat image){
+
+        std::vector<BoundingBox> results;
+
+        auto mean = cv::Scalar(0,0,0);
+        if(image.channels() == 1){
+            mean = cv::Scalar(0);
+        }
+
+        // Check for 16-bit
+        double scale_factor = 1/255.0;
+
+        if(image.elemSize() == 2){
+            scale_factor = 1/65535.0;
+        }
+
+        auto input_size = cv::Size(image.cols, image.rows);
+
+        bool swap_rb = false; // BGR->RGB?
+        bool crop = false; // Use the entire image
+
+        // No normalising! The model will handle it.
+        auto blob = cv::dnn::blobFromImage(image, 1.0, input_size, mean, swap_rb, crop);
+
+        //Sets the input to the network
+        net.setInput(blob);
+
+        // Runs the forward pass to get output of the output layers
+        std::vector<cv::Mat> outputs;
+        net.forward(outputs, output_names);
+
+        postProcessTensorflow(image, outputs, results);
+
+        std::vector<double> layersTimes;
+        double freq = cv::getTickFrequency() / 1000;
+        processing_time = net.getPerfProfile(layersTimes) / freq;
+
+        std::cout << "Processed in: " << processing_time << std::endl;
+
+        return results;
+}
+
+std::vector<BoundingBox> DetectorOpenCV::inferDarknet(cv::Mat image){
 
         std::vector<BoundingBox> results;
 

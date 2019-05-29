@@ -11,6 +11,11 @@
 
 #include<boundingbox.h>
 
+typedef enum {
+    FRAMEWORK_TENSORFLOW,
+    FRAMEWORK_DARKNET
+} model_framework;
+
 class DetectorOpenCV
 {
 
@@ -18,12 +23,19 @@ public:
     DetectorOpenCV();
 
     void setImageSize(int width, int height);
-    void loadDarknet(std::string names_file, std::string cfg_file, std::string model_file);
+
+    void loadNetwork(std::string names_file, std::string cfg_file, std::string model_file);
+
     void annotateImage(cv::Mat &image,
                        std::vector<BoundingBox> boxes,
                        cv::Scalar colour = cv::Scalar(0,0,255),
                        cv::Scalar font_colour = cv::Scalar(255,255,255));
+
     std::vector<BoundingBox> infer(cv::Mat image);
+    std::vector<BoundingBox> inferDarknet(cv::Mat image);
+    std::vector<BoundingBox> inferTensorflow(cv::Mat image);
+
+    void setFramework(model_framework framework){this->framework = framework;}
     void setConfidenceThreshold(double thresh){confThreshold = std::max(0.0, thresh);}
     double getConfidenceThreshold(void){ return confThreshold;}
     void setTarget(int target);
@@ -44,10 +56,12 @@ private:
     int input_height = 416;       // Height of network's input image
     int input_channels = 3;
     int preferable_target = cv::dnn::DNN_TARGET_OPENCL;
+    model_framework framework = FRAMEWORK_DARKNET;
 
     std::vector<std::string> class_names;
     std::vector<std::string> output_names;
     cv::dnn::Net net;
+    void postProcessTensorflow(cv::Mat &frame, const std::vector<cv::Mat> &outputs, std::vector<BoundingBox> &filtered_boxes);
 };
 
 #endif // DETECTOROPENCV_H

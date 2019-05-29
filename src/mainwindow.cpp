@@ -122,7 +122,8 @@ void MainWindow::setupDetector(void){
 
     detector.setChannels(detection_dialog.getChannels());
     detector.setTarget(detection_dialog.getTarget());
-    detector.loadDarknet(names_file, cfg_file, weight_file);
+    detector.setFramework(detection_dialog.getFramework());
+    detector.loadNetwork(names_file, cfg_file, weight_file);
     ui->actionDetect_Objects->setEnabled(true);
     ui->actionDetect_project->setEnabled(true);
 }
