@@ -80,8 +80,6 @@ cv::Mat ImageDisplay::getOriginalImage(void){
 
 void ImageDisplay::loadPixmap(){
 
-    pixmap.load(current_imagepath);
-
     original_image = cv::imread(current_imagepath.toStdString(), cv::IMREAD_UNCHANGED|cv::IMREAD_ANYDEPTH);
 
     if(original_image.empty()){
@@ -91,42 +89,30 @@ void ImageDisplay::loadPixmap(){
 
     display_image = original_image.clone();
 
-    if(original_image.elemSize() == 2){
+    // Default to single channel 8-bit image
+    format = QImage::Format_Grayscale8;
+    bit_depth = 8;
 
+    if(original_image.elemSize() == 2){
         convert16(display_image);
         bit_depth = 16;
-
-        if(display_image.channels() == 1 && apply_colourmap){
-            cv::applyColorMap(display_image, display_image, colour_map);
-        }
-
-        // Still no idea why we can't just load the data into the pixmap.
-        QTemporaryDir dir;
-        if (dir.isValid()) {
-            cv::imwrite(dir.path().toStdString()+"/temp.png", display_image);
-            pixmap.load(dir.path()+"/temp.png");
-        }
-
-    }else{
-        // Default to single channel 8-bit image
-        format = QImage::Format_Grayscale8;
-        bit_depth = 8;
-
-        if(display_image.channels() == 3){
-            cv::cvtColor(display_image, display_image, cv::COLOR_BGR2RGB);
-            format = QImage::Format_RGB888;
-            bit_depth = 24;
-        }else if (display_image.channels() == 4){
-            cv::cvtColor(display_image, display_image, cv::COLOR_BGRA2RGBA);
-            format = QImage::Format_RGBA8888;
-            bit_depth = 32;
-        }else if(display_image.channels() == 1 && apply_colourmap){
-            cv::applyColorMap(display_image, display_image, colour_map);
-            format = QImage::Format_RGB888;
-        }
-
-        pixmap.fromImage(QImage(display_image.data, display_image.cols, display_image.rows, display_image.step, format));
     }
+
+    if(display_image.channels() == 3){
+        cv::cvtColor(display_image, display_image, cv::COLOR_BGR2RGB);
+        format = QImage::Format_RGB888;
+        bit_depth = 24;
+    }else if (display_image.channels() == 4){
+        cv::cvtColor(display_image, display_image, cv::COLOR_BGRA2RGBA);
+        format = QImage::Format_RGBA8888;
+        bit_depth = 32;
+    }else if(display_image.channels() == 1 && apply_colourmap){
+        cv::applyColorMap(display_image, display_image, colour_map);
+        cv::cvtColor(display_image, display_image, cv::COLOR_BGR2RGB);
+        format = QImage::Format_RGB888;
+    }
+
+    pixmap = QPixmap::fromImage(QImage(display_image.data, display_image.cols, display_image.rows, display_image.step, format));
 
     imageLabel->setImage(display_image);
     updateDisplay();
