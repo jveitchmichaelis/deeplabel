@@ -22,20 +22,6 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="4" column="0">
-      <widget class="QLabel" name="label_7">
-       <property name="text">
-        <string>Target</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Config file</string>
-       </property>
-      </widget>
-     </item>
      <item row="2" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
@@ -43,90 +29,21 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="0" colspan="4">
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>Loaded Network Parameters:</string>
-       </property>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="frameworkComboBox">
+       <item>
+        <property name="text">
+         <string>Darknet (YOLO)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Tensorflow</string>
+        </property>
+       </item>
       </widget>
-     </item>
-     <item row="1" column="3">
-      <widget class="QToolButton" name="cfgPathButton">
-       <property name="text">
-        <string>...</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="cfgPathLineEdit"/>
-     </item>
-     <item row="2" column="3">
-      <widget class="QToolButton" name="weightPathButton">
-       <property name="text">
-        <string>...</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="1">
-      <widget class="QLabel" name="imageHeightLabel">
-       <property name="text">
-        <string>-</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>Image Width</string>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="0">
-      <widget class="QLabel" name="label_6">
-       <property name="text">
-        <string>Channels</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QLineEdit" name="weightPathLineEdit"/>
      </item>
      <item row="6" column="1">
-      <widget class="QLabel" name="imageWidthLabel">
-       <property name="text">
-        <string>-</string>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="1">
-      <widget class="QLabel" name="imageChannelsLabel">
-       <property name="text">
-        <string>-</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="0">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Image Height</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_10">
-       <property name="text">
-        <string>Names file</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="3">
-      <widget class="QToolButton" name="namesPathButton">
-       <property name="text">
-        <string>...</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
       <widget class="QComboBox" name="targetComboBox">
        <item>
         <property name="text">
@@ -145,27 +62,130 @@
        </item>
       </widget>
      </item>
-     <item row="3" column="1">
-      <widget class="QLineEdit" name="namesPathLineEdit"/>
+     <item row="3" column="3">
+      <widget class="QToolButton" name="namesPathButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QComboBox" name="frameworkComboBox">
-       <item>
-        <property name="text">
-         <string>Darknet (YOLO)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Tensorflow</string>
-        </property>
-       </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Config file</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="weightPathLineEdit"/>
+     </item>
+     <item row="9" column="1">
+      <widget class="QLabel" name="imageHeightLabel">
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="0">
+      <widget class="QLabel" name="label_6">
+       <property name="text">
+        <string>Channels</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0" colspan="2">
+      <widget class="QCheckBox" name="convertGrayscaleCheckbox">
+       <property name="text">
+        <string>Convert grayscale images to RGB</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item row="0" column="0">
       <widget class="QLabel" name="label_8">
        <property name="text">
         <string>Type</string>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Image Height</string>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="1">
+      <widget class="QLabel" name="imageChannelsLabel">
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="3">
+      <widget class="QToolButton" name="cfgPathButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="0" colspan="4">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Loaded Network Parameters:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="1">
+      <widget class="QLabel" name="imageWidthLabel">
+       <property name="text">
+        <string>-</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="3">
+      <widget class="QToolButton" name="weightPathButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="cfgPathLineEdit"/>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_10">
+       <property name="text">
+        <string>Names file</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="namesPathLineEdit"/>
+     </item>
+     <item row="8" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Image Width</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="label_7">
+       <property name="text">
+        <string>Target</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0" colspan="2">
+      <widget class="QCheckBox" name="convertDepthCheckbox">
+       <property name="text">
+        <string>Convert 16-bit images to 8-bit</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

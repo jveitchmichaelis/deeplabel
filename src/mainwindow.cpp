@@ -49,8 +49,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->actionDraw_Tool->setChecked(true);
 
-    connect(ui->changeImageButton, SIGNAL(clicked(bool)), this, SLOT(changeImage()));
-    connect(ui->imageNumberSpinbox, SIGNAL(editingFinished()), this, SLOT(changeImage()));
+    connect(ui->changeImageButton, SIGNAL(clicked(bool)), this, SLOT(updateDisplay()));
+    connect(ui->imageNumberSpinbox, SIGNAL(editingFinished()), this, SLOT(updateDisplay()));
 
     connect(ui->colourMapCombo, SIGNAL(currentIndexChanged(QString)), display, SLOT(setColourMap(QString)));
     connect(ui->colourMapCheckbox, SIGNAL(clicked(bool)), display, SLOT(toggleColourMap(bool)));
@@ -123,7 +123,10 @@ void MainWindow::setupDetector(void){
     detector.setChannels(detection_dialog.getChannels());
     detector.setTarget(detection_dialog.getTarget());
     detector.setFramework(detection_dialog.getFramework());
+    detector.setConvertGrayscale(detection_dialog.getConvertGrayscale());
+    detector.setConvertDepth(detection_dialog.getConvertDepth());
     detector.loadNetwork(names_file, cfg_file, weight_file);
+
     ui->actionDetect_Objects->setEnabled(true);
     ui->actionDetect_project->setEnabled(true);
 }
@@ -139,13 +142,6 @@ void MainWindow::detectCurrentImage(){
 void MainWindow::detectObjects(cv::Mat &image, QString image_path){
 
     if(image.empty()) return;
-
-    if(image.channels() != detector.getChannels()){
-        qDebug() << "Input channel mismatch. Expecting"
-                 << detector.getChannels()
-                 << "but image has" << image.channels()
-                 << "channels.";
-    }
 
     auto new_boxes = detector.infer(image);
 
@@ -237,11 +233,6 @@ void MainWindow::toggleRefineTracking(bool state){
 
 void MainWindow::enableWrap(bool enable){
     wrap_index = enable;
-}
-
-void MainWindow::changeImage(){
-    current_index = ui->imageNumberSpinbox->value()-1;
-    updateDisplay();
 }
 
 void MainWindow::jumpForward(int n){
@@ -436,7 +427,7 @@ void MainWindow::nextUnlabelled(){
 
     if(n != -1){
         ui->imageNumberSpinbox->setValue(n);
-        changeImage();
+        updateDisplay();
     }
 }
 
@@ -668,6 +659,8 @@ void MainWindow::nextImage(){
         current_index++;
     }
 
+    ui->imageNumberSpinbox->setValue(current_index+1);
+
     // Show the new image
     updateDisplay();
 
@@ -697,6 +690,7 @@ void MainWindow::previousImage(){
       current_index--;
     }
 
+    ui->imageNumberSpinbox->setValue(current_index+1);
     updateDisplay();
 }
 
@@ -706,13 +700,13 @@ void MainWindow::updateDisplay(){
         return;
     }
 
+    current_index = ui->imageNumberSpinbox->value()-1;
     current_imagepath = images.at(current_index);
     display->setImagePath(current_imagepath);
 
     updateLabels();
 
     ui->imageProgressBar->setValue(current_index+1);
-    ui->imageNumberSpinbox->setValue(current_index+1);
     ui->imageIndexLabel->setText(QString("%1/%2").arg(current_index+1).arg(number_images));
 
 }

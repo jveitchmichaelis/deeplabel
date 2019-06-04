@@ -27,6 +27,8 @@ public:
     QString getNames(void){return names_file;}
     QString getWeights(void){return weight_file;}
     QString getCfg(void){return cfg_file;}
+    bool getConvertGrayscale(void);
+    bool getConvertDepth(void);
     model_framework getFramework(void){return framework;}
     int getTarget();
     ~DetectorSetupDialog();
@@ -38,13 +40,17 @@ private slots:
     void setWeightsFile();
     void setFramework();
     void setTarget();
+    void setConvertGrayscale(void);
+    void setConvertDepth(void);
 
     void checkForm();
+
 
 private:
     Ui::DetectorSetupDialog *ui;
     bool getParamsFromConfig();
     void updateFields();
+
 
     QSettings* settings;
 
@@ -55,6 +61,8 @@ private:
     int image_height;
     int image_channels;
     int target;
+    bool convert_grayscale;
+    bool convert_depth;
     model_framework framework = FRAMEWORK_TENSORFLOW;
     QString openFile(QString title, QString search_path="", QString filter="");
 };

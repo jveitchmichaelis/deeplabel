@@ -32,6 +32,22 @@ void DetectorOpenCV::setChannels(int channels){
 
 void DetectorOpenCV::setTarget(int target){
     preferable_target = target;
+
+    if(preferable_target == cv::dnn::DNN_TARGET_OPENCL){
+        // Check for GPU
+        cv::ocl::Context context;
+
+        if(!cv::ocl::haveOpenCL()){
+            std::cout << "OpenCL is not available. Falling back to CPU" << std::endl;
+            preferable_target = cv::dnn::DNN_TARGET_CPU;
+        }
+
+        // Attempt to use a GPU
+        if(context.create(cv::ocl::Device::TYPE_GPU)){
+            std::cout << "Found OpenCL capable GPU - we're going to use it!" << std::endl;
+            cv::ocl::Device(context.device(1));
+        }
+    }
 }
 
 void DetectorOpenCV::loadNetwork(std::string names_file, std::string cfg_file, std::string model_file){
@@ -217,11 +233,42 @@ void DetectorOpenCV::postProcess(cv::Mat& frame, const std::vector<cv::Mat>& out
 }
 
 std::vector<BoundingBox> DetectorOpenCV::infer(cv::Mat image){
-    if(framework == FRAMEWORK_TENSORFLOW){
-        return inferTensorflow(image);
-    }else if(framework == FRAMEWORK_DARKNET){
-        return inferDarknet(image);
+
+    std::vector<BoundingBox> detections;
+
+    if(convert_depth && image.elemSize() == 2){
+        double minval, maxval;
+        cv::minMaxIdx(image, &minval, &maxval);
+
+        double range = maxval-minval;
+        double scale_factor = 255.0/range;
+
+        image.convertTo(image, CV_32FC1);
+        image -= minval;
+        image *= scale_factor;
+        image.convertTo(image, CV_8UC1);
     }
+
+    if(convert_grayscale && image.channels() == 1){
+        cv::cvtColor(image, image, cv::COLOR_GRAY2RGB);
+    }
+
+    if(image.channels() != input_channels){
+        std::cout << "Input channel mismatch. Expecting "
+                 << input_channels
+                 << " but image has " << image.channels()
+                 << " channels.";
+
+        return detections;
+    }
+
+    if(framework == FRAMEWORK_TENSORFLOW){
+        detections = inferTensorflow(image);
+    }else if(framework == FRAMEWORK_DARKNET){
+        detections =  inferDarknet(image);
+    }
+
+    return detections;
 
 }
 

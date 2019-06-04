@@ -7,9 +7,11 @@
 #include<vector>
 
 #include<opencv2/opencv.hpp>
+#include <opencv2/core/ocl.hpp>
 #include<opencv2/dnn.hpp>
 
 #include<boundingbox.h>
+#include<imagedisplay.h>
 
 typedef enum {
     FRAMEWORK_TENSORFLOW,
@@ -37,6 +39,8 @@ public:
 
     void setFramework(model_framework framework){this->framework = framework;}
     void setConfidenceThreshold(double thresh){confThreshold = std::max(0.0, thresh);}
+    void setConvertGrayscale(bool convert){convert_grayscale = convert;}
+    void setConvertDepth(bool convert){convert_depth = convert;}
     double getConfidenceThreshold(void){ return confThreshold;}
     void setTarget(int target);
     void setChannels(int channels);
@@ -48,7 +52,8 @@ private:
     void readNamesFile(std::string class_file = "coco.names");
     void getOutputClassNames(void);
 
-
+    bool convert_grayscale = true;
+    bool convert_depth = true;
     double processing_time;
     double confThreshold = 0.5; // Confidence threshold
     double nmsThreshold = 0.4;  // Non-maximum suppression threshold

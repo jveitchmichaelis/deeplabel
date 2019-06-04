@@ -91,7 +91,6 @@ private slots:
     void nextImage(void);
     void previousImage(void);
     void removeImage(void);
-    void changeImage(void);
 
     void addLabel(BoundingBox bbox);
     void removeLabel(BoundingBox bbox);

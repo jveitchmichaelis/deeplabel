@@ -15,12 +15,20 @@ DetectorSetupDialog::DetectorSetupDialog(QWidget *parent) :
     connect(ui->frameworkComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(setFramework()));
     connect(ui->targetComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(setTarget()));
     connect(ui->namesPathLineEdit, SIGNAL(editingFinished()), this, SLOT(checkForm()));
+    connect(ui->convertGrayscaleCheckbox, SIGNAL(clicked(bool)), this, SLOT(setConvertGrayscale()));
+    connect(ui->convertDepthCheckbox, SIGNAL(clicked(bool)), this, SLOT(setConvertDepth()));
 
     settings = new QSettings("DeepLabel", "DeepLabel");
 
     cfg_file = settings->value("model_cfg", "").toString();
     weight_file = settings->value("model_weights", "").toString();
     names_file = settings->value("model_names", "").toString();
+
+    convert_grayscale = settings->value("model_convert_grayscale", true).toBool();
+    ui->convertGrayscaleCheckbox->setChecked(convert_grayscale);
+
+    convert_depth = settings->value("model_convert_depth", true).toBool();
+    ui->convertDepthCheckbox->setChecked(convert_depth);
 
     image_width = settings->value("model_width", 0).toInt();
     image_height = settings->value("model_height", 0).toInt();
@@ -57,12 +65,25 @@ void DetectorSetupDialog::updateFields(){
     ui->imageChannelsLabel->setText(QString::number(image_channels));
 }
 
-void DetectorSetupDialog::checkForm(void){
+void DetectorSetupDialog::setConvertGrayscale(void){
+    convert_grayscale = ui->convertGrayscaleCheckbox->isChecked();
+    settings->setValue("model_convert_grayscale", convert_grayscale);
+}
 
-    // Don't bother checking if nothing changed
-    if(cfg_file == ui->cfgPathLineEdit->text() &&
-       weight_file == ui->weightPathLineEdit->text() &&
-       names_file == ui->namesPathLineEdit->text()) return;
+bool DetectorSetupDialog::getConvertGrayscale(void){
+    return convert_grayscale;
+}
+
+void DetectorSetupDialog::setConvertDepth(void){
+    convert_depth = ui->convertDepthCheckbox->isChecked();
+    settings->setValue("model_convert_depth", convert_depth);
+}
+
+bool DetectorSetupDialog::getConvertDepth(void){
+    return convert_depth;
+}
+
+void DetectorSetupDialog::checkForm(void){
 
     ui->buttonBox->button(QDialogButtonBox::Ok)->setDisabled(true);
 
@@ -77,6 +98,8 @@ void DetectorSetupDialog::checkForm(void){
     if(!QFile(cfg_file).exists()){
         qDebug() << "Config file doesn't exist";
         return;
+    }else if(!getParamsFromConfig()){
+        return;
     }
 
     if(!QFile(weight_file).exists()){
@@ -88,9 +111,6 @@ void DetectorSetupDialog::checkForm(void){
         qDebug() << "Names file doesn't exist";
         return;
     }
-
-    if(!getParamsFromConfig())
-        return;
 
     // At this point, all good.
     ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
@@ -133,6 +153,8 @@ bool DetectorSetupDialog::getParamsFromConfig(void){
         auto channels = darknet_settings.value("channels").toInt();
 
         darknet_settings.endGroup();
+
+        qDebug() << width << height << channels;
 
         if(width > 0 && height > 0 && channels > 0){
 
