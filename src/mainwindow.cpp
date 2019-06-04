@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->refineTrackingCheckbox, SIGNAL(clicked(bool)), this, SLOT(toggleRefineTracking(bool)));
 
     connect(ui->nextUnlabelledButton, SIGNAL(clicked(bool)), this, SLOT(nextUnlabelled()));
+    connect(ui->nextInstanceButton, SIGNAL(clicked(bool)), this, SLOT(nextInstance()));
 
     display = new ImageDisplay;
     ui->imageDisplayLayout->addWidget(display);
@@ -458,6 +459,15 @@ void MainWindow::nextUnlabelled(){
 
     if(n != -1){
         ui->imageNumberSpinbox->setValue(n);
+        updateDisplay();
+    }
+}
+
+void MainWindow::nextInstance(void){
+    int n = project->getNextInstance(current_imagepath, current_class);
+
+    if(n != -1){
+        ui->imageNumberSpinbox->setValue(n+1);
         updateDisplay();
     }
 }

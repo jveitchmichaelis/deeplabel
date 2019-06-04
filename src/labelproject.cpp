@@ -563,6 +563,30 @@ int LabelProject::getNextUnlabelled(QString fileName){
     return -1;
 }
 
+int LabelProject::getNextInstance(QString fileName, QString className){
+    /*!
+     * Returns the index of the next unlabelled image, after \a fileName
+     */
+    QList<QString> images;
+    getImageList(images);
+
+    int i = images.indexOf(fileName);
+    QList<BoundingBox> bboxes;
+
+    for(i += 1; i < images.size(); i++){
+        bboxes.clear();
+        getLabels(images.at(i), bboxes);
+
+        for(auto bbox : bboxes){
+            if(bbox.classname == className){
+                return i;
+            }
+        }
+    }
+
+    return -1;
+}
+
 bool LabelProject::removeImage(QString fileName){
 
     /*!

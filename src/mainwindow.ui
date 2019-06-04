@@ -155,16 +155,6 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="0" colspan="3">
-          <widget class="QComboBox" name="classComboBox"/>
-         </item>
-         <item row="3" column="2">
-          <widget class="QPushButton" name="removeClassButton">
-           <property name="text">
-            <string>Remove class</string>
-           </property>
-          </widget>
-         </item>
          <item row="6" column="0">
           <widget class="QLineEdit" name="newClassText">
            <property name="text">
@@ -186,6 +176,23 @@
           <widget class="QPushButton" name="removeImageLabelsButton">
            <property name="text">
             <string>Remove image labels</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0" colspan="2">
+          <widget class="QComboBox" name="classComboBox"/>
+         </item>
+         <item row="2" column="2">
+          <widget class="QPushButton" name="removeClassButton">
+           <property name="text">
+            <string>Remove class</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="2">
+          <widget class="QPushButton" name="nextInstanceButton">
+           <property name="text">
+            <string>Next instance</string>
            </property>
           </widget>
          </item>

@@ -49,6 +49,7 @@ public:
     bool setOccluded(QString fileName, BoundingBox bbox, int occluded);
 
     int getNextUnlabelled(QString fileName);
+    int getNextInstance(QString fileName, QString className);
 
     //QString getClassName(int classId);
     int getImageId(QString fileName);
@@ -66,6 +67,7 @@ public slots:
     int addImageFolder(QString path);
     void cancelLoad();
     void addFolderRecursive(QString path_filter);
+
 private:
     QSqlDatabase db;
     QMutex mutex;

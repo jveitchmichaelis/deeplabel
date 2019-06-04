@@ -110,6 +110,8 @@ private slots:
     void toggleAutoPropagate(bool state);
     void toggleRefineTracking(bool state);
     void nextUnlabelled();
+    void nextInstance();
+
     QRect refineBoundingBox(cv::Mat image, QRect bbox, int margin=5, bool debug_save=false);
     QRect refineBoundingBoxSimple(cv::Mat image, QRect bbox, int margin=5, bool debug_save=false);
     void refineBoxes();
@@ -124,6 +126,7 @@ private slots:
     void setupDetector();
     void setConfidenceThreshold();
     void setNMSThreshold();
+
 
 signals:
     void selectedClass(QString);
