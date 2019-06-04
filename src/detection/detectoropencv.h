@@ -39,9 +39,11 @@ public:
 
     void setFramework(model_framework framework){this->framework = framework;}
     void setConfidenceThreshold(double thresh){confThreshold = std::max(0.0, thresh);}
+    void setNMSThreshold(double thresh){nmsThreshold = std::max(0.0, thresh);}
     void setConvertGrayscale(bool convert){convert_grayscale = convert;}
     void setConvertDepth(bool convert){convert_depth = convert;}
     double getConfidenceThreshold(void){ return confThreshold;}
+    double getNMSThreshold(void){ return nmsThreshold;}
     void setTarget(int target);
     void setChannels(int channels);
     int getChannels(void){return input_channels;}

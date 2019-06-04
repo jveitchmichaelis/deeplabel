@@ -100,7 +100,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionDetect_Objects->setEnabled(false);
     connect(ui->actionDetect_Objects, SIGNAL(triggered(bool)), this, SLOT(detectCurrentImage()));
     connect(ui->actionSet_threshold, SIGNAL(triggered(bool)), this, SLOT(setConfidenceThreshold()));
+    connect(ui->actionSet_NMS_threshold, SIGNAL(triggered(bool)), this, SLOT(setNMSThreshold()));
     detector.setConfidenceThreshold(settings->value("detector_confidence", 0.5).toDouble());
+    detector.setNMSThreshold(settings->value("detector_nms_threshold", 0.4).toDouble());
     connect(ui->actionDetect_project, SIGNAL(triggered(bool)), this, SLOT(detectProject()));
     //ui->actionInit_Tracking->setIcon(awesome->icon(fa::objectungroup, options));
 
@@ -196,6 +198,35 @@ void MainWindow::setConfidenceThreshold(void){
     if(confidence_set_dialog.result() == QDialog::Accepted){
         detector.setConfidenceThreshold(threshold_spinbox->value());
         settings->setValue("detector_confidence", detector.getConfidenceThreshold());
+    }
+}
+
+void MainWindow::setNMSThreshold(void){
+    QDialog  confidence_set_dialog(this);
+
+    auto threshold_spinbox = new QDoubleSpinBox();
+    threshold_spinbox->setMinimum(0);
+    threshold_spinbox->setMaximum(1);
+    threshold_spinbox->setValue(detector.getNMSThreshold());
+
+    auto threshold_label = new QLabel("NMS Threshold: ");
+
+    auto ok_button = new QPushButton("Ok");
+
+    confidence_set_dialog.setWindowTitle("NMS Threshold");
+    confidence_set_dialog.setLayout(new QVBoxLayout());
+    confidence_set_dialog.layout()->addWidget(threshold_label);
+    confidence_set_dialog.layout()->addWidget(threshold_spinbox);
+    confidence_set_dialog.layout()->addWidget(ok_button);
+    confidence_set_dialog.layout()->setSizeConstraint(QLayout::SetFixedSize);
+
+    connect(ok_button, SIGNAL(clicked(bool)), &confidence_set_dialog, SLOT(accept()));
+
+    confidence_set_dialog.exec();
+
+    if(confidence_set_dialog.result() == QDialog::Accepted){
+        detector.setNMSThreshold(threshold_spinbox->value());
+        settings->setValue("detector_nms_threshold", detector.getNMSThreshold());
     }
 }
 

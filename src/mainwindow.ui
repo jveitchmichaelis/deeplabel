@@ -432,6 +432,7 @@
     <addaction name="actionSetup_detector"/>
     <addaction name="actionSet_threshold"/>
     <addaction name="actionDetect_project"/>
+    <addaction name="actionSet_NMS_threshold"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuImages"/>
@@ -649,7 +650,7 @@
   </action>
   <action name="actionSet_threshold">
    <property name="text">
-    <string>Set threshold</string>
+    <string>Set confidence threshold</string>
    </property>
   </action>
   <action name="actionDetect_project">
@@ -658,6 +659,11 @@
    </property>
    <property name="text">
     <string>Run on project</string>
+   </property>
+  </action>
+  <action name="actionSet_NMS_threshold">
+   <property name="text">
+    <string>Set NMS threshold</string>
    </property>
   </action>
  </widget>

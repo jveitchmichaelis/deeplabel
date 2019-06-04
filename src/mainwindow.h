@@ -123,6 +123,7 @@ private slots:
     void detectProject();
     void setupDetector();
     void setConfidenceThreshold();
+    void setNMSThreshold();
 
 signals:
     void selectedClass(QString);
