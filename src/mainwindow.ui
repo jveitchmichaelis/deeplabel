@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>931</width>
-    <height>585</height>
+    <height>671</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -403,7 +403,7 @@
      <x>0</x>
      <y>0</y>
      <width>931</width>
-     <height>17</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -439,8 +439,8 @@
     </property>
     <addaction name="actionSetup_detector"/>
     <addaction name="actionSet_threshold"/>
-    <addaction name="actionDetect_project"/>
     <addaction name="actionSet_NMS_threshold"/>
+    <addaction name="actionDetect_project"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuImages"/>
