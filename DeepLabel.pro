@@ -36,7 +36,7 @@ QMAKE_CXXFLAGS += -mmacosx-version-min=10.12
 # If you use pkg-config, *everything* gets linked. Wasteful.
 INCLUDEPATH += /usr/local/include/opencv4
 LIBS += -L/usr/local/opt/opencv/lib/
-LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lopencv_tracking -lopencv_video -lopencv_videoio
+LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lopencv_tracking -lopencv_video -lopencv_videoio -lopencv_dnn
 }
 
 unix:!macx{
@@ -44,7 +44,7 @@ message("Linux")
 #CONFIG += link_pkgconfig
 #PKGCONFIG += opencv4
 INCLUDEPATH += /usr/local/include/opencv4
-LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lopencv_tracking -lopencv_video -lopencv_videoio
+LIBS += -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lopencv_tracking -lopencv_video -lopencv_videoio -lopencv_dnn
 }
 
 win32{
