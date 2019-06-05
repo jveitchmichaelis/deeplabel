@@ -25,6 +25,7 @@ signals:
 public slots:
     void splitData(float split=1, bool shuffle=false, int seed=42);
     bool setOutputFolder(QString folder);
+    void setExportUnlabelled(bool res){export_unlabelled = res;}
     void process();
 
 private:
@@ -47,6 +48,8 @@ private:
 
     int image_id;
     int label_id;
+
+    bool export_unlabelled = false;
 
     bool processImages(const QString folder, const QString filename, const QList<QString> images);
     bool saveImage(cv::Mat &image, const QString output, const double scale_x = -1.0, const double scale_y = -1.0);

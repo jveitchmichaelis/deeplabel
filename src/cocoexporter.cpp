@@ -25,6 +25,7 @@ void CocoExporter::splitData(float split, bool shuffle, int seed){
     train_set = images.mid(0, pivot);
     validation_set = images.mid(pivot);
 
+    qDebug() << "Split: " << split;
     qDebug() << train_set.size() << " images selected for train set.";
     qDebug() << validation_set.size() << " images selected for validation set.";
 
@@ -102,8 +103,9 @@ bool CocoExporter::processImages(const QString folder, const QString filename, c
     }
 
     foreach(image_path, images){
-        qDebug() << image_path;
         project->getLabels(image_path, labels);
+
+        if(!export_unlabelled && labels.size() == 0) continue;
 
         QString extension = QFileInfo(image_path).suffix();
         QString filename_noext = QFileInfo(image_path).baseName();

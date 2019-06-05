@@ -98,17 +98,16 @@ int KittiExporter::processSet(QString folder, QList<QString> images, int i){
     foreach(image, images){
         project->getLabels(image, labels);
 
-        if(labels.size() > 0){
+        if(!export_unlabelled && labels.size() == 0) continue;
 
-            QString extension = QFileInfo(image).suffix();
-            QString image_filename = QString("%1/images/%2.%3").arg(folder).arg(i, pad, base, QChar('0')).arg(extension);
-            saveImage(image, image_filename, scale_x, scale_y);
+        QString extension = QFileInfo(image).suffix();
+        QString image_filename = QString("%1/images/%2.%3").arg(folder).arg(i, pad, base, QChar('0')).arg(extension);
+        saveImage(image, image_filename, scale_x, scale_y);
 
-            QString label_filename = QString("%1/labels/%2.txt").arg(folder).arg(i, pad, base, QChar('0'));
-            appendLabel(label_filename, labels, scale_x, scale_y);
+        QString label_filename = QString("%1/labels/%2.txt").arg(folder).arg(i, pad, base, QChar('0'));
+        appendLabel(label_filename, labels, scale_x, scale_y);
 
-            i++;
-        }
+        i++;
 
     }
 

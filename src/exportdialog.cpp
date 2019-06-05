@@ -13,6 +13,7 @@ ExportDialog::ExportDialog(QWidget *parent) :
     connect(ui->exportSelectComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(toggleExporter()));
     connect(ui->randomSplitCheckbox, SIGNAL(clicked(bool)), this, SLOT(toggleShuffle(bool)));
     connect(ui->validationSplitSpinbox, SIGNAL(valueChanged(int)), this, SLOT(setValidationSplit(int)));
+    connect(ui->exportLabelledCheckbox, SIGNAL(clicked(bool)), this, SLOT(setExportUnlabelled(bool)));
 
     connect(ui->namesFileLineEdit, SIGNAL(textEdited(QString)), SLOT(setNamesFile(QString)));
     connect(ui->namesFilePushButton, SIGNAL(clicked()), this, SLOT(setNamesFile()));
@@ -21,8 +22,10 @@ ExportDialog::ExportDialog(QWidget *parent) :
 
     settings = new QSettings("DeepLabel", "DeepLabel");
 
-    setValidationSplit(settings->value("validation_split_pc", 80).toInt());
+    ui->validationSplitSpinbox->setValue(settings->value("validation_split_pc", 80).toInt());
     toggleShuffle(settings->value("do_shuffle", false).toBool());
+    setExportUnlabelled(settings->value("export_unlabelled", false).toBool());
+    ui->exportLabelledCheckbox->setChecked(export_unlabelled);
 
     if(settings->contains("output_folder")){
         auto path = settings->value("output_folder").toString();
@@ -43,6 +46,15 @@ ExportDialog::~ExportDialog()
 {
     delete settings;
     delete ui;
+}
+
+bool ExportDialog::getExportUnlablled(void){
+    return export_unlabelled;
+}
+
+void ExportDialog::setExportUnlabelled(bool res){
+    export_unlabelled = res;
+    settings->setValue("export_unlabelled", export_unlabelled);
 }
 
 void ExportDialog::setValidationSplit(int value){

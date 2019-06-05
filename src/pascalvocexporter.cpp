@@ -154,8 +154,10 @@ bool PascalVocExporter::processImages(const QString folder, const QList<QString>
     int i = 0;
 
     foreach(image_path, images){
-        qDebug() << image_path;
         project->getLabels(image_path, labels);
+
+        if(!export_unlabelled && labels.size() == 0) continue;
+
 
         QString extension = QFileInfo(image_path).suffix();
         QString filename_noext = QFileInfo(image_path).baseName();

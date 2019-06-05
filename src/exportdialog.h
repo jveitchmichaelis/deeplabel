@@ -24,8 +24,11 @@ public:
     QString getOutputFolder(){return output_folder; }
     QString getNamesFile(){return names_file; }
     int getShuffle(){return do_shuffle; }
-    float getValidationSplit(){return static_cast<float>(validation_split_pc)/100; }
+    double getValidationSplit(){
+        return static_cast<double>(validation_split_pc)/100.0;
+    }
     bool getCreateLabelMap();
+    bool getExportUnlablled();
 
 private slots:
     void setNamesFile(QString path="");
@@ -33,7 +36,7 @@ private slots:
     void setValidationSplit(int value);
     void toggleShuffle(bool shuffle);
     void toggleExporter();
-
+    void setExportUnlabelled(bool res);
 private:
     Ui::ExportDialog *ui;
     bool checkOK();
@@ -45,6 +48,7 @@ private:
     QString current_exporter = "Darknet";
     bool do_shuffle = false;
     int validation_split_pc = 80;
+    bool export_unlabelled;
 
 };
 

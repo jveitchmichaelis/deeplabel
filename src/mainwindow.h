@@ -48,7 +48,7 @@ private:
     Ui::MainWindow *ui;
     LabelProject *project;
     ImageLabel *currentImage;
-    ExportDialog export_dialog;
+    ExportDialog *export_dialog;
     MultiTracker *multitracker;
     QScrollArea *imageScrollArea;
     ImageDisplay *display;

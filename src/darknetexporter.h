@@ -21,6 +21,7 @@ signals:
 public slots:
     void splitData(float split=1, bool shuffle=false, int seed=42);
     bool setOutputFolder(QString folder);
+    void setExportUnlabelled(bool res){export_unlabelled = res;}
     void generateLabelIds(const QString names_file);
     void process();
 
@@ -41,6 +42,7 @@ private:
 
     QString output_folder;
 
+    bool export_unlabelled = false;
 
     std::map<QString, int> id_map;
 

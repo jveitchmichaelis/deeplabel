@@ -77,9 +77,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     project = new LabelProject;
 
-    export_dialog.setModal(true);
-    connect(&export_dialog, SIGNAL(accepted()), this, SLOT(handleExportDialog()));
-
     settings = new QSettings("DeepLabel", "DeepLabel");
 
     multitracker = new MultiTrackerCV();
@@ -466,7 +463,6 @@ void MainWindow::nextUnlabelled(){
 }
 
 void MainWindow::nextInstance(void){
-    qDebug() << current_class;
     int n = project->getNextInstance(current_imagepath, current_class);
 
     if(n != -1){
@@ -848,41 +844,50 @@ void MainWindow::addImageFolder(void){
 void MainWindow::handleExportDialog(){
 
     // If we hit OK and not cancel
-    if(export_dialog.result() != QDialog::Accepted ) return;
+    if(export_dialog->result() != QDialog::Accepted ) return;
 
     QThread* export_thread = new QThread;
 
-    if(export_dialog.getExporter() == "Kitti"){
+    if(export_dialog->getExporter() == "Kitti"){
         KittiExporter exporter(project);
         exporter.moveToThread(export_thread);
-        exporter.setOutputFolder(export_dialog.getOutputFolder());
-        exporter.splitData(export_dialog.getValidationSplit(), export_dialog.getShuffle());
+        exporter.setOutputFolder(export_dialog->getOutputFolder());
+        exporter.splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
+        exporter.setExportUnlabelled(export_dialog->getExportUnlablled());
         exporter.process();
-    }else if(export_dialog.getExporter() == "Darknet"){
+    }else if(export_dialog->getExporter() == "Darknet"){
         DarknetExporter exporter(project);
         exporter.moveToThread(export_thread);
-        exporter.generateLabelIds(export_dialog.getNamesFile());
-        exporter.setOutputFolder(export_dialog.getOutputFolder());
-        exporter.splitData(export_dialog.getValidationSplit(), export_dialog.getShuffle());
+        exporter.generateLabelIds(export_dialog->getNamesFile());
+        exporter.setOutputFolder(export_dialog->getOutputFolder());
+        exporter.splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
+        exporter.setExportUnlabelled(export_dialog->getExportUnlablled());
         exporter.process();
-    }else if(export_dialog.getExporter() == "Pascal VOC"){
+    }else if(export_dialog->getExporter() == "Pascal VOC"){
         PascalVocExporter exporter(project);
         exporter.moveToThread(export_thread);
-        exporter.setOutputFolder(export_dialog.getOutputFolder());
-        exporter.splitData(export_dialog.getValidationSplit(), export_dialog.getShuffle());
-        exporter.process(export_dialog.getCreateLabelMap());
+        exporter.setOutputFolder(export_dialog->getOutputFolder());
+        exporter.splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
+        exporter.process(export_dialog->getCreateLabelMap());
 
-    }else if(export_dialog.getExporter().startsWith("COCO")){
+    }else if(export_dialog->getExporter().startsWith("COCO")){
         CocoExporter exporter(project);
         exporter.moveToThread(export_thread);
-        exporter.setOutputFolder(export_dialog.getOutputFolder());
-        exporter.splitData(export_dialog.getValidationSplit(), export_dialog.getShuffle());
+        exporter.setOutputFolder(export_dialog->getOutputFolder());
+        exporter.splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
+        exporter.setExportUnlabelled(export_dialog->getExportUnlablled());
         exporter.process();
     }
 }
 
 void MainWindow::launchExportDialog(){
-    export_dialog.open();
+
+    export_dialog = new ExportDialog(this);
+
+    export_dialog->setModal(true);
+    connect(export_dialog, SIGNAL(accepted()), this, SLOT(handleExportDialog()));
+
+    export_dialog->open();
 }
 
 MainWindow::~MainWindow()

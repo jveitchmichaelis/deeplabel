@@ -33,9 +33,12 @@ private:
 
     QString output_folder;
 
+    bool export_unlabelled = false;
+
 public slots:
     void splitData(float split=0.9, bool shuffle=true);
     bool setOutputFolder(QString folder);
+    void setExportUnlabelled(bool res){export_unlabelled = res;}
     void process();
 
 private:
