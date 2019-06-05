@@ -82,6 +82,7 @@ private slots:
     void newProject(void);
 
     void addClass(void);
+    void setCurrentClass(QString);
     void removeClass(void);
 
     void addVideo(void);

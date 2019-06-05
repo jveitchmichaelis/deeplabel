@@ -550,10 +550,9 @@ int LabelProject::getNextUnlabelled(QString fileName){
     QList<QString> images;
     getImageList(images);
 
-    int i = images.indexOf(fileName);
     QList<BoundingBox> bboxes;
 
-    for(i += 1; i < images.size(); i++){
+    for(int i = images.indexOf(fileName) + 1; i < images.size(); i++){
         bboxes.clear();
         getLabels(images.at(i), bboxes);
 
@@ -578,7 +577,7 @@ int LabelProject::getNextInstance(QString fileName, QString className){
         getLabels(images.at(i), bboxes);
 
         for(auto bbox : bboxes){
-            if(bbox.classname == className){
+            if(bbox.classname.compare(className) == 0){
                 return i;
             }
         }

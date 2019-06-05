@@ -35,13 +35,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->imageDisplayLayout->addWidget(display);
     currentImage = display->getImageLabel();
 
-
     connect(this, SIGNAL(selectedClass(QString)), currentImage, SLOT(setClassname(QString)));
     connect(currentImage, SIGNAL(newLabel(BoundingBox)), this, SLOT(addLabel(BoundingBox)));
     connect(currentImage, SIGNAL(removeLabel(BoundingBox)), this, SLOT(removeLabel(BoundingBox)));
     connect(ui->actionDraw_Tool, SIGNAL(triggered(bool)), currentImage, SLOT(setDrawMode()));
     connect(ui->actionSelect_Tool, SIGNAL(triggered(bool)), currentImage, SLOT(setSelectMode()));
-    connect(ui->classComboBox, SIGNAL(currentIndexChanged(QString)), currentImage, SLOT(setClassname(QString)));
+    connect(ui->classComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(setCurrentClass(QString)));
     connect(display, SIGNAL(image_loaded()), this, SLOT(updateImageInfo()));
 
     connect(ui->removeClassButton, SIGNAL(clicked(bool)), this, SLOT(removeClass()));
@@ -109,6 +108,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     resize(QGuiApplication::primaryScreen()->availableSize() * 3 / 5);
 
+}
+
+void MainWindow::setCurrentClass(QString name){
+    current_class = name;
+    emit selectedClass(current_class);
 }
 
 void MainWindow::setupDetector(void){
@@ -372,8 +376,7 @@ void MainWindow::updateClassList(){
     if(classes.size() > 0){
         ui->classComboBox->setEnabled(true);
         ui->removeClassButton->setEnabled(true);
-        current_class = ui->classComboBox->currentText();
-        emit selectedClass(current_class);
+        ui->classComboBox->setCurrentIndex(0);
     }else{
         ui->classComboBox->setDisabled(true);
         ui->removeClassButton->setDisabled(true);
@@ -427,7 +430,6 @@ void MainWindow::removeImage(){
 }
 
 void MainWindow::removeClass(){
-    current_class = ui->classComboBox->currentText();
 
     if (QMessageBox::Yes == QMessageBox::question(this,
                                                   tr("Remove Class"),
@@ -464,6 +466,7 @@ void MainWindow::nextUnlabelled(){
 }
 
 void MainWindow::nextInstance(void){
+    qDebug() << current_class;
     int n = project->getNextInstance(current_imagepath, current_class);
 
     if(n != -1){
