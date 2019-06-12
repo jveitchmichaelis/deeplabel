@@ -78,7 +78,7 @@ private slots:
 
     void updateDisplay(void);
 
-    void openProject(void);
+    void openProject(QString filename = "");
     void newProject(void);
 
     void addClass(void);
@@ -129,6 +129,7 @@ private slots:
     void setNMSThreshold();
 
 
+    void updateCurrentIndex(int index);
 signals:
     void selectedClass(QString);
 

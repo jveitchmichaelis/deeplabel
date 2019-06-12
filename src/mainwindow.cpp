@@ -290,12 +290,15 @@ void MainWindow::setSelectMode(){
     currentImage->setSelectMode();
 }
 
-void MainWindow::openProject()
+void MainWindow::openProject(QString fileName)
 {
-    QString openDir = settings->value("project_folder", QDir::homePath()).toString();
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Project"),
-                                                    openDir,
-                                                    tr("Label database (*.lbldb)"));
+
+    if(fileName == ""){
+        QString openDir = settings->value("project_folder", QDir::homePath()).toString();
+        fileName = QFileDialog::getOpenFileName(this, tr("Open Project"),
+                                                        openDir,
+                                                        tr("Label database (*.lbldb)"));
+    }
 
     if(fileName != ""){
         settings->setValue("project_folder", QFileInfo(fileName).absoluteDir().absolutePath());
@@ -343,20 +346,27 @@ void MainWindow::addImageFolders(void){
 void MainWindow::updateImageList(){
     project->getImageList(images);
     number_images = images.size();
-    ui->imageProgressBar->setMaximum(number_images);
-    ui->imageNumberSpinbox->setMaximum(number_images);
 
     if(number_images == 0){
-        ui->changeImageButton->setDisabled(true);
-        ui->imageNumberSpinbox->setDisabled(true);
-        ui->imageProgressBar->setDisabled(true);
-        ui->propagateCheckBox->setDisabled(true);
+        ui->imageGroupBox->setDisabled(true);
+        ui->labelGroupBox->setDisabled(true);
+        ui->navigationGroupBox->setDisabled(true);
+        ui->actionExport->setDisabled(true);
+        ui->imageIndexLabel->setText(QString("-"));
     }else{
-        ui->changeImageButton->setEnabled(true);
-        ui->imageNumberSpinbox->setEnabled(true);
-        ui->imageProgressBar->setEnabled(true);
-        ui->propagateCheckBox->setEnabled(true);
+        ui->imageGroupBox->setEnabled(true);
+        ui->labelGroupBox->setEnabled(true);
+        ui->navigationGroupBox->setEnabled(true);
+        ui->actionExport->setEnabled(true);
     }
+
+    ui->imageProgressBar->setValue(0);
+    ui->imageProgressBar->setMaximum(number_images);
+
+    ui->imageNumberSpinbox->setMaximum(number_images);
+    ui->imageNumberSpinbox->setValue(1);
+
+
 }
 
 void MainWindow::updateClassList(){
@@ -440,17 +450,14 @@ void MainWindow::removeClass(){
 
 void MainWindow::initDisplay(){
 
+    display->clearPixmap();
+
     updateImageList();
     updateClassList();
 
-    if(number_images != 0){
-        current_index = 0;
-        ui->imageGroupBox->setEnabled(true);
-        ui->labelGroupBox->setEnabled(true);
-        ui->navigationGroupBox->setEnabled(true);
-        updateDisplay();
-        ui->actionExport->setEnabled(true);
-    }
+    current_index = 0;
+
+    updateDisplay();
 }
 
 void MainWindow::nextUnlabelled(){
@@ -734,21 +741,25 @@ void MainWindow::previousImage(){
     updateDisplay();
 }
 
+void MainWindow::updateCurrentIndex(int index){
+    current_index = index;
+    updateDisplay();
+}
+
 void MainWindow::updateDisplay(){
 
     if(images.size() == 0){
         return;
+    }else{
+        current_index = ui->imageNumberSpinbox->value()-1;
+        current_imagepath = images.at(current_index);
+        display->setImagePath(current_imagepath);
+
+        updateLabels();
+
+        ui->imageProgressBar->setValue(current_index+1);
+        ui->imageIndexLabel->setText(QString("%1/%2").arg(current_index+1).arg(number_images));
     }
-
-    current_index = ui->imageNumberSpinbox->value()-1;
-    current_imagepath = images.at(current_index);
-    display->setImagePath(current_imagepath);
-
-    updateLabels();
-
-    ui->imageProgressBar->setValue(current_index+1);
-    ui->imageIndexLabel->setText(QString("%1/%2").arg(current_index+1).arg(number_images));
-
 }
 
 void MainWindow::updateImageInfo(void){
@@ -769,10 +780,11 @@ void MainWindow::newProject()
                                                     tr("Label database (*.lbldb)"));
 
     if(fileName != ""){
+        free(project);
+        project = new LabelProject;
         project->createDatabase(fileName);
+        openProject(fileName);
     }
-
-    updateDisplay();
 
     return;
 }

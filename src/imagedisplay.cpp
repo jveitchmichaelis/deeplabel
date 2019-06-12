@@ -57,6 +57,11 @@ void ImageDisplay::setImagePath(QString path){
     }
 }
 
+void ImageDisplay::clearPixmap(void){
+    pixmap = QPixmap();
+    imageLabel->setPixmap(pixmap);
+}
+
 void ImageDisplay::convert16(cv::Mat &source, double minval, double maxval){
 
     if(minval < 0 || maxval < 0){
@@ -79,6 +84,9 @@ cv::Mat ImageDisplay::getOriginalImage(void){
 }
 
 void ImageDisplay::loadPixmap(){
+
+    if(current_imagepath == "")
+        return;
 
     original_image = cv::imread(current_imagepath.toStdString(), cv::IMREAD_UNCHANGED|cv::IMREAD_ANYDEPTH);
 
@@ -174,6 +182,7 @@ void ImageDisplay::resetZoom(){
 
 void ImageDisplay::updateDisplay()
 {
+    if(pixmap.isNull()) return;
 
     fit_to_window = ui->fitToWindowButton->isChecked();
 
@@ -184,9 +193,8 @@ void ImageDisplay::updateDisplay()
     // or leave it full-size
     imageLabel->setScaledContents(fit_to_window);
 
-    if(!pixmap.isNull()){
-        imageLabel->setPixmap(pixmap);
-    }
+    imageLabel->setPixmap(pixmap);
+
 }
 
 

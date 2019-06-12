@@ -64,6 +64,9 @@ void ImageLabel::zoom(double factor){
 QPixmap ImageLabel::scaledPixmap(void)
 {
 
+    if(base_pixmap.isNull())
+        return QPixmap();
+
     if(shouldScaleContents){
         scaled_pixmap = base_pixmap.scaled( size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
     }else if(zoom_factor != 1.0){
@@ -197,6 +200,9 @@ void ImageLabel::drawBoundingBox(BoundingBox bbox){
 }
 
 void ImageLabel::drawBoundingBox(BoundingBox bbox, QColor colour){
+
+    if(scaled_pixmap.isNull()) return;
+
     QPainter painter;
     painter.begin(&scaled_pixmap);
     QPen pen(colour, 2);

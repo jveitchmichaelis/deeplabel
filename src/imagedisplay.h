@@ -33,6 +33,7 @@ public slots:
 
     void toggleColourMap(bool enable);
     cv::Mat getOriginalImage();
+    void clearPixmap();
 private:
     cv::Mat display_image;
     cv::Mat original_image;
