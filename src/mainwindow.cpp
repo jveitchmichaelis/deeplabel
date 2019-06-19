@@ -69,7 +69,6 @@ MainWindow::MainWindow(QWidget *parent) :
     next_shortcut.append(QKeySequence("Right"));
     ui->actionNextImage->setShortcuts(next_shortcut);
 
-
     // Override progress bar animation on Windows
 #ifdef WIN32
     ui->imageProgressBar->setStyleSheet("QProgressBar::chunk {background-color: #3add36; width: 1px;}");
@@ -269,12 +268,18 @@ void MainWindow::enableWrap(bool enable){
 }
 
 void MainWindow::jumpForward(int n){
+
+    if(ui->imageNumberSpinbox->maximum() == 0) return;
+
     current_index = std::min(ui->imageNumberSpinbox->maximum()-1, ui->imageNumberSpinbox->value()+n);
+    ui->imageNumberSpinbox->setValue(current_index);
     updateDisplay();
 }
 
 void MainWindow::jumpBackward(int n){
+
     current_index = std::max(1, ui->imageNumberSpinbox->value()-n);
+    ui->imageNumberSpinbox->setValue(current_index);
     updateDisplay();
 }
 
