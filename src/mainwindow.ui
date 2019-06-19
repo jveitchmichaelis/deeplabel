@@ -523,9 +523,6 @@
    </property>
   </action>
   <action name="actionDraw_Tool">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
    <property name="text">
     <string>Draw</string>
    </property>
@@ -537,9 +534,6 @@
    </property>
   </action>
   <action name="actionSelect_Tool">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
    <property name="text">
     <string>Select</string>
    </property>

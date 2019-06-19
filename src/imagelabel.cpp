@@ -85,6 +85,7 @@ QPixmap ImageLabel::scaledPixmap(void)
 
 void ImageLabel::setDrawMode(){
     current_mode = MODE_DRAW;
+    setCursor(Qt::CrossCursor);
     rubberBand->setGeometry(QRect(bbox_origin, QSize()));
     rubberBand->show();
 }
@@ -97,6 +98,7 @@ void ImageLabel::setDrawDragMode(){
 
 void ImageLabel::setSelectMode(){
     current_mode = MODE_SELECT;
+    setCursor(Qt::ArrowCursor);
     rubberBand->hide();
 }
 
