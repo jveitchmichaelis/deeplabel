@@ -19,6 +19,8 @@ ImageLabel::ImageLabel(QWidget *parent) :
     setFocusPolicy(Qt::StrongFocus);
 
     rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
+
+    setDrawMode();
 }
 
 void ImageLabel::setPixmap ( QPixmap & p)
