@@ -15,3 +15,15 @@ before_install:
 script:
     - qmake -makefile -o Makefile DeepLabel.pro
     - make -j4
+
+deploy:
+  provider: releases
+  api_key:
+     secure: "bLTzJL3yS1YW0BhCFtjzeeHTsPHFPkyNML3JmeNITlPJgwOchk3N7t6XOjr4baiUYgHwp5Bg2gnaEmh9mtQ9YfB6g4wqJqUcGfhYLvCUwupxEoQlxQDKAgLBqbzj2AMxI73Fo8DuCAP78r8WoP4
+DWV05TXNXzHLItL4uv1XMjDJtTHosZKt9dSvqX6p1AT2tQfUinfNJDV/A4u6zjYS/vyGqoQDPNF3FpYOU3tlkbeaLSNEFc0XP4XBEqa5f1e6VPO0fsr3Hw2Vz9ezDieLXctoM2elRwKXdaL+rWg/nXMcbbOwxXGjgOWEhNzvq+xug/NjsGL6GBTEfjdDk
+33oET8gTgnip3A9SeW6cc5aCmzFFqvvzvpR5hXwH4YPuvQ5lt7CY98oPMFKocESeFDwQtsmWD3ZbWu1BIRoiedffV3ghquTlVy9iADGze4mc9S9AfA5ikt1z1gfjZbbKjoGzb4nEIOjbDz1Sl79QMT40uoNXScqc9P8G5+tj0AHxCPO7+5eYDjHoo5is+
+KabmLGyLuJTjUZ9nFHVO5rA6oooEpIL9Ozj6a/tMR5PcYb0X3E51WkMMOxFcWqtqQ32s67Sug3CntNns2srM+lf3dfZm8kg+8CvSSjKpOMLPvqvxeAuVnHgel7XqAzFi3of+miQPaV+AuQi2nVfXkWKX63JoWU="
+  file: "/Users/travis/build/jveitchmichaelis/deeplabel/release/DeepLabel.app"
+  skip_cleanup: true
+  on:
+    tags: true
