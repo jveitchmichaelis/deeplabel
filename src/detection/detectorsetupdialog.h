@@ -57,12 +57,12 @@ private:
     QString cfg_file;
     QString weight_file;
     QString names_file;
-    int image_width;
-    int image_height;
-    int image_channels;
-    int target;
-    bool convert_grayscale;
-    bool convert_depth;
+    int image_width = 320;
+    int image_height = 240;
+    int image_channels = 3; // default
+    int target = 0;
+    bool convert_grayscale = true;
+    bool convert_depth = true;
     model_framework framework = FRAMEWORK_TENSORFLOW;
     QString openFile(QString title, QString search_path="", QString filter="");
 };

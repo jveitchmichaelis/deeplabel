@@ -246,6 +246,12 @@ void MainWindow::detectProject(void){
             break;
 
         auto image = cv::imread(image_path.toStdString(), cv::IMREAD_UNCHANGED|cv::IMREAD_ANYDEPTH);
+
+        // Assume we have an alpha image if 4 channels
+        if(image.channels() == 4){
+            cv::cvtColor(image, image, cv::COLOR_BGRA2BGR);
+        }
+
         detectObjects(image, image_path);
 
         progress.setValue(i++);
@@ -502,7 +508,10 @@ QRect MainWindow::refineBoundingBoxSimple(cv::Mat image, QRect bbox, int margin,
     cv::Mat roi_thresh;
 
     // Convert colour images to grayscale for thresholding
-    if(roi.channels() == 3){
+    if(roi.channels() == 4){
+        cv::cvtColor(roi, roi, cv::COLOR_BGRA2GRAY);
+    }
+    else if(roi.channels() == 3){
         cv::cvtColor(roi, roi, cv::COLOR_BGR2GRAY);
     }
 
@@ -814,7 +823,7 @@ void MainWindow::addImages(void){
     QString openDir = settings->value("data_folder", QDir::homePath()).toString();
     QStringList image_filenames = QFileDialog::getOpenFileNames(this, tr("Select image(s)"),
                                                     openDir,
-                                                    tr("JPEG (*.jpg, *.jpeg, *.JPG, *.JPEG);;PNG (*.png, *.PNG);;BMP (*.bmp, *.BMP);;TIFF (*.tif, *.tiff, *.TIF, *.TIFF);;All images (*.jpg, *.jpeg, *.png, *.bmp, *.tiff)"));
+                                                    tr("JPEG (*.jpg *.jpeg *.JPG *.JPEG);;PNG (*.png *.PNG);;BMP (*.bmp *.BMP);;TIFF (*.tif *.tiff *.TIF *.TIFF);;All images (*.jpg *.jpeg *.png *.bmp *.tiff)"));
 
     if(image_filenames.size() != 0){
         QString path;

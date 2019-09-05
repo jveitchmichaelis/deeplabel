@@ -32,13 +32,17 @@ DetectorSetupDialog::DetectorSetupDialog(QWidget *parent) :
 
     image_width = settings->value("model_width", 0).toInt();
     image_height = settings->value("model_height", 0).toInt();
-    image_channels = settings->value("model_channels", 0).toInt();
+    image_channels = settings->value("model_channels", 3).toInt();
 
     framework = static_cast<model_framework>(settings->value("model_framework", 0).toInt());
     if(framework == FRAMEWORK_DARKNET){
         ui->frameworkComboBox->setCurrentText("Darknet (YOLO)");
+        ui->imageHeightLabel->show();
+        ui->imageWidthLabel->show();
     }else if(framework == FRAMEWORK_TENSORFLOW){
         ui->frameworkComboBox->setCurrentText("Tensorflow");
+        ui->imageHeightLabel->hide();
+        ui->imageWidthLabel->hide();
     }
 
     target = settings->value("model_target", cv::dnn::DNN_TARGET_CPU).toInt();

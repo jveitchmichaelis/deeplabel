@@ -7,7 +7,7 @@
 #include<vector>
 
 #include<opencv2/opencv.hpp>
-#include <opencv2/core/ocl.hpp>
+#include<opencv2/core/ocl.hpp>
 #include<opencv2/dnn.hpp>
 
 #include<boundingbox.h>

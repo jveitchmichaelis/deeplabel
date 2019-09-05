@@ -90,10 +90,8 @@ void DetectorOpenCV::postProcessTensorflow(cv::Mat& frame, const std::vector<cv:
     auto detections = outputs.at(0);
     const int numDetections = detections.size[2];
 
-    /*
     std::cout << "Outputs_size: " << detections.total() << std::endl;
     std::cout << "Number of detections: " << numDetections << std::endl;
-    */
 
     // batch id, class id, confidence, bbox (x4)
     detections = detections.reshape(1, detections.total() / 7);
@@ -236,6 +234,12 @@ std::vector<BoundingBox> DetectorOpenCV::infer(cv::Mat image){
 
     std::vector<BoundingBox> detections;
 
+
+    // Assume we have an alpha image if 4 channels
+    if(image.channels() == 4){
+        cv::cvtColor(image, image, cv::COLOR_BGRA2BGR);
+    }
+
     if(convert_depth && image.elemSize() == 2){
         double minval, maxval;
         cv::minMaxIdx(image, &minval, &maxval);
@@ -256,7 +260,7 @@ std::vector<BoundingBox> DetectorOpenCV::infer(cv::Mat image){
     if(image.channels() != input_channels){
         std::cout << "Input channel mismatch. Expecting "
                  << input_channels
-                 << " but image has " << image.channels()
+                 << " channels but image has " << image.channels()
                  << " channels.";
 
         return detections;
