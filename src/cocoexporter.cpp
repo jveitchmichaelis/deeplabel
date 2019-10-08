@@ -179,8 +179,8 @@ bool CocoExporter::processImages(const QString folder, const QString filename, c
 
     licenses_array.append(license);
 
-    label_file["image"] = image_array;
-    label_file["annotation"] = annotations_array;
+    label_file["images"] = image_array;
+    label_file["annotations"] = annotations_array;
     label_file["license"] = licenses_array;
     label_file["categories"] = category_array;
 
