@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->actionNew_Project, SIGNAL(triggered(bool)), this, SLOT(newProject()));
     connect(ui->actionOpen_Project, SIGNAL(triggered(bool)), this, SLOT(openProject()));
+    connect(ui->actionMerge_Project, SIGNAL(triggered(bool)), this, SLOT(mergeProject()));
 
     connect(ui->actionAdd_video, SIGNAL(triggered(bool)), this, SLOT(addVideo()));
     connect(ui->actionAdd_image, SIGNAL(triggered(bool)), this, SLOT(addImages()));
@@ -104,6 +105,62 @@ MainWindow::MainWindow(QWidget *parent) :
 
     resize(QGuiApplication::primaryScreen()->availableSize() * 3 / 5);
 
+}
+
+void MainWindow::mergeProject(QString filename){
+
+    if(filename == ""){
+        QString openDir = settings->value("project_folder", QDir::homePath()).toString();
+        filename = QFileDialog::getOpenFileName(this, tr("Open Project"),
+                                                        openDir,
+                                                        tr("Label database (*.lbldb)"));
+    }
+
+    if(filename == "") return;
+
+    LabelProject new_project;
+    new_project.loadDatabase(filename);
+
+    // Add new classes
+    QList<QString> new_classes;
+    new_project.getClassList(new_classes);
+
+    qDebug() << "Found " << new_classes.size() << " classes.";
+
+    for(auto &classname : new_classes){
+        project->addClass(classname);
+    }
+
+    // Add new images
+    QList<QString> new_images;
+    new_project.getImageList(new_images);
+
+    qDebug() << "Found " << new_images.size() << " images.";
+
+    for(auto &image : new_images){
+        // Add image
+        auto res = project->addAsset(image);
+
+        if(!res){
+            qDebug() << "Problem adding: " << image;
+        }else{
+            qDebug() << "Added: " << image;
+        }
+
+        // Add labels for image
+        QList<BoundingBox> bboxes;
+        new_project.getLabels(image, bboxes);
+
+        for(auto &bbox : bboxes){
+            // Update the class ID
+            bbox.classid = project->getClassId(bbox.classname);
+            project->addLabel(image, bbox);
+        }
+    }
+
+    updateImageList();
+    updateClassList();
+    updateDisplay();
 }
 
 void MainWindow::setCurrentClass(QString name){

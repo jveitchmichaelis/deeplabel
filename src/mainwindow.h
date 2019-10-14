@@ -79,6 +79,7 @@ private slots:
     void updateDisplay(void);
 
     void openProject(QString filename = "");
+    void mergeProject(QString filename = "");
     void newProject(void);
 
     void addClass(void);

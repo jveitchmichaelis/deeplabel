@@ -412,6 +412,7 @@
     </property>
     <addaction name="actionNew_Project"/>
     <addaction name="actionOpen_Project"/>
+    <addaction name="actionMerge_Project"/>
     <addaction name="actionExport"/>
    </widget>
    <widget class="QMenu" name="menuImages">
@@ -665,6 +666,11 @@
   <action name="actionSet_NMS_threshold">
    <property name="text">
     <string>Set NMS threshold</string>
+   </property>
+  </action>
+  <action name="actionMerge_Project">
+   <property name="text">
+    <string>Merge Project</string>
    </property>
   </action>
  </widget>

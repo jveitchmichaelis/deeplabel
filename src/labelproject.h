@@ -73,6 +73,7 @@ private:
     QMutex mutex;
     bool checkDatabase();
     bool should_cancel;
+    QString connection_name;
 
 };
 

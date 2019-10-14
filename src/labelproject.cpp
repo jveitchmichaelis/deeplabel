@@ -24,7 +24,9 @@ bool LabelProject::loadDatabase(QString fileName)
         db.close();
     }
 
-    db = QSqlDatabase::addDatabase("QSQLITE");
+    connection_name = fileName;
+
+    db = QSqlDatabase::addDatabase("QSQLITE", connection_name);
     db.setDatabaseName(fileName);
 
     QFileInfo check_file(fileName);
@@ -90,23 +92,24 @@ bool LabelProject::createDatabase(QString fileName)
     bool res;
 
     loadDatabase(fileName);
+    {
+        QSqlQuery query(db);
 
-    QSqlQuery query(db);
+        /*
+         * The label database is a simple relational db - image locations, classes
+         * and label bounding boxes.
+         */
 
-    /*
-     * The label database is a simple relational db - image locations, classes
-     * and label bounding boxes.
-     */
+        res = query.exec("CREATE table images (image_id INTEGER PRIMARY KEY ASC, "
+                   "path varchar(256))");
+        res &= query.exec("CREATE table classes (class_id INTEGER PRIMARY KEY ASC, "
+                   "name varchar(32))");
+        res &= query.exec("CREATE table labels (label_id INTEGER PRIMARY KEY ASC, "
+                   "image_id int, class_id int, x int, y int, width int, height int, automatic int)");
 
-    res = query.exec("CREATE table images (image_id INTEGER PRIMARY KEY ASC, "
-               "path varchar(256))");
-    res &= query.exec("CREATE table classes (class_id INTEGER PRIMARY KEY ASC, "
-               "name varchar(32))");
-    res &= query.exec("CREATE table labels (label_id INTEGER PRIMARY KEY ASC, "
-               "image_id int, class_id int, x int, y int, width int, height int, automatic int)");
-
-    if(!res){
-        qDebug() << "Error: " << query.lastError();
+        if(!res){
+            qDebug() << "Error: " << query.lastError();
+        }
     }
 
     return checkDatabase();
@@ -157,20 +160,21 @@ bool LabelProject::getImageList(QList<QString> &images)
      * Get a list of all images in the database with absolute paths, which is cleared prior to retrieval. Returns false if the database query failed.
      */
     bool res = false;
+    {
+        QSqlQuery query(db);
+        res = query.exec("SELECT path FROM images");
 
-    QSqlQuery query(db);
-    res = query.exec("SELECT path FROM images");
+        if(!res){
+            qDebug() << "Error: " << query.lastError();
+        }else{
 
-    if(!res){
-        qDebug() << "Error: " << query.lastError();
-    }else{
+            images.clear();
 
-        images.clear();
-
-        while (query.next()) {
-            QString path = query.value(0).toString();
-            // Push absolute file path
-            images.push_back(QDir::cleanPath(QDir(db.databaseName()).path() + QDir::separator() + path));
+            while (query.next()) {
+                QString path = query.value(0).toString();
+                // Push absolute file path
+                images.push_back(QDir::cleanPath(QDir(db.databaseName()).path() + QDir::separator() + path));
+            }
         }
     }
 
@@ -184,18 +188,20 @@ bool LabelProject::getClassList(QList<QString> &classes)
      */
     bool res = false;
 
-    QSqlQuery query(db);
-    res = query.exec("SELECT name FROM classes");
+    {
+        QSqlQuery query(db);
+        res = query.exec("SELECT name FROM classes");
 
-    if(!res){
-        qDebug() << "Error: " << query.lastError();
-    }else{
+        if(!res){
+            qDebug() << "Error: " << query.lastError();
+        }else{
 
-        classes.clear();
+            classes.clear();
 
-        while (query.next()) {
-            QString name = query.value(0).toString();
-            classes.push_back(name);
+            while (query.next()) {
+                QString name = query.value(0).toString();
+                classes.push_back(name);
+            }
         }
     }
 
@@ -207,18 +213,21 @@ bool LabelProject::classInDB(QString className){
      * Returns true if \a className is in the database
      */
     bool res = false;
-    QSqlQuery query(db);
-    query.prepare("SELECT * FROM classes WHERe (name)"
-                  "= (:name)");
 
-    query.bindValue(":name", className);
-    res = query.exec();
+    {
+        QSqlQuery query(db);
+        query.prepare("SELECT * FROM classes WHERe (name)"
+                      "= (:name)");
 
-    if(!res){
-        qDebug() << "Error: " << query.lastError();
-        return false;
-    }else{
-        return query.next();
+        query.bindValue(":name", className);
+        res = query.exec();
+
+        if(!res){
+            qDebug() << "Error: " << query.lastError();
+            return false;
+        }else{
+            return query.next();
+        }
     }
 }
 
@@ -228,18 +237,19 @@ bool LabelProject::imageInDB(QString fileName){
      */
     bool res = false;
     //IF NOT EXISTS(SELECT * FROM images where (path) = (:PATH))
+    {
+        QSqlQuery query(db);
+        query.prepare("SELECT * FROM images WHERe (path)"
+                      "= (:path)");
 
-    QSqlQuery query(db);
-    query.prepare("SELECT * FROM images WHERe (path)"
-                  "= (:path)");
+        query.bindValue(":path", QDir(db.databaseName()).relativeFilePath(fileName));
+        res = query.exec();
 
-    query.bindValue(":path", QDir(db.databaseName()).relativeFilePath(fileName));
-    res = query.exec();
-
-    if(!res){
-        qDebug() << "Error: " << query.lastError();
-    }else{
-        return query.next();
+        if(!res){
+            qDebug() << "Error: " << query.lastError();
+        }else{
+            return query.next();
+        }
     }
 
     return false;
@@ -308,15 +318,17 @@ bool LabelProject::addAsset(QString fileName)
     QFileInfo check_file(fileName);
 
     if (  check_file.exists() && check_file.isFile() ){
-        QSqlQuery query(db);
-        query.prepare("INSERT INTO images (path)"
-                      "VALUES (:path)");
+        {
+            QSqlQuery query(db);
+            query.prepare("INSERT INTO images (path)"
+                          "VALUES (:path)");
 
-        query.bindValue(":path", QDir(db.databaseName()).relativeFilePath(fileName));
-        res = query.exec();
+            query.bindValue(":path", QDir(db.databaseName()).relativeFilePath(fileName));
+            res = query.exec();
 
-        if(!res){
-            qDebug() << "Error: " << query.lastError();
+            if(!res){
+                qDebug() << "Error: " << query.lastError();
+            }
         }
     }
 
@@ -328,19 +340,20 @@ int LabelProject::getImageId(QString fileName){
      * Get the image ID for an image at an absolute path (\a fileName), returns -1 if not found
      */
     int id = -1;
+    {
+        QSqlQuery query(db);
+        query.prepare("SELECT image_id FROM images WHERE path = ?");
 
-    QSqlQuery query(db);
-    query.prepare("SELECT image_id FROM images WHERE path = ?");
+        //Important - we need the relative image path again
+        query.bindValue(0, QDir(db.databaseName()).relativeFilePath(fileName));
+        bool res = query.exec();
 
-    //Important - we need the relative image path again
-    query.bindValue(0, QDir(db.databaseName()).relativeFilePath(fileName));
-    bool res = query.exec();
-
-    if(!res){
-        qDebug() << "Error: " << query.lastError();
-    }else{
-        if(query.next()){
-            id = query.value(0).toInt();
+        if(!res){
+            qDebug() << "Error: " << query.lastError();
+        }else{
+            if(query.next()){
+                id = query.value(0).toInt();
+            }
         }
     }
 
@@ -352,17 +365,18 @@ int LabelProject::getClassId(QString className){
      * Get the class ID for an class name, (\a className), returns -1 if not found
      */
     int id = -1;
+    {
+        QSqlQuery query(db);
+        query.prepare("SELECT class_id FROM classes WHERE name = ?");
+        query.bindValue(0, className);
+        bool res = query.exec();
 
-    QSqlQuery query(db);
-    query.prepare("SELECT class_id FROM classes WHERE name = ?");
-    query.bindValue(0, className);
-    bool res = query.exec();
-
-    if(!res){
-        qDebug() << "Error: " << query.lastError();
-    }else{
-        if(query.next()){
-            id = query.value(0).toInt();
+        if(!res){
+            qDebug() << "Error: " << query.lastError();
+        }else{
+            if(query.next()){
+                id = query.value(0).toInt();
+            }
         }
     }
 
@@ -383,31 +397,33 @@ bool LabelProject::getLabels(int image_id, QList<BoundingBox> &bboxes){
     bool res = false;
 
     if(image_id > 0){
-        QSqlQuery query(db);
+        {
+            QSqlQuery query(db);
 
-        query.prepare("SELECT name, x, y, width, height FROM labels"
-                      " INNER JOIN classes ON labels.class_id = classes.class_id"
-                      " WHERE image_id = ?");
-        query.addBindValue(image_id);
-        res = query.exec();
+            query.prepare("SELECT name, x, y, width, height FROM labels"
+                          " INNER JOIN classes ON labels.class_id = classes.class_id"
+                          " WHERE image_id = ?");
+            query.addBindValue(image_id);
+            res = query.exec();
 
-        if(!res){
-            qDebug() << "Error: " << query.lastError();
-        }
+            if(!res){
+                qDebug() << "Error: " << query.lastError();
+            }
 
-        while(query.next()){
-            BoundingBox new_bbox;
-            auto rec = query.record();
+            while(query.next()){
+                BoundingBox new_bbox;
+                auto rec = query.record();
 
-            new_bbox.classname = rec.value(rec.indexOf("name")).toString();
-            new_bbox.classid = getClassId(new_bbox.classname);
+                new_bbox.classname = rec.value(rec.indexOf("name")).toString();
+                new_bbox.classid = getClassId(new_bbox.classname);
 
-            new_bbox.rect.setX(rec.value(rec.indexOf("x")).toInt());
-            new_bbox.rect.setY(rec.value(rec.indexOf("y")).toInt());
-            new_bbox.rect.setWidth(rec.value(rec.indexOf("width")).toInt());
-            new_bbox.rect.setHeight(rec.value(rec.indexOf("height")).toInt());
+                new_bbox.rect.setX(rec.value(rec.indexOf("x")).toInt());
+                new_bbox.rect.setY(rec.value(rec.indexOf("y")).toInt());
+                new_bbox.rect.setWidth(rec.value(rec.indexOf("width")).toInt());
+                new_bbox.rect.setHeight(rec.value(rec.indexOf("height")).toInt());
 
-            bboxes.append(new_bbox);
+                bboxes.append(new_bbox);
+            }
         }
     }
 
@@ -423,15 +439,17 @@ bool LabelProject::removeLabels(QString fileName){
     bool res = false;
 
     if(image_id > 0){
-        QSqlQuery query(db);
+        {
+            QSqlQuery query(db);
 
-        query.prepare("DELETE FROM labels WHERE (image_id = :image_id)");
-        query.bindValue(":image_id", image_id);
+            query.prepare("DELETE FROM labels WHERE (image_id = :image_id)");
+            query.bindValue(":image_id", image_id);
 
-        res = query.exec();
+            res = query.exec();
 
-        if(!res){
-            qDebug() << "Error: " << query.lastError();
+            if(!res){
+                qDebug() << "Error: " << query.lastError();
+            }
         }
 
     }
@@ -450,21 +468,23 @@ bool LabelProject::removeLabel(QString fileName, BoundingBox bbox){
     bool res = false;
 
     if(image_id > 0 && class_id > 0){
-        QSqlQuery query(db);
+        {
+            QSqlQuery query(db);
 
-        query.prepare("DELETE FROM labels WHERE (image_id = :image_id AND class_id = :class_id"
-                      " AND x = :x AND y = :y AND width = :width AND height = :height)");
-        query.bindValue(":image_id", image_id);
-        query.bindValue(":class_id", class_id);
-        query.bindValue(":x", bbox.rect.x());
-        query.bindValue(":y", bbox.rect.y());
-        query.bindValue(":width", bbox.rect.width());
-        query.bindValue(":height", bbox.rect.height());
+            query.prepare("DELETE FROM labels WHERE (image_id = :image_id AND class_id = :class_id"
+                          " AND x = :x AND y = :y AND width = :width AND height = :height)");
+            query.bindValue(":image_id", image_id);
+            query.bindValue(":class_id", class_id);
+            query.bindValue(":x", bbox.rect.x());
+            query.bindValue(":y", bbox.rect.y());
+            query.bindValue(":width", bbox.rect.width());
+            query.bindValue(":height", bbox.rect.height());
 
-        res = query.exec();
+            res = query.exec();
 
-        if(!res){
-            qDebug() << "Error: " << query.lastError();
+            if(!res){
+                qDebug() << "Error: " << query.lastError();
+            }
         }
 
     }
@@ -483,24 +503,25 @@ bool LabelProject::setOccluded(QString fileName, BoundingBox bbox, int occluded)
     bool res = false;
 
     if(image_id > 0 && class_id > 0){
-        QSqlQuery query(db);
+        {
+            QSqlQuery query(db);
 
-        query.prepare("UPDATE labels SET occluded = :occluded WHERE (image_id = :image_id AND class_id = :class_id"
-                      " AND x = :x AND y = :y AND width = :width AND height = :height)");
-        query.bindValue(":image_id", image_id);
-        query.bindValue(":class_id", class_id);
-        query.bindValue(":x", bbox.rect.x());
-        query.bindValue(":y", bbox.rect.y());
-        query.bindValue(":width", bbox.rect.width());
-        query.bindValue(":height", bbox.rect.height());
-        query.bindValue(":occluded", occluded);
+            query.prepare("UPDATE labels SET occluded = :occluded WHERE (image_id = :image_id AND class_id = :class_id"
+                          " AND x = :x AND y = :y AND width = :width AND height = :height)");
+            query.bindValue(":image_id", image_id);
+            query.bindValue(":class_id", class_id);
+            query.bindValue(":x", bbox.rect.x());
+            query.bindValue(":y", bbox.rect.y());
+            query.bindValue(":width", bbox.rect.width());
+            query.bindValue(":height", bbox.rect.height());
+            query.bindValue(":occluded", occluded);
 
-        res = query.exec();
+            res = query.exec();
 
-        if(!res){
-            qDebug() << "Error: " << query.lastError();
+            if(!res){
+                qDebug() << "Error: " << query.lastError();
+            }
         }
-
     }
 
     return res;
@@ -516,28 +537,29 @@ bool LabelProject::removeClass(QString className){
     bool res = false;
 
     if(class_id > 0){
-        QSqlQuery query(db);
+        {
+            QSqlQuery query(db);
 
-        // Delete all labels with this class
-        query.prepare("DELETE FROM labels WHERE (class_id = :class_id)");
-        query.bindValue(":class_id", class_id);
+            // Delete all labels with this class
+            query.prepare("DELETE FROM labels WHERE (class_id = :class_id)");
+            query.bindValue(":class_id", class_id);
 
-        res = query.exec();
+            res = query.exec();
 
-        if(!res){
-            qDebug() << "Error: " << query.lastError();
+            if(!res){
+                qDebug() << "Error: " << query.lastError();
+            }
+
+            // Delete the class itself
+            query.prepare("DELETE FROM classes WHERE (class_id = :class_id)");
+            query.bindValue(":class_id", class_id);
+
+            res = query.exec();
+
+            if(!res){
+                qDebug() << "Error: " << query.lastError();
+            }
         }
-
-        // Delete the class itself
-        query.prepare("DELETE FROM classes WHERE (class_id = :class_id)");
-        query.bindValue(":class_id", class_id);
-
-        res = query.exec();
-
-        if(!res){
-            qDebug() << "Error: " << query.lastError();
-        }
-
     }
 
     return res;
@@ -597,26 +619,28 @@ bool LabelProject::removeImage(QString fileName){
     bool res = false;
 
     if(image_id > 0){
-        QSqlQuery query(db);
+        {
+            QSqlQuery query(db);
 
-        // Delete all labels for this image
-        query.prepare("DELETE FROM labels WHERE (image_id = :image_id)");
-        query.bindValue(":image_id", image_id);
+            // Delete all labels for this image
+            query.prepare("DELETE FROM labels WHERE (image_id = :image_id)");
+            query.bindValue(":image_id", image_id);
 
-        res = query.exec();
+            res = query.exec();
 
-        if(!res){
-            qDebug() << "Error: " << query.lastError();
-        }
+            if(!res){
+                qDebug() << "Error: " << query.lastError();
+            }
 
-        // Delete the image itself
-        query.prepare("DELETE FROM images WHERE (image_id = :image_id)");
-        query.bindValue(":image_id", image_id);
+            // Delete the image itself
+            query.prepare("DELETE FROM images WHERE (image_id = :image_id)");
+            query.bindValue(":image_id", image_id);
 
-        res = query.exec();
+            res = query.exec();
 
-        if(!res){
-            qDebug() << "Error: " << query.lastError();
+            if(!res){
+                qDebug() << "Error: " << query.lastError();
+            }
         }
 
     }
@@ -639,22 +663,23 @@ bool LabelProject::addLabel(QString fileName, BoundingBox bbox)
     int class_id = getClassId(bbox.classname);
 
     if(image_id > 0 && class_id > 0){
-        QSqlQuery query(db);
+        {
+            QSqlQuery query(db);
 
-        query.prepare("INSERT INTO labels (image_id, class_id, x, y, width, height)"
-                      "VALUES (:image_id, :class_id, :x, :y, :width, :height)");
-        query.bindValue(":image_id", image_id);
-        query.bindValue(":class_id", class_id);
-        query.bindValue(":x", bbox.rect.x());
-        query.bindValue(":y", bbox.rect.y());
-        query.bindValue(":width", bbox.rect.width());
-        query.bindValue(":height", bbox.rect.height());
-        res = query.exec();
+            query.prepare("INSERT INTO labels (image_id, class_id, x, y, width, height)"
+                          "VALUES (:image_id, :class_id, :x, :y, :width, :height)");
+            query.bindValue(":image_id", image_id);
+            query.bindValue(":class_id", class_id);
+            query.bindValue(":x", bbox.rect.x());
+            query.bindValue(":y", bbox.rect.y());
+            query.bindValue(":width", bbox.rect.width());
+            query.bindValue(":height", bbox.rect.height());
+            res = query.exec();
 
-        if(!res){
-            qDebug() << "Error: " << query.lastError();
+            if(!res){
+                qDebug() << "Error: " << query.lastError();
+            }
         }
-
     }
 
     return res;
@@ -726,14 +751,17 @@ bool LabelProject::addClass(QString className)
         return true;
     }
 
-    QSqlQuery query(db);
-    query.prepare("INSERT INTO classes (name)"
-                  "VALUES (:name)");
-    query.bindValue(":name", className);
-    res = query.exec();
+    {
+        QSqlQuery query(db);
+        query.prepare("INSERT INTO classes (name)"
+                      "VALUES (:name)");
+        query.bindValue(":name", className);
+        res = query.exec();
 
-    if(!res){
-        qDebug() << "Error: " << query.lastError();
+
+        if(!res){
+            qDebug() << "Error: " << query.lastError();
+        }
     }
 
     return res;
@@ -746,7 +774,9 @@ LabelProject::~LabelProject()
      */
 
     if(db.isOpen()){
+        qDebug() << "Closing database.";
         db.close();
+        QSqlDatabase::removeDatabase(connection_name);
     }
 
     emit finished();
