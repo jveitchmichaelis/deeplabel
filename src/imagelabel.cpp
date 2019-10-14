@@ -243,6 +243,14 @@ void ImageLabel::setBoundingBoxes(QList<BoundingBox> input_bboxes){
 void ImageLabel::setClassname(QString classname)
 {
     current_classname = classname;
+
+    if(selected_bbox.classname != classname){
+        auto new_bbox = selected_bbox;
+        new_bbox.classname = classname;
+
+        emit updateLabel(selected_bbox, new_bbox);
+    }
+
 }
 
 void ImageLabel::setScaledContents(bool should_scale){
@@ -267,10 +275,12 @@ void ImageLabel::drawLabel(QPoint location){
     }
 
     BoundingBox bbox;
+    selected_bbox = BoundingBox();
     foreach(bbox, bboxes){
         if(bbox.rect.contains(location)){
             drawBoundingBox(bbox, Qt::green);
             selected_bbox = bbox;
+            emit setCurrentClass(selected_bbox.classname);
         }else{
             drawBoundingBox(bbox);
         }

@@ -38,7 +38,9 @@ public:
 signals:
     void newLabel(BoundingBox);
     void removeLabel(BoundingBox);
+    void updateLabel(BoundingBox, BoundingBox);
     void setOccluded(BoundingBox);
+    void setCurrentClass(QString);
 
 public slots:
     void setPixmap ( QPixmap & );

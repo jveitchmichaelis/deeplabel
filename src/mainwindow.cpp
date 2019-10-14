@@ -39,6 +39,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(selectedClass(QString)), currentImage, SLOT(setClassname(QString)));
     connect(currentImage, SIGNAL(newLabel(BoundingBox)), this, SLOT(addLabel(BoundingBox)));
     connect(currentImage, SIGNAL(removeLabel(BoundingBox)), this, SLOT(removeLabel(BoundingBox)));
+    connect(currentImage, SIGNAL(updateLabel(BoundingBox, BoundingBox)), this, SLOT(updateLabel(BoundingBox, BoundingBox)));
+    connect(currentImage, SIGNAL(setCurrentClass(QString)), this, SLOT(setCurrentClass(QString)));
+
     connect(ui->actionDraw_Tool, SIGNAL(triggered(bool)), currentImage, SLOT(setDrawMode()));
     connect(ui->actionSelect_Tool, SIGNAL(triggered(bool)), currentImage, SLOT(setSelectMode()));
     connect(ui->classComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(setCurrentClass(QString)));
@@ -164,6 +167,11 @@ void MainWindow::mergeProject(QString filename){
 }
 
 void MainWindow::setCurrentClass(QString name){
+
+    if(ui->classComboBox->currentText() != name){
+        ui->classComboBox->setCurrentText(name);
+    }
+
     current_class = name;
     emit selectedClass(current_class);
 }
@@ -462,9 +470,10 @@ void MainWindow::addClass(){
     QString new_class = ui->newClassText->text();
 
     if(new_class.simplified() != "" && !classes.contains(new_class)){
-        project->addClass(new_class);
+        project->addClass(new_class.simplified());
         ui->newClassText->clear();
         updateClassList();
+        setCurrentClass(new_class.simplified());
     }
 }
 
@@ -489,6 +498,7 @@ void MainWindow::removeImageLabels(){
 }
 
 void MainWindow::updateLabel(BoundingBox old_bbox, BoundingBox new_bbox){
+
     project->removeLabel(current_imagepath, old_bbox);
     project->addLabel(current_imagepath, new_bbox);
     updateLabels();
