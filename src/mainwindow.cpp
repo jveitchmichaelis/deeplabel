@@ -380,8 +380,10 @@ void MainWindow::openProject(QString fileName)
         settings->setValue("project_folder", QFileInfo(fileName).absoluteDir().absolutePath());
         if(project->loadDatabase(fileName)){
             initDisplay();
+            setWindowTitle("DeepLabel - " + fileName);
         }else{
             QMessageBox::warning(this,tr("Remove Image"), tr("Failed to open project."));
+            setWindowTitle("DeepLabel");
         }
     }
 
