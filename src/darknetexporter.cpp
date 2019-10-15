@@ -168,6 +168,12 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
         QString filename_noext = QFileInfo(image_path).baseName();
         QString image_filename = QString("%1/%2.%3").arg(folder).arg(filename_noext).arg(extension);
 
+        // Correct for duplicate file names in output
+        int dupe_file = 1;
+        while(QFile(image_filename).exists()){
+            image_filename = QString("%1/%2_%3.%4").arg(folder).arg(filename_noext).arg(dupe_file++).arg(extension);
+        }
+
         cv::Mat image = cv::imread(image_path.toStdString());
         //saveImage(image, image_filename);
 
