@@ -1,71 +1,6 @@
 #include "cocoexporter.h"
 
-CocoExporter::CocoExporter(LabelProject *project, QObject *parent) : QObject(parent)
-{
-
-    this->project = project;
-    project->getImageList(images);
-}
-
-void CocoExporter::splitData(float split, bool shuffle, int seed){
-
-    if(split < 0 || split > 1){
-        qDebug() << "Invalid split fraction, should be [0,1]";
-    }
-
-    if(shuffle){
-        std::random_device rd;
-        std::mt19937 generator(rd());
-        generator.seed(static_cast<unsigned int>(seed));
-
-        std::shuffle(images.begin(), images.end(), generator);
-    }
-
-    int pivot = static_cast<int>(images.size() * split);
-    train_set = images.mid(0, pivot);
-    validation_set = images.mid(pivot);
-
-    qDebug() << "Split: " << split;
-    qDebug() << train_set.size() << " images selected for train set.";
-    qDebug() << validation_set.size() << " images selected for validation set.";
-
-}
-
-bool CocoExporter::setOutputFolder(const QString folder){
-
-    if(folder == "") return false;
-
-    output_folder = folder;
-
-    //Make output folder if it doesn't exist
-    if (!QDir(output_folder).exists()){
-        qDebug() << "Making output folder" << output_folder;
-        QDir().mkpath(output_folder);
-    }
-
-    //Make the training and validation folders
-    train_folder = QDir::cleanPath(output_folder+"/train");
-    if (!QDir(train_folder).exists()){
-        qDebug() << "Making training folder" << train_folder;
-        QDir().mkpath(train_folder);
-    }
-
-    val_folder = QDir::cleanPath(output_folder+"/val");
-    if (!QDir(val_folder).exists()){
-        qDebug() << "Making validation folder" << val_folder;
-        QDir().mkpath(val_folder);
-    }
-
-    train_label_folder = QDir::cleanPath(train_folder);
-    train_image_folder = QDir::cleanPath(train_folder);
-    val_label_folder = QDir::cleanPath(val_folder);
-    val_image_folder = QDir::cleanPath(val_folder);
-
-    return true;
-
-}
-
-bool CocoExporter::processImages(const QString folder, const QString filename, const QList<QString> images){
+bool CocoExporter::processImages(const QString folder, const QString label_filename, const QList<QString> images){
 
     QString image_path;
     QList<BoundingBox> labels;
@@ -191,10 +126,10 @@ bool CocoExporter::processImages(const QString folder, const QString filename, c
     label_file["license"] = licenses_array;
     label_file["categories"] = category_array;
 
-    QString label_filename = QString("%1/%2.json").arg(output_folder).arg(filename);
+    QString label_filepath = QString("%1/%2.json").arg(output_folder).arg(label_filename);
 
     QJsonDocument json_output(label_file);
-    QFile f(label_filename);
+    QFile f(label_filepath);
 
     f.open(QIODevice::WriteOnly | QIODevice::Truncate);
 

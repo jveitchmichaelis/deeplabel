@@ -392,8 +392,14 @@ void MainWindow::openProject(QString fileName)
 
 void MainWindow::updateLabels(){
     QList<BoundingBox> bboxes;
-
     project->getLabels(current_imagepath, bboxes);
+
+    for(auto &bbox : bboxes){
+        qDebug() << bbox.classname << bbox.rect.center() << bbox.rect.width()*bbox.rect.height();
+    }
+
+    qDebug() << "--";
+
     ui->instanceCountLabel->setNum(bboxes.size());
     currentImage->setBoundingBoxes(bboxes);
 }
@@ -764,7 +770,10 @@ void MainWindow::updateTrackers(void){
     // propagate the bounding boxes. Otherwise we assume that the
     // current labels are the correct ones and should override.
 
-    multitracker->update(currentImage->getImage());
+    auto image = currentImage->getImage();
+    if(image.empty()) return;
+
+    multitracker->update(image);
 
     auto new_bboxes = multitracker->getBoxes();
 

@@ -81,6 +81,7 @@ SOURCES += \
         darknetexporter.cpp \
         exportdialog.cpp \
         multitracker.cpp \
+    src/baseexporter.cpp \
     src/cocoexporter.cpp \
     src/imagedisplay.cpp \
     src/pascalvocexporter.cpp \
@@ -96,6 +97,7 @@ HEADERS += \
         darknetexporter.h \
         exportdialog.h \
         multitracker.h \
+    src/baseexporter.h \
     src/cocoexporter.h \
     src/imagedisplay.h \
     src/pascalvocexporter.h \

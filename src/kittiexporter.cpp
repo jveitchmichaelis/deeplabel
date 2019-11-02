@@ -1,27 +1,5 @@
 #include "kittiexporter.h"
 
-KittiExporter::KittiExporter(LabelProject *project, QObject *parent) : QObject(parent)
-{
-    this->project = project;
-    project->getImageList(images);
-}
-
-
-void KittiExporter::splitData(float split, bool shuffle){
-
-    if(shuffle){
-        std::random_device rd;
-        std::mt19937 g(rd());
-
-        std::shuffle(images.begin(), images.end(), g);
-    }
-
-    auto pivot = images.size() * split;
-    train_set = images.mid(0, pivot);
-    validation_set = images.mid(pivot);
-
-}
-
 bool KittiExporter::setOutputFolder(QString folder){
 
     if(folder == "") return false;
@@ -76,16 +54,6 @@ void KittiExporter::appendLabel(QString label_filename, QList<BoundingBox> label
     }
 }
 
-bool KittiExporter::saveImage(QString input, QString output, double &scale_x, double &scale_y){
-    cv::Mat image = cv::imread(input.toStdString());
-    cv::Size imsize;
-
-    if(scale_x != 1 || scale_y !=1)
-        cv::resize(image, image, imsize, scale_x, scale_y);
-
-    return cv::imwrite(output.toStdString(), image);
-}
-
 int KittiExporter::processSet(QString folder, QList<QString> images, int i){
 
     int base = 10;
@@ -101,8 +69,15 @@ int KittiExporter::processSet(QString folder, QList<QString> images, int i){
         if(!export_unlabelled && labels.size() == 0) continue;
 
         QString extension = QFileInfo(image).suffix();
-        QString image_filename = QString("%1/images/%2.%3").arg(folder).arg(i, pad, base, QChar('0')).arg(extension);
-        saveImage(image, image_filename, scale_x, scale_y);
+        QString filename_noext = QFileInfo(image).baseName();
+
+        QString image_filename = QString("%1/%2.%3").arg(folder).arg(filename_noext).arg(extension);
+
+        // Correct for duplicate file names in output
+        int dupe_file = 1;
+        while(QFile(image_filename).exists()){
+            image_filename = QString("%1/%2_%3.%4").arg(folder).arg(filename_noext).arg(dupe_file++).arg(extension);
+        }
 
         QString label_filename = QString("%1/labels/%2.txt").arg(folder).arg(i, pad, base, QChar('0'));
         appendLabel(label_filename, labels, scale_x, scale_y);

@@ -51,9 +51,6 @@
          </item>
          <item row="5" column="0" colspan="2">
           <widget class="QCheckBox" name="propagateCheckBox">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
            <property name="text">
             <string>Track labels</string>
            </property>
@@ -403,7 +400,7 @@
      <x>0</x>
      <y>0</y>
      <width>931</width>
-     <height>20</height>
+     <height>17</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
