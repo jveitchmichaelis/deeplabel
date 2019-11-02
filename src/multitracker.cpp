@@ -41,6 +41,8 @@ void MultiTrackerCV::init(const cv::Mat &image, QList<BoundingBox> bboxes){
     // If we are tracking and we have some labelled boxes already
     QtConcurrent::blockingMap(bboxes.begin(), bboxes.end(), [&](BoundingBox &bbox)
     {
+        if(bbox.rect.width()*bbox.rect.height() <= 0) return;
+
         auto tracker = createTrackerByName(type_);
         tracker->init(image, qrect2cv(bbox.rect));
 
