@@ -50,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->removeClassButton, SIGNAL(clicked(bool)), this, SLOT(removeClass()));
     connect(ui->removeImageButton, SIGNAL(clicked(bool)), this, SLOT(removeImage()));
     connect(ui->removeImageLabelsButton, SIGNAL(clicked(bool)), this, SLOT(removeImageLabels()));
+    connect(ui->removeLabelsForwardButton, SIGNAL(clicked(bool)), this, SLOT(removeImageLabelsForward()));
 
     ui->actionDraw_Tool->setChecked(true);
 
@@ -394,12 +395,6 @@ void MainWindow::updateLabels(){
     QList<BoundingBox> bboxes;
     project->getLabels(current_imagepath, bboxes);
 
-    for(auto &bbox : bboxes){
-        qDebug() << bbox.classname << bbox.rect.center() << bbox.rect.width()*bbox.rect.height();
-    }
-
-    qDebug() << "--";
-
     ui->instanceCountLabel->setNum(bboxes.size());
     currentImage->setBoundingBoxes(bboxes);
 }
@@ -502,6 +497,37 @@ void MainWindow::removeImageLabels(){
         project->removeLabels(current_imagepath);
         updateLabels();
         updateDisplay();
+    }
+}
+
+void MainWindow::removeImageLabelsForward(){
+    if (QMessageBox::Yes == QMessageBox::question(this,
+                                                  tr("Remove Labels"),
+                                                  QString("Really delete all labels forwards?"))){;
+
+        while(true){
+
+            QList<BoundingBox> bboxes;
+            project->getLabels(current_imagepath, bboxes);
+
+            if(bboxes.size() == 0){
+                return;
+            }
+
+            if(current_index == (number_images-1)){
+                    return;
+            }else{
+                current_index++;
+            }
+
+            ui->imageNumberSpinbox->setValue(current_index+1);
+            project->removeLabels(current_imagepath);
+
+            // Show the new image
+            updateLabels();
+            updateDisplay();
+        }
+
     }
 }
 
