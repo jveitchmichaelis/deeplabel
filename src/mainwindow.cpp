@@ -381,9 +381,12 @@ void MainWindow::openProject(QString fileName)
         settings->setValue("project_folder", QFileInfo(fileName).absoluteDir().absolutePath());
         if(project->loadDatabase(fileName)){
             initDisplay();
+            ui->menuImages->setEnabled(true);
+            ui->menuNavigation->setEnabled(true);
+            ui->mainToolBar->setEnabled(true);
             setWindowTitle("DeepLabel - " + fileName);
         }else{
-            QMessageBox::warning(this,tr("Remove Image"), tr("Failed to open project."));
+            QMessageBox::warning(this,tr("Project file error"), tr("Failed to open project."));
             setWindowTitle("DeepLabel");
         }
     }

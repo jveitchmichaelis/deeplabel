@@ -407,7 +407,7 @@
      <x>0</x>
      <y>0</y>
      <width>931</width>
-     <height>20</height>
+     <height>17</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -420,6 +420,9 @@
     <addaction name="actionExport"/>
    </widget>
    <widget class="QMenu" name="menuImages">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Images</string>
     </property>
@@ -429,6 +432,9 @@
     <addaction name="actionAdd_video"/>
    </widget>
    <widget class="QMenu" name="menuNavigation">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Navigation</string>
     </property>
@@ -452,6 +458,9 @@
    <addaction name="menuDetection"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="movable">
     <bool>false</bool>
    </property>
