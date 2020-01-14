@@ -43,7 +43,7 @@ bool CocoExporter::processImages(const QString folder, const QString label_filen
         if(!export_unlabelled && labels.size() == 0) continue;
 
         QString extension = QFileInfo(image_path).suffix();
-        QString filename_noext = QFileInfo(image_path).baseName();
+        QString filename_noext = QFileInfo(image_path).completeBaseName();
 
         QString image_filename = QString("%1/%2.%3").arg(folder).arg(filename_noext).arg(extension);
 

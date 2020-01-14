@@ -265,7 +265,7 @@ void LabelProject::cancelLoad(){
 void LabelProject::addVideo(QString fileName, QString outputFolder){
     cv::VideoCapture video(fileName.toStdString());
 
-    QString base_name = QFileInfo(fileName).baseName();
+    QString base_name = QFileInfo(fileName).completeBaseName();
     QDir dir(outputFolder);
 
     cv::Mat frame;

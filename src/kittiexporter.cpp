@@ -69,7 +69,7 @@ int KittiExporter::processSet(QString folder, QList<QString> images, int i){
         if(!export_unlabelled && labels.size() == 0) continue;
 
         QString extension = QFileInfo(image).suffix();
-        QString filename_noext = QFileInfo(image).baseName();
+        QString filename_noext = QFileInfo(image).completeBaseName();
 
         QString image_filename = QString("%1/%2.%3").arg(folder).arg(filename_noext).arg(extension);
 

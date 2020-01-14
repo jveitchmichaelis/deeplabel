@@ -160,7 +160,7 @@ bool PascalVocExporter::processImages(const QString folder, const QList<QString>
 
 
         QString extension = QFileInfo(image_path).suffix();
-        QString filename_noext = QFileInfo(image_path).baseName();
+        QString filename_noext = QFileInfo(image_path).completeBaseName();
         QString image_filename = QString("%1/%2.%3").arg(folder).arg(filename_noext).arg(extension);
 
         // Correct for duplicate file names in output
