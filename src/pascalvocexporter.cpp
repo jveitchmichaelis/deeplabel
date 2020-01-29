@@ -109,8 +109,8 @@ void PascalVocExporter::writeLabels(const cv::Mat &image, const QString image_fi
 
                 stream.writeStartElement("bndbox");
                     stream.writeTextElement("xmin", QString::number(label.rect.left()));
-                    stream.writeTextElement("ymin", QString::number(label.rect.top()));
                     stream.writeTextElement("xmax", QString::number(label.rect.right()));
+                    stream.writeTextElement("ymin", QString::number(label.rect.top()));
                     stream.writeTextElement("ymax", QString::number(label.rect.bottom()));
                 stream.writeEndElement(); //bndbox
 
