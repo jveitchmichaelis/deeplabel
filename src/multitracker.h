@@ -17,7 +17,7 @@ class MultiTracker : public QObject
 {
     Q_OBJECT
 public:
-    explicit MultiTracker(QObject *parent = nullptr){}
+    explicit MultiTracker(QObject *parent = nullptr) : QObject(parent){}
 
 signals:
 
@@ -36,7 +36,7 @@ class MultiTrackerCV : public MultiTracker
     Q_OBJECT
 
 public:
-    explicit MultiTrackerCV(QObject *parent = nullptr){}
+    explicit MultiTrackerCV(QObject *parent = nullptr) : MultiTracker(parent){}
 
 public slots:
     void init(const cv::Mat &image, QList<BoundingBox> bboxes);
@@ -54,7 +54,7 @@ class MultiTrackerCamshift : public MultiTracker
 {
     Q_OBJECT
 public:
-    explicit MultiTrackerCamshift(QObject *parent = nullptr){}
+    explicit MultiTrackerCamshift(QObject *parent = nullptr)  : MultiTracker(parent){}
     void init(const cv::Mat &image, QList<BoundingBox> bboxes);
     void update(const cv::Mat &image);
 
