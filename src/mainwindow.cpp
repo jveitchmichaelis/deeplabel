@@ -62,6 +62,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->actionWrap_images, SIGNAL(triggered(bool)), this, SLOT(enableWrap(bool)));
     connect(ui->actionExport, SIGNAL(triggered(bool)), this, SLOT(launchExportDialog()));
+    connect(ui->actionImport_Labels, SIGNAL(triggered(bool)), this, SLOT(launchImportDialog()));
     connect(ui->actionRefine_boxes, SIGNAL(triggered(bool)), this, SLOT(refineBoxes()));
 
     connect(ui->actionSetup_detector, SIGNAL(triggered(bool)), this, SLOT(setupDetector()));
@@ -384,6 +385,8 @@ void MainWindow::openProject(QString fileName)
             ui->menuImages->setEnabled(true);
             ui->menuNavigation->setEnabled(true);
             ui->mainToolBar->setEnabled(true);
+            ui->actionImport_Labels->setEnabled(true);
+            ui->actionMerge_Project->setEnabled(true);
             setWindowTitle("DeepLabel - " + fileName);
         }else{
             QMessageBox::warning(this,tr("Project file error"), tr("Failed to open project."));
@@ -1021,6 +1024,31 @@ void MainWindow::launchExportDialog(){
     connect(export_dialog, SIGNAL(accepted()), this, SLOT(handleExportDialog()));
 
     export_dialog->open();
+}
+
+void MainWindow::handleImportDialog(){
+
+    // If we hit OK and not cancel
+    if(import_dialog->result() != QDialog::Accepted ) return;
+
+    QThread* import_thread = new QThread;
+
+    if(import_dialog->getImporter() == "Darknet"){
+        DarknetImporter importer(project);
+        importer.moveToThread(import_thread);
+        importer.setImportUnlabelled(import_dialog->getImportUnlabelled());
+        importer.import(import_dialog->getInputFile(), import_dialog->getNamesFile());
+    }
+}
+
+void MainWindow::launchImportDialog(){
+
+    import_dialog = new ImportDialog(this);
+
+    import_dialog->setModal(true);
+    connect(import_dialog, SIGNAL(accepted()), this, SLOT(handleImportDialog()));
+
+    import_dialog->open();
 }
 
 MainWindow::~MainWindow()

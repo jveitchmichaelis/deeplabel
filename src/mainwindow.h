@@ -22,11 +22,14 @@
 #include <pascalvocexporter.h>
 #include <cocoexporter.h>
 
+#include <darknetimporter.h>
+
 #include <detection/detectoropencv.h>
 #include <detection/detectorsetupdialog.h>
 
 #include <algorithm>
 #include <exportdialog.h>
+#include <importdialog.h>
 #include <multitracker.h>
 #include <imagedisplay.h>
 
@@ -49,6 +52,7 @@ private:
     LabelProject *project;
     ImageLabel *currentImage;
     ExportDialog *export_dialog;
+    ImportDialog *import_dialog;
     MultiTracker *multitracker;
     QScrollArea *imageScrollArea;
     ImageDisplay *display;
@@ -106,6 +110,8 @@ private slots:
     void enableWrap(bool enable);
     void launchExportDialog();
     void handleExportDialog();
+    void launchImportDialog();
+    void handleImportDialog();
 
     // Tracking
     void initTrackers();
@@ -132,6 +138,7 @@ private slots:
 
 
     void updateCurrentIndex(int index);
+
 signals:
     void selectedClass(QString);
 

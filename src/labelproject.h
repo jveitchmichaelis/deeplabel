@@ -51,9 +51,9 @@ public:
     int getNextUnlabelled(QString fileName);
     int getNextInstance(QString fileName, QString className);
 
-    //QString getClassName(int classId);
     int getImageId(QString fileName);
     int getClassId(QString className);
+    QString getClassName(int classID);
     void assignThread(QThread* thread);
 
 signals:

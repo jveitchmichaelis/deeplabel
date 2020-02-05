@@ -417,6 +417,7 @@
     <addaction name="actionNew_Project"/>
     <addaction name="actionOpen_Project"/>
     <addaction name="actionMerge_Project"/>
+    <addaction name="actionImport_Labels"/>
     <addaction name="actionExport"/>
    </widget>
    <widget class="QMenu" name="menuImages">
@@ -682,8 +683,19 @@
    </property>
   </action>
   <action name="actionMerge_Project">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Merge Project</string>
+   </property>
+  </action>
+  <action name="actionImport_Labels">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Import Labels</string>
    </property>
   </action>
  </widget>

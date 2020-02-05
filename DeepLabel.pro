@@ -82,8 +82,11 @@ SOURCES += \
         exportdialog.cpp \
         multitracker.cpp \
     src/baseexporter.cpp \
+    src/baseimporter.cpp \
     src/cocoexporter.cpp \
+    src/darknetimporter.cpp \
     src/imagedisplay.cpp \
+    src/importdialog.cpp \
     src/pascalvocexporter.cpp \
     detection/detectoropencv.cpp \
     detection/detectorsetupdialog.cpp
@@ -98,13 +101,17 @@ HEADERS += \
         exportdialog.h \
         multitracker.h \
     src/baseexporter.h \
+    src/baseimporter.h \
     src/cocoexporter.h \
+    src/darknetimporter.h \
     src/imagedisplay.h \
+    src/importdialog.h \
     src/pascalvocexporter.h \
     detection/detectoropencv.h \
     detection/detectorsetupdialog.h
 
 FORMS += \
+    src/importdialog.ui \
         src/mainwindow.ui \
     src/exportdialog.ui \
     src/imagedisplay.ui \

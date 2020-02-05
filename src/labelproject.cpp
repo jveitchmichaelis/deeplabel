@@ -383,6 +383,29 @@ int LabelProject::getClassId(QString className){
     return id;
 }
 
+QString LabelProject::getClassName(int classID){
+    /*!
+     * Get the class Name for an class id, (\a classID), returns "" if not found
+     */
+    QString className = "";
+    {
+        QSqlQuery query(db);
+        query.prepare("SELECT name FROM classes WHERE class_id = ?");
+        query.bindValue(0, classID);
+        bool res = query.exec();
+
+        if(!res){
+            qDebug() << "Error: " << query.lastError();
+        }else{
+            if(query.next()){
+                className = query.value(0).toString();
+            }
+        }
+    }
+
+    return className;
+}
+
 bool LabelProject::getLabels(QString fileName, QList<BoundingBox> &bboxes){
     bboxes.clear();
     int image_id = getImageId(fileName);
@@ -660,7 +683,13 @@ bool LabelProject::addLabel(QString fileName, BoundingBox bbox)
     bool res = false;
 
     int image_id = getImageId(fileName);
-    int class_id = getClassId(bbox.classname);
+    int class_id = -1;
+
+    if(bbox.classname != ""){
+        class_id = getClassId(bbox.classname);
+    }else if(bbox.classid > 0){
+        class_id = bbox.classid;
+    }
 
     if(image_id > 0 && class_id > 0){
         {
