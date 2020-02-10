@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>327</width>
-    <height>177</height>
+    <height>290</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,10 +16,17 @@
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="outputFolderLineEdit">
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_2">
        <property name="text">
-        <string/>
+        <string>Output Folder</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Validation Split</string>
        </property>
       </widget>
      </item>
@@ -37,6 +44,11 @@
        </item>
        <item>
         <property name="text">
+         <string>GCP AutoML</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>Kitti</string>
         </property>
        </item>
@@ -47,7 +59,7 @@
        </item>
       </widget>
      </item>
-     <item row="5" column="0" colspan="2">
+     <item row="7" column="0" colspan="2">
       <widget class="QCheckBox" name="labelMapCheckbox">
        <property name="enabled">
         <bool>false</bool>
@@ -82,44 +94,27 @@
        </property>
       </widget>
      </item>
-     <item row="6" column="0" colspan="3">
+     <item row="6" column="0" colspan="2">
+      <widget class="QCheckBox" name="exportLabelledCheckbox">
+       <property name="text">
+        <string>Export unlabelled images</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0" colspan="3">
       <widget class="QCheckBox" name="randomSplitCheckbox">
        <property name="text">
         <string>Randomise Split</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_3">
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="outputFolderLineEdit">
        <property name="text">
-        <string>Validation Split</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1" colspan="2">
-      <widget class="QSpinBox" name="validationSplitSpinbox">
-       <property name="suffix">
-        <string>%</string>
-       </property>
-       <property name="maximum">
-        <number>100</number>
-       </property>
-       <property name="value">
-        <number>80</number>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QLineEdit" name="namesFileLineEdit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Output Type: </string>
+        <string/>
        </property>
       </widget>
      </item>
@@ -142,10 +137,17 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_2">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
        <property name="text">
-        <string>Output Folder</string>
+        <string>Output Type: </string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="namesFileLineEdit">
+       <property name="enabled">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -156,13 +158,33 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="0" colspan="2">
-      <widget class="QCheckBox" name="exportLabelledCheckbox">
+     <item row="5" column="0">
+      <widget class="QLabel" name="label_5">
        <property name="text">
-        <string>Export unlabelled images</string>
+        <string>Bucket URI</string>
        </property>
-       <property name="checked">
-        <bool>true</bool>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QSpinBox" name="validationSplitSpinbox">
+       <property name="suffix">
+        <string>%</string>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="value">
+        <number>80</number>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QLineEdit" name="gcpBucketLineEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="placeholderText">
+        <string>gs://your/bucket/path</string>
        </property>
       </widget>
      </item>

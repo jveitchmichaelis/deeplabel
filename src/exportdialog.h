@@ -27,6 +27,9 @@ public:
     double getValidationSplit(){
         return static_cast<double>(validation_split_pc)/100.0;
     }
+
+    QString getBucket(){ return bucket_uri; }
+
     bool getCreateLabelMap();
     bool getExportUnlablled();
 
@@ -37,6 +40,7 @@ private slots:
     void toggleShuffle(bool shuffle);
     void toggleExporter();
     void setExportUnlabelled(bool res);
+    void setBucketUri(QString uri);
 private:
     Ui::ExportDialog *ui;
     bool checkOK();
@@ -45,6 +49,7 @@ private:
 
     QString output_folder = "";
     QString names_file = "";
+    QString bucket_uri = "";
     QString current_exporter = "Darknet";
     bool do_shuffle = false;
     int validation_split_pc = 80;

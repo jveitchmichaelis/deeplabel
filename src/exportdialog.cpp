@@ -14,6 +14,7 @@ ExportDialog::ExportDialog(QWidget *parent) :
     connect(ui->randomSplitCheckbox, SIGNAL(clicked(bool)), this, SLOT(toggleShuffle(bool)));
     connect(ui->validationSplitSpinbox, SIGNAL(valueChanged(int)), this, SLOT(setValidationSplit(int)));
     connect(ui->exportLabelledCheckbox, SIGNAL(clicked(bool)), this, SLOT(setExportUnlabelled(bool)));
+    connect(ui->gcpBucketLineEdit, SIGNAL(textEdited(QString)), SLOT(setBucketUri(QString)));
 
     connect(ui->namesFileLineEdit, SIGNAL(textEdited(QString)), SLOT(setNamesFile(QString)));
     connect(ui->namesFilePushButton, SIGNAL(clicked()), this, SLOT(setNamesFile()));
@@ -92,6 +93,12 @@ void ExportDialog::setOutputFolder(QString path){
     checkOK();
 }
 
+void ExportDialog::setBucketUri(QString uri){
+    if(uri != ""){
+        bucket_uri = uri;
+    }
+}
+
 void ExportDialog::setNamesFile(QString path){
 
     if(path == ""){
@@ -122,6 +129,10 @@ bool ExportDialog::checkOK(){
     if(!QDir(output_folder).exists() || output_folder == ""){
         qDebug() << "Export output folder doesn't exist";
         return false;
+    }
+
+    if(ui->exportSelectComboBox->currentText() == "GCP AutoML"){
+        if(bucket_uri == "") return false;
     }
 
     if(ui->exportSelectComboBox->currentText() == "Darknet"){
@@ -164,6 +175,7 @@ void ExportDialog::toggleExporter(){
     ui->namesFileLineEdit->setEnabled(current_exporter == "Darknet");
     ui->namesFilePushButton->setEnabled(current_exporter == "Darknet");
     ui->labelMapCheckbox->setEnabled(current_exporter == "Pascal VOC");
+    ui->gcpBucketLineEdit->setEnabled(current_exporter == "GCP AutoML");
 
     checkOK();
 }

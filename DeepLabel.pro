@@ -85,6 +85,7 @@ SOURCES += \
     src/baseimporter.cpp \
     src/cocoexporter.cpp \
     src/darknetimporter.cpp \
+    src/gcpexporter.cpp \
     src/imagedisplay.cpp \
     src/importdialog.cpp \
     src/pascalvocexporter.cpp \
@@ -104,6 +105,8 @@ HEADERS += \
     src/baseimporter.h \
     src/cocoexporter.h \
     src/darknetimporter.h \
+    src/exporter.h \
+    src/gcpexporter.h \
     src/imagedisplay.h \
     src/importdialog.h \
     src/pascalvocexporter.h \

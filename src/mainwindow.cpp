@@ -1005,7 +1005,6 @@ void MainWindow::handleExportDialog(){
         exporter.setOutputFolder(export_dialog->getOutputFolder());
         exporter.splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
         exporter.process(export_dialog->getCreateLabelMap());
-
     }else if(export_dialog->getExporter().startsWith("COCO")){
         CocoExporter exporter(project);
         exporter.moveToThread(export_thread);
@@ -1013,7 +1012,15 @@ void MainWindow::handleExportDialog(){
         exporter.splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
         exporter.setExportUnlabelled(export_dialog->getExportUnlablled());
         exporter.process();
-    }
+    }else if(export_dialog->getExporter().startsWith("GCP")){
+        GCPExporter exporter(project);
+        exporter.moveToThread(export_thread);
+        exporter.setBucket(export_dialog->getBucket());
+        exporter.setOutputFolder(export_dialog->getOutputFolder());
+        exporter.splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
+        exporter.setExportUnlabelled(export_dialog->getExportUnlablled());
+        exporter.process();
+        }
 }
 
 void MainWindow::launchExportDialog(){

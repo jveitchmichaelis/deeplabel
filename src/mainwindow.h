@@ -16,11 +16,7 @@
 #include <opencv2/opencv.hpp>
 #include <imagelabel.h>
 #include <labelproject.h>
-
-#include <kittiexporter.h>
-#include <darknetexporter.h>
-#include <pascalvocexporter.h>
-#include <cocoexporter.h>
+#include <exporter.h>
 
 #include <darknetimporter.h>
 
