@@ -6,10 +6,10 @@ bool GCPExporter::processImages(const QString folder,
                                 gcp_image_type split_type){
     QString image_path;
     QList<BoundingBox> labels;
-    QString label_filename = QString("%1/%2.txt").arg(folder).arg(filename);
+    QString label_filename = QString("%1/%2.csv").arg(folder).arg(filename);
 
     QFile f(label_filename);
-    if (!f.open(QIODevice::Append | QIODevice::Truncate)) {
+    if (!f.open(QIODevice::Append)) {
         return false;
     }
 
@@ -29,8 +29,6 @@ bool GCPExporter::processImages(const QString folder,
     }else{
         split_text = "UNASSIGNED";
     }
-
-
 
     int i=0;
 
@@ -81,7 +79,7 @@ bool GCPExporter::processImages(const QString folder,
                     .arg(QString::number(static_cast<double>(label.rect.topLeft().x())/width))
                     .arg(QString::number(static_cast<double>(label.rect.topLeft().y())/height))
                     .arg(QString::number(static_cast<double>(label.rect.bottomRight().x())/width))
-                    .arg(QString::number(static_cast<double>(label.rect.bottomRight().x())/height));
+                    .arg(QString::number(static_cast<double>(label.rect.bottomRight().y())/height));
 
            qDebug() << gcp_label;
 
