@@ -21,7 +21,15 @@ void DarknetImporter::import(QString image_list, QString names_file){
     // Get image filenames
     auto filenames = readLines(image_list);
 
+    QProgressDialog progress("...", "Abort", 0, filenames.size(), static_cast<QWidget*>(parent()));
+    progress.setWindowModality(Qt::WindowModal);
+    progress.setWindowTitle("Loading images");
+    int i = 0;
+
     for(auto &image_path : filenames){
+
+        if(progress.wasCanceled())
+            break;
 
         qDebug() << "Importing " << image_path;
 
@@ -30,6 +38,9 @@ void DarknetImporter::import(QString image_list, QString names_file){
         qDebug() << "Found: " << boxes.size() << " labels.";
 
         addAsset(image_path, boxes);
+
+        progress.setValue(++i);
+        progress.setLabelText(image_path);
 
     }
 }
@@ -48,7 +59,6 @@ QList<BoundingBox> DarknetImporter::loadLabels(QString image_path){
     if(width <= 0 || height <= 0) return boxes;
 
     auto lines = readLines(label_filename);
-
     for(auto &line : lines){
         BoundingBox bbox;
         auto label = line.simplified().split(" ");
