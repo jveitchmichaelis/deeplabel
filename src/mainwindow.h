@@ -131,7 +131,7 @@ private slots:
     void setupDetector();
     void setConfidenceThreshold();
     void setNMSThreshold();
-
+    void computeStatistics();
 
     void updateCurrentIndex(int index);
 
