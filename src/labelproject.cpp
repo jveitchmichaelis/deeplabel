@@ -767,6 +767,34 @@ int LabelProject::addImageFolder(QString path){
 
 }
 
+bool LabelProject::addLabelledAssets(QList<QString> images, QList<QList<BoundingBox>> bboxes){
+    if(images.size() != bboxes.size())
+        return false;
+
+    QSqlDatabase::database().transaction();
+
+    QProgressDialog progress("...", "Abort", 0, images.size(), static_cast<QWidget*>(parent()));
+    progress.setWindowModality(Qt::WindowModal);
+    progress.setWindowTitle("Loading into database");
+
+    for(int i=0; i < images.size(); ++i){
+
+        if(progress.wasCanceled())
+            break;
+
+        auto image = images[i];
+        addAsset(image);
+        for(auto &bbox : bboxes[i]){
+            addLabel(image, bbox);
+        }
+
+        progress.setValue(++i);
+        progress.setLabelText(image);
+    }
+
+    return QSqlDatabase::database().commit();
+}
+
 bool LabelProject::addClass(QString className)
 {
     /*!
