@@ -906,6 +906,9 @@ void MainWindow::newProject()
     if(fileName != ""){
         free(project);
         project = new LabelProject;
+        if(!fileName.endsWith((".lbldb")))
+            fileName += ".lbldb";
+
         project->createDatabase(fileName);
         openProject(fileName);
     }
