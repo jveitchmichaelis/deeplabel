@@ -313,7 +313,7 @@ bool LabelProject::addAsset(QString fileName)
 
     if(imageInDB(fileName)){
         qDebug() << "Image exists!";
-        return true;
+        return false;
     }
     QFileInfo check_file(fileName);
 
@@ -783,13 +783,14 @@ bool LabelProject::addLabelledAssets(QList<QString> images, QList<QList<Bounding
             break;
 
         auto image = images[i];
-        addAsset(image);
-        for(auto &bbox : bboxes[i]){
-            addLabel(image, bbox);
+        if(addAsset(image)){
+            for(auto &bbox : bboxes[i]){
+                addLabel(image, bbox);
+            }
         }
 
-        progress.setValue(++i);
-        progress.setLabelText(image);
+        progress.setValue(i);
+        progress.setLabelText(QString("%1/%2: %3").arg(i).arg(images.size()).arg(image));
     }
 
     return QSqlDatabase::database().commit();

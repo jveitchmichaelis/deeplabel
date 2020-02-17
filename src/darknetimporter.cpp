@@ -37,11 +37,14 @@ void DarknetImporter::import(QString image_list, QString names_file){
         bboxes.append(loadLabels(image_path));
 
         progress.setValue(++i);
-        progress.setLabelText(image_path);
+        progress.setLabelText(QString("%1/%2: %3").arg(i).arg(filenames.size()).arg(image_path));
 
     }
-    qDebug() << "Loading images into DB";
-    project->addLabelledAssets(filenames.mid(0, bboxes.size()), bboxes);
+
+    if(progress.wasCanceled())
+        project->addLabelledAssets(filenames.mid(0, bboxes.size()), bboxes);
+    else
+        project->addLabelledAssets(filenames, bboxes);
 }
 
 QList<BoundingBox> DarknetImporter::loadLabels(QString image_path){

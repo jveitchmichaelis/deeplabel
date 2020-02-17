@@ -22,10 +22,8 @@ bool CocoExporter::processImages(const QString folder, const QString label_filen
     QJsonArray licenses_array;
     QJsonArray image_array;
     QJsonArray category_array;
-
-    int i = 0;
-
     QList<QString> classnames;
+
     project->getClassList(classnames);
 
     for(auto &classname : classnames){
@@ -37,7 +35,15 @@ bool CocoExporter::processImages(const QString folder, const QString label_filen
         category_array.append(category);
     }
 
+    QProgressDialog progress("...", "Abort", 0, images.size(), static_cast<QWidget*>(parent()));
+    progress.setWindowModality(Qt::WindowModal);
+    progress.setWindowTitle("Exporting images");
+    int i = 0;
+
     foreach(image_path, images){
+        if(progress.wasCanceled())
+            break;
+
         project->getLabels(image_path, labels);
 
         if(!export_unlabelled && labels.size() == 0) continue;
@@ -111,7 +117,9 @@ bool CocoExporter::processImages(const QString folder, const QString label_filen
         }
 
         image_id++;
-        emit export_progress((100 * i++)/images.size());
+
+        progress.setValue(++i);
+        progress.setLabelText(image_path);
     }
 
     QJsonObject license;
