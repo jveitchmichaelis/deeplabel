@@ -1060,7 +1060,7 @@ void MainWindow::refineRange(int start, int end){
     QList<QString> images;
     project->getImageList(images);
 
-    QProgressDialog progress("Refining images", "Cancel", 0, start-end, this);
+    QProgressDialog progress("Refining images", "Cancel", 0, end-start, this);
     progress.setWindowModality(Qt::WindowModal);
     progress.setLabelText("...");
     QApplication::processEvents(); // Otherwise stuff can happen a wee bit fast
