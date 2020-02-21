@@ -99,8 +99,10 @@ void ImportDialog::setNamesFile(QString path){
 
 bool ImportDialog::checkOK(){
 
-    // If output folder exists
-    if(!QDir(input_file).exists() || input_file == ""){
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setDisabled(true);
+
+    // If input file exists
+    if(!QFile(input_file).exists() || input_file == ""){
         qDebug() << "Import file/folder doesn't exist";
         return false;
     }
@@ -131,7 +133,7 @@ bool ImportDialog::checkOK(){
         }
     }
 
-    return true;
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
 }
 
 
