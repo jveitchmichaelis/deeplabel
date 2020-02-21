@@ -125,6 +125,8 @@ void ExportDialog::setNamesFile(QString path){
 
 bool ExportDialog::checkOK(){
 
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setDisabled(true);
+
     // If output folder exists
     if(!QDir(output_folder).exists() || output_folder == ""){
         qDebug() << "Export output folder doesn't exist";
@@ -161,7 +163,7 @@ bool ExportDialog::checkOK(){
         }
     }
 
-    return true;
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
 }
 
 bool ExportDialog::getCreateLabelMap(void){
