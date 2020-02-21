@@ -109,6 +109,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionDetect_project, SIGNAL(triggered(bool)), this, SLOT(detectProject()));
     //ui->actionInit_Tracking->setIcon(awesome->icon(fa::objectungroup, options));
 
+    refine_range_dialog = new RefineRangeDialog(this);
+    connect(ui->actionRefine_image_range, SIGNAL(triggered(bool)), refine_range_dialog, SLOT(open()));
+    connect(refine_range_dialog, SIGNAL(accepted()), this, SLOT(handleRefineRange()));
+
     resize(QGuiApplication::primaryScreen()->availableSize() * 3 / 5);
 
 }
@@ -452,7 +456,7 @@ void MainWindow::updateImageList(){
     ui->imageNumberSpinbox->setMaximum(number_images);
     ui->imageNumberSpinbox->setValue(1);
 
-
+    refine_range_dialog->setMaxImage(number_images);
 }
 
 void MainWindow::updateClassList(){
@@ -868,6 +872,7 @@ void MainWindow::previousImage(){
 
 void MainWindow::updateCurrentIndex(int index){
     current_index = index;
+    ui->imageNumberSpinbox->setValue(current_index);
     updateDisplay();
 }
 
@@ -1036,6 +1041,44 @@ void MainWindow::launchExportDialog(){
     connect(export_dialog, SIGNAL(accepted()), this, SLOT(handleExportDialog()));
 
     export_dialog->open();
+}
+
+void MainWindow::handleRefineRange(){
+
+    if(refine_range_dialog->result() != QDialog::Accepted ){
+        qDebug() << "Rejected";
+        return;
+    }
+
+    refineRange(refine_range_dialog->getStart(), refine_range_dialog->getEnd());
+}
+
+void MainWindow::refineRange(int start, int end){
+
+    if(start == -1 || end == -1) return;
+
+    QList<QString> images;
+    project->getImageList(images);
+
+    QProgressDialog progress("Refining images", "Cancel", 0, start-end, this);
+    progress.setWindowModality(Qt::WindowModal);
+    progress.setLabelText("...");
+    QApplication::processEvents(); // Otherwise stuff can happen a wee bit fast
+
+    for(int i = start; i < end; ++i){
+        if(progress.wasCanceled())
+            break;
+
+        progress.setLabelText(images[i]);
+
+        updateCurrentIndex(i);
+        refineBoxes();
+        nextImage();
+
+        progress.setValue(i);
+        QApplication::processEvents();
+
+    }
 }
 
 void MainWindow::computeStatistics(void){

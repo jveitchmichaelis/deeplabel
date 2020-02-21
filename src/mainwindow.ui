@@ -443,7 +443,7 @@
    </widget>
    <widget class="QMenu" name="menuImages">
     <property name="enabled">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="title">
      <string>Images</string>
@@ -453,6 +453,7 @@
     <addaction name="actionAdd_image_folders"/>
     <addaction name="actionAdd_video"/>
     <addaction name="actionCalculate_histograms"/>
+    <addaction name="actionRefine_image_range"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuImages"/>
@@ -524,6 +525,9 @@
    </property>
   </action>
   <action name="actionAdd_image">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Add image(s)</string>
    </property>
@@ -710,6 +714,11 @@
    </property>
    <property name="text">
     <string>Calculate histograms</string>
+   </property>
+  </action>
+  <action name="actionRefine_image_range">
+   <property name="text">
+    <string>Refine image range</string>
    </property>
   </action>
  </widget>

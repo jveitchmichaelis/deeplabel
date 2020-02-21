@@ -90,7 +90,8 @@ SOURCES += \
     src/importdialog.cpp \
     src/pascalvocexporter.cpp \
     detection/detectoropencv.cpp \
-    detection/detectorsetupdialog.cpp
+    detection/detectorsetupdialog.cpp \
+    src/refinerangedialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -111,14 +112,16 @@ HEADERS += \
     src/importdialog.h \
     src/pascalvocexporter.h \
     detection/detectoropencv.h \
-    detection/detectorsetupdialog.h
+    detection/detectorsetupdialog.h \
+    src/refinerangedialog.h
 
 FORMS += \
     src/importdialog.ui \
         src/mainwindow.ui \
     src/exportdialog.ui \
     src/imagedisplay.ui \
-    detection/detectorsetupdialog.ui
+    detection/detectorsetupdialog.ui \
+    src/refinerangedialog.ui
 
 include(QtAwesome/QtAwesome/QtAwesome.pri)
 

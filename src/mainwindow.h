@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <exportdialog.h>
 #include <importdialog.h>
+#include <refinerangedialog.h>
 #include <multitracker.h>
 #include <imagedisplay.h>
 
@@ -49,6 +50,7 @@ private:
     ImageLabel *currentImage;
     ExportDialog *export_dialog;
     ImportDialog *import_dialog;
+    RefineRangeDialog *refine_range_dialog;
     MultiTracker *multitracker;
     QScrollArea *imageScrollArea;
     ImageDisplay *display;
@@ -134,7 +136,8 @@ private slots:
     void computeStatistics();
 
     void updateCurrentIndex(int index);
-
+    void refineRange(int start, int end);
+    void handleRefineRange();
 signals:
     void selectedClass(QString);
 
