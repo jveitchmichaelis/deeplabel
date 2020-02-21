@@ -53,7 +53,13 @@ DetectorSetupDialog::DetectorSetupDialog(QWidget *parent) :
     }else if(target == cv::dnn::DNN_TARGET_OPENCL_FP16){
         ui->targetComboBox->setCurrentText("OpenCL FP16");
     }
-
+#ifdef WITH_CUDA
+    }else if(target == cv::dnn::DNN_TARGET_CUDA){
+        ui->targetComboBox->setCurrentText("OpenCL FP16");
+    }else if(target == cv::dnn::DNN_TARGET_CUDA_FP16){
+        ui->targetComboBox->setCurrentText("OpenCL FP16");
+    }
+#endif
     updateFields();
     checkForm();
 
