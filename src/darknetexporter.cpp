@@ -40,7 +40,6 @@ void DarknetExporter::writeLabels(const cv::Mat &image, const QString label_file
     if (f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
         BoundingBox label;
         foreach(label, labels){
-            QString text;
 
             // Check if this label exists in the database
             if(id_map.find(label.classname.toLower()) == id_map.end()){
@@ -53,15 +52,18 @@ void DarknetExporter::writeLabels(const cv::Mat &image, const QString label_file
             double width = static_cast<double>(label.rect.width())/image.cols;
             double height = static_cast<double>(label.rect.height())/image.rows;
 
-            text += QString("%1").arg(id_map[label.classname.toLower()]);
-            text += QString(" %1").arg(x);
-            text += QString(" %1").arg(y);
-            text += QString(" %1").arg(width);
-            text += QString(" %1").arg(height);
-            text += "\n";
+            if (width > 0 && height > 0) {
+                QString text;
 
-            f.write(text.toUtf8());
+                text += QString("%1").arg(id_map[label.classname.toLower()]);
+                text += QString(" %1").arg(x);
+                text += QString(" %1").arg(y);
+                text += QString(" %1").arg(width);
+                text += QString(" %1").arg(height);
+                text += "\n";
 
+                f.write(text.toUtf8());
+            }
         }
     }
 }
