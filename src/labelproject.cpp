@@ -691,7 +691,7 @@ bool LabelProject::addLabel(QString fileName, BoundingBox bbox)
         class_id = bbox.classid;
     }
 
-    if(image_id > 0 && class_id > 0){
+    if(image_id > 0 && class_id > 0 && bbox.rect.width()*bbox.rect.height() > 0){
         {
             QSqlQuery query(db);
 
