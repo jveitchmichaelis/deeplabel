@@ -445,6 +445,10 @@ bool LabelProject::getLabels(int image_id, QList<BoundingBox> &bboxes){
                 new_bbox.rect.setWidth(rec.value(rec.indexOf("width")).toInt());
                 new_bbox.rect.setHeight(rec.value(rec.indexOf("height")).toInt());
 
+                if(new_bbox.rect.width()*new_bbox.rect.height() <= 0){
+                    continue;
+                }
+
                 bboxes.append(new_bbox);
             }
         }
