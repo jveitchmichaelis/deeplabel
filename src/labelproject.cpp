@@ -311,9 +311,14 @@ bool LabelProject::addAsset(QString fileName)
      */
     bool res = false;
 
+    if(!QFile::exists(fileName)){
+        qDebug() << "File not found on disk " << fileName;
+        return false;
+    }
+
     if(imageInDB(fileName)){
         qDebug() << "Image exists!";
-        return false;
+        return true;
     }
     QFileInfo check_file(fileName);
 

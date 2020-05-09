@@ -187,13 +187,6 @@
           </widget>
          </item>
          <item row="7" column="2">
-          <widget class="QPushButton" name="removeLabelsForwardButton">
-           <property name="text">
-            <string>Remove next labels</string>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="0">
           <widget class="QPushButton" name="removeImageLabelsButton">
            <property name="text">
             <string>Remove image labels</string>
@@ -455,10 +448,18 @@
     <addaction name="actionCalculate_histograms"/>
     <addaction name="actionRefine_image_range"/>
    </widget>
+   <widget class="QMenu" name="menuLabeling">
+    <property name="title">
+     <string>Labeling</string>
+    </property>
+    <addaction name="actionRemove_image_labels"/>
+    <addaction name="actionRemove_labels_forwards"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuImages"/>
    <addaction name="menuNavigation"/>
    <addaction name="menuDetection"/>
+   <addaction name="menuLabeling"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <property name="enabled">
@@ -719,6 +720,16 @@
   <action name="actionRefine_image_range">
    <property name="text">
     <string>Refine image range</string>
+   </property>
+  </action>
+  <action name="actionRemove_labels_forwards">
+   <property name="text">
+    <string>Remove labels forwards</string>
+   </property>
+  </action>
+  <action name="actionRemove_image_labels">
+   <property name="text">
+    <string>Remove image labels</string>
    </property>
   </action>
  </widget>

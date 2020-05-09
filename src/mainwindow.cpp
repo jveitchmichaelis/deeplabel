@@ -50,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->removeClassButton, SIGNAL(clicked(bool)), this, SLOT(removeClass()));
     connect(ui->removeImageButton, SIGNAL(clicked(bool)), this, SLOT(removeImage()));
     connect(ui->removeImageLabelsButton, SIGNAL(clicked(bool)), this, SLOT(removeImageLabels()));
-    connect(ui->removeLabelsForwardButton, SIGNAL(clicked(bool)), this, SLOT(removeImageLabelsForward()));
+    connect(ui->actionRemove_labels_forwards, SIGNAL(triggered(bool)), this, SLOT(removeImageLabelsForward()));
 
     ui->actionDraw_Tool->setChecked(true);
 
@@ -1151,9 +1151,14 @@ void MainWindow::handleImportDialog(){
         importer.moveToThread(import_thread);
         importer.setImportUnlabelled(import_dialog->getImportUnlabelled());
         importer.import(import_dialog->getInputFile(), import_dialog->getNamesFile());
+    }else if(import_dialog->getImporter() == "Coco"){
+        CocoImporter importer(project);
+        importer.moveToThread(import_thread);
+        importer.setImportUnlabelled(import_dialog->getImportUnlabelled());
+        importer.import(import_dialog->getAnnotationFile());
     }
 
-    updateDisplay();
+    initDisplay();
 }
 
 void MainWindow::launchImportDialog(){

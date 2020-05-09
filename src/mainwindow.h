@@ -19,6 +19,7 @@
 #include <exporter.h>
 
 #include <darknetimporter.h>
+#include <cocoimporter.h>
 
 #include <detection/detectoropencv.h>
 #include <detection/detectorsetupdialog.h>

@@ -6,6 +6,8 @@
 class DarknetImporter : public BaseImporter
 {
 public:
+    using BaseImporter::import;
+
     explicit DarknetImporter(LabelProject *project, QObject *parent = nullptr) : BaseImporter(parent){
         this->project = project;
     }

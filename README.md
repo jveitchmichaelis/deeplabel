@@ -23,6 +23,13 @@ A typical workflow for DeepLabel is:
 4. Label the images
 5. Export data in the desired format
 
+## Data import
+
+Currently you can import data in the following formats:
+
+* Darknet (provide image list and names)
+* COCO (provide an annotation .json file)
+
 ## Data export
 
 Currently you can export in:

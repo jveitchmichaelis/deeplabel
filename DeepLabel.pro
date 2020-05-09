@@ -91,7 +91,8 @@ SOURCES += \
     src/pascalvocexporter.cpp \
     detection/detectoropencv.cpp \
     detection/detectorsetupdialog.cpp \
-    src/refinerangedialog.cpp
+    src/refinerangedialog.cpp \
+    src/cocoimporter.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -113,7 +114,8 @@ HEADERS += \
     src/pascalvocexporter.h \
     detection/detectoropencv.h \
     detection/detectorsetupdialog.h \
-    src/refinerangedialog.h
+    src/refinerangedialog.h \
+    src/cocoimporter.h
 
 FORMS += \
     src/importdialog.ui \
