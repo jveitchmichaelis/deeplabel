@@ -1,6 +1,9 @@
 # DeepLabel
 
-Mac CI: [![Build Status](https://travis-ci.org/jveitchmichaelis/deeplabel.svg?branch=master)](https://travis-ci.org/jveitchmichaelis/deeplabel)
+**Mac CI:** [![Build Status](https://travis-ci.org/jveitchmichaelis/deeplabel.svg?branch=master)](https://travis-ci.org/jveitchmichaelis/deeplabel)
+
+**If you use DeepLabel for research or commercial purposes, please cite here!** [![DOI](https://zenodo.org/badge/105791274.svg)](https://zenodo.org/badge/latestdoi/105791274)
+
 
 Download the [latest release](https://github.com/jveitchmichaelis/deeplabel/releases/latest)!
 
