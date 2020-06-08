@@ -20,18 +20,31 @@ void DarknetImporter::import(QString image_list, QString names_file){
 
     // Get image filenames
     auto filenames = readLines(image_list);
+    filenames.sort();
+
+    QProgressDialog progress("...", "Abort", 0, filenames.size(), static_cast<QWidget*>(parent()));
+    progress.setWindowModality(Qt::WindowModal);
+    progress.setWindowTitle("Loading images and labels");
+    int i = 0;
+
+    QList<QList<BoundingBox>> bboxes;
 
     for(auto &image_path : filenames){
 
-        qDebug() << "Importing " << image_path;
+        if(progress.wasCanceled())
+            break;
 
-        auto boxes = loadLabels(image_path);
+        bboxes.append(loadLabels(image_path));
 
-        qDebug() << "Found: " << boxes.size() << " labels.";
-
-        addAsset(image_path, boxes);
+        progress.setValue(++i);
+        progress.setLabelText(QString("%1/%2: %3").arg(i).arg(filenames.size()).arg(image_path));
 
     }
+
+    if(progress.wasCanceled())
+        project->addLabelledAssets(filenames.mid(0, bboxes.size()), bboxes);
+    else
+        project->addLabelledAssets(filenames, bboxes);
 }
 
 QList<BoundingBox> DarknetImporter::loadLabels(QString image_path){
@@ -48,15 +61,18 @@ QList<BoundingBox> DarknetImporter::loadLabels(QString image_path){
     if(width <= 0 || height <= 0) return boxes;
 
     auto lines = readLines(label_filename);
-
     for(auto &line : lines){
         BoundingBox bbox;
         auto label = line.simplified().split(" ");
 
         if(label.size() != 5) continue;
 
-        // bbox.classname = project->getClassName();
-        bbox.classid = label.at(0).toInt();
+        bbox.classid = label.at(0).toInt() + 1; // Since in the database they're 1-indexed
+        bbox.classname = project->getClassName(bbox.classid);
+
+        if(bbox.classname == ""){
+            qDebug() << "Warning. Class" << bbox.classid << " not found in names file.";
+        }
 
         int center_x = static_cast<int>(label.at(1).toFloat() * width);
         int center_y = static_cast<int>(label.at(2).toFloat() * height);
@@ -89,6 +105,7 @@ void DarknetImporter::loadClasses(QString names_file){
             if(QString(line) == "") continue;
 
             project->addClass(line.simplified());
+            qDebug() << line.simplified();
         }
     }
 

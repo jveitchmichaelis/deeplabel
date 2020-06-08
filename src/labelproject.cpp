@@ -311,6 +311,11 @@ bool LabelProject::addAsset(QString fileName)
      */
     bool res = false;
 
+    if(!QFile::exists(fileName)){
+        qDebug() << "File not found on disk " << fileName;
+        return false;
+    }
+
     if(imageInDB(fileName)){
         qDebug() << "Image exists!";
         return true;
@@ -444,6 +449,10 @@ bool LabelProject::getLabels(int image_id, QList<BoundingBox> &bboxes){
                 new_bbox.rect.setY(rec.value(rec.indexOf("y")).toInt());
                 new_bbox.rect.setWidth(rec.value(rec.indexOf("width")).toInt());
                 new_bbox.rect.setHeight(rec.value(rec.indexOf("height")).toInt());
+
+                if(new_bbox.rect.width()*new_bbox.rect.height() <= 0){
+                    continue;
+                }
 
                 bboxes.append(new_bbox);
             }
@@ -691,7 +700,7 @@ bool LabelProject::addLabel(QString fileName, BoundingBox bbox)
         class_id = bbox.classid;
     }
 
-    if(image_id > 0 && class_id > 0){
+    if(image_id > 0 && class_id > 0 && bbox.rect.width()*bbox.rect.height() > 0){
         {
             QSqlQuery query(db);
 
@@ -765,6 +774,35 @@ int LabelProject::addImageFolder(QString path){
 
     return number_added;
 
+}
+
+bool LabelProject::addLabelledAssets(QList<QString> images, QList<QList<BoundingBox>> bboxes){
+    if(images.size() != bboxes.size())
+        return false;
+
+    QSqlDatabase::database().transaction();
+
+    QProgressDialog progress("...", "Abort", 0, images.size(), static_cast<QWidget*>(parent()));
+    progress.setWindowModality(Qt::WindowModal);
+    progress.setWindowTitle("Loading into database");
+
+    for(int i=0; i < images.size(); ++i){
+
+        if(progress.wasCanceled())
+            break;
+
+        auto image = images[i];
+        if(addAsset(image)){
+            for(auto &bbox : bboxes[i]){
+                addLabel(image, bbox);
+            }
+        }
+
+        progress.setValue(i);
+        progress.setLabelText(QString("%1/%2: %3").arg(i).arg(images.size()).arg(image));
+    }
+
+    return QSqlDatabase::database().commit();
 }
 
 bool LabelProject::addClass(QString className)

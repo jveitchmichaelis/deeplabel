@@ -50,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->removeClassButton, SIGNAL(clicked(bool)), this, SLOT(removeClass()));
     connect(ui->removeImageButton, SIGNAL(clicked(bool)), this, SLOT(removeImage()));
     connect(ui->removeImageLabelsButton, SIGNAL(clicked(bool)), this, SLOT(removeImageLabels()));
-    connect(ui->removeLabelsForwardButton, SIGNAL(clicked(bool)), this, SLOT(removeImageLabelsForward()));
+    connect(ui->actionRemove_labels_forwards, SIGNAL(triggered(bool)), this, SLOT(removeImageLabelsForward()));
 
     ui->actionDraw_Tool->setChecked(true);
 
@@ -66,6 +66,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionRefine_boxes, SIGNAL(triggered(bool)), this, SLOT(refineBoxes()));
 
     connect(ui->actionSetup_detector, SIGNAL(triggered(bool)), this, SLOT(setupDetector()));
+    connect(ui->actionCalculate_histograms, SIGNAL(triggered(bool)), this, SLOT(computeStatistics()));
 
     auto prev_shortcut = ui->actionPreviousImage->shortcuts();
     prev_shortcut.append(QKeySequence("Left"));
@@ -107,6 +108,10 @@ MainWindow::MainWindow(QWidget *parent) :
     detector.setNMSThreshold(settings->value("detector_nms_threshold", 0.4).toDouble());
     connect(ui->actionDetect_project, SIGNAL(triggered(bool)), this, SLOT(detectProject()));
     //ui->actionInit_Tracking->setIcon(awesome->icon(fa::objectungroup, options));
+
+    refine_range_dialog = new RefineRangeDialog(this);
+    connect(ui->actionRefine_image_range, SIGNAL(triggered(bool)), refine_range_dialog, SLOT(open()));
+    connect(refine_range_dialog, SIGNAL(accepted()), this, SLOT(handleRefineRange()));
 
     resize(QGuiApplication::primaryScreen()->availableSize() * 3 / 5);
 
@@ -451,7 +456,7 @@ void MainWindow::updateImageList(){
     ui->imageNumberSpinbox->setMaximum(number_images);
     ui->imageNumberSpinbox->setValue(1);
 
-
+    refine_range_dialog->setMaxImage(number_images);
 }
 
 void MainWindow::updateClassList(){
@@ -867,6 +872,7 @@ void MainWindow::previousImage(){
 
 void MainWindow::updateCurrentIndex(int index){
     current_index = index;
+    ui->imageNumberSpinbox->setValue(current_index);
     updateDisplay();
 }
 
@@ -899,7 +905,11 @@ void MainWindow::updateImageInfo(void){
 void MainWindow::newProject()
 {
     QString openDir = settings->value("project_folder", QDir::homePath()).toString();
-    QString fileName = QFileDialog::getSaveFileName(this, tr("New Project"),
+
+    QFileDialog dialog(this);
+    dialog.setDefaultSuffix(".lbldb");
+
+    QString fileName = dialog.getSaveFileName(this, tr("New Project"),
                                                     openDir,
                                                     tr("Label database (*.lbldb)"));
 
@@ -1033,6 +1043,102 @@ void MainWindow::launchExportDialog(){
     export_dialog->open();
 }
 
+void MainWindow::handleRefineRange(){
+
+    if(refine_range_dialog->result() != QDialog::Accepted ){
+        qDebug() << "Rejected";
+        return;
+    }
+
+    refineRange(refine_range_dialog->getStart(), refine_range_dialog->getEnd());
+}
+
+void MainWindow::refineRange(int start, int end){
+
+    if(start == -1 || end == -1) return;
+
+    QList<QString> images;
+    project->getImageList(images);
+
+    QProgressDialog progress("Refining images", "Cancel", 0, end-start, this);
+    progress.setWindowModality(Qt::WindowModal);
+    progress.setLabelText("...");
+    QApplication::processEvents(); // Otherwise stuff can happen a wee bit fast
+
+    for(int i = start; i < end; ++i){
+        if(progress.wasCanceled())
+            break;
+
+        progress.setLabelText(images[i]);
+
+        updateCurrentIndex(i);
+        refineBoxes();
+        nextImage();
+
+        progress.setValue(i);
+        QApplication::processEvents();
+
+    }
+}
+
+void MainWindow::computeStatistics(void){
+    QList<QString> images;
+    project->getImageList(images);
+    std::vector<cv::Mat> histograms;
+    histograms.resize(4);
+
+    QProgressDialog progress("...", "Abort", 0, images.size(), this->parentWidget());
+    progress.setWindowModality(Qt::WindowModal);
+    progress.setWindowTitle("Calculating stats");
+    progress.show();
+    int i = 0;
+
+    for(auto &image_path : images){
+        if(progress.wasCanceled())
+            break;
+
+        auto image = cv::imread(image_path.toStdString(), cv::IMREAD_UNCHANGED);
+        std::vector<cv::Mat> image_channels;
+        cv::split( image, image_channels );
+        int histSize = 65536;
+        float range[] = { 0, 65536 }; //the upper boundary is exclusive
+        const float* histRange = { range };
+        bool uniform = true, accumulate = true;
+
+        for(int c=0; c < static_cast<int>(image_channels.size()); ++c){
+            cv::calcHist( &image_channels[c], 1, 0, cv::Mat(), histograms[c], 1, &histSize, &histRange, uniform, accumulate );
+        }
+
+        progress.setValue(++i);
+        progress.setLabelText(image_path);
+
+        QApplication::processEvents();
+    }
+
+    for(auto &histogram : histograms){
+
+        double s = 0;
+        double total_hist = 0;
+
+        for(int i=0; i < histogram.total(); ++i){
+            s += histogram.at<float>(i) * (i + 0.5); // bin centre
+            total_hist += histogram.at<float>(i);
+        }
+
+        double mean = s / total_hist;
+
+        double t = 0;
+        for(int i=0; i < histogram.total(); ++i){
+          double x = (i - mean);
+          t += histogram.at<float>(i)*x*x;
+        }
+        double stdev = std::sqrt(t / total_hist);
+
+        qDebug() << "Mean: " << mean;
+        qDebug() << "Std: " << stdev;
+    }
+}
+
 void MainWindow::handleImportDialog(){
 
     // If we hit OK and not cancel
@@ -1045,7 +1151,14 @@ void MainWindow::handleImportDialog(){
         importer.moveToThread(import_thread);
         importer.setImportUnlabelled(import_dialog->getImportUnlabelled());
         importer.import(import_dialog->getInputFile(), import_dialog->getNamesFile());
+    }else if(import_dialog->getImporter() == "Coco"){
+        CocoImporter importer(project);
+        importer.moveToThread(import_thread);
+        importer.setImportUnlabelled(import_dialog->getImportUnlabelled());
+        importer.import(import_dialog->getAnnotationFile());
     }
+
+    initDisplay();
 }
 
 void MainWindow::launchImportDialog(){

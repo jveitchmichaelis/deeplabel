@@ -1,6 +1,9 @@
 # DeepLabel
 
-Mac CI: [![Build Status](https://travis-ci.org/jveitchmichaelis/deeplabel.svg?branch=master)](https://travis-ci.org/jveitchmichaelis/deeplabel)
+**Mac CI:** [![Build Status](https://travis-ci.org/jveitchmichaelis/deeplabel.svg?branch=master)](https://travis-ci.org/jveitchmichaelis/deeplabel)
+
+**If you use DeepLabel for research or commercial purposes, please cite here!** [![DOI](https://zenodo.org/badge/105791274.svg)](https://zenodo.org/badge/latestdoi/105791274)
+
 
 Download the [latest release](https://github.com/jveitchmichaelis/deeplabel/releases/latest)!
 
@@ -22,6 +25,13 @@ A typical workflow for DeepLabel is:
 3. Load in a class list, or manually add classes
 4. Label the images
 5. Export data in the desired format
+
+## Data import
+
+Currently you can import data in the following formats:
+
+* Darknet (provide image list and names)
+* COCO (provide an annotation .json file)
 
 ## Data export
 

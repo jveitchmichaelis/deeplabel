@@ -2,6 +2,7 @@
 #define IMPORTDIALOG_H
 
 #include <QDialog>
+#include <QPushButton>
 #include <QFile>
 #include <QDir>
 #include <QFileDialog>
@@ -21,13 +22,14 @@ public:
     QString getImporter(){return current_importer; }
     QString getInputFile(){return input_file; }
     QString getNamesFile(){return names_file; }
+    QString getAnnotationFile(){return annotation_file; }
     bool getImportUnlabelled();
     ~ImportDialog();
 
-
-private slots:
+ private slots:
     void setNamesFile(QString path="");
     void setInputFile(QString path="");
+    void setAnnotationFile(QString path="");
     void toggleImporter();
     void setImportUnlabelled(bool res);
 
@@ -38,6 +40,7 @@ private:
     Ui::ImportDialog *ui;
     QString input_file = "";
     QString names_file = "";
+    QString annotation_file = "";
     QString current_importer = "Darknet";
     bool import_unlabelled;
 };

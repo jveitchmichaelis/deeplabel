@@ -14,6 +14,8 @@ ImportDialog::ImportDialog(QWidget *parent) :
     connect(ui->namesFilePushButton, SIGNAL(clicked()), this, SLOT(setNamesFile()));
     connect(ui->inputListLineEdit, SIGNAL(textEdited(QString)), SLOT(setInputFile(QString)));
     connect(ui->inputListPushButton, SIGNAL(clicked()), this, SLOT(setInputFile()));
+    connect(ui->annotationLineEdit, SIGNAL(textEdited(QString)), SLOT(setAnnotationFile(QString)));
+    connect(ui->annotationPushButton, SIGNAL(clicked()), this, SLOT(setAnnotationFile()));
 
     settings = new QSettings("DeepLabel", "DeepLabel");
 
@@ -31,6 +33,13 @@ ImportDialog::ImportDialog(QWidget *parent) :
         auto path = settings->value("names_file").toString();
         if(path != ""){
             setNamesFile(path);
+         }
+    }
+
+    if(settings->contains("annotation_file")){
+        auto path = settings->value("annotation_file").toString();
+        if(path != ""){
+            setAnnotationFile(path);
          }
     }
 
@@ -97,15 +106,62 @@ void ImportDialog::setNamesFile(QString path){
     checkOK();
 }
 
+void ImportDialog::setAnnotationFile(QString path){
+
+    if(path == ""){
+        QString openDir;
+
+        if(annotation_file == ""){
+             openDir = QDir::homePath();
+        }else{
+             openDir = QFileInfo(annotation_file).absoluteDir().absolutePath();
+        }
+
+        path = QFileDialog::getOpenFileName(this, tr("Select darknet names file"),
+                                                        openDir);
+    }
+
+    if(path != ""){
+        annotation_file = path;
+        ui->annotationLineEdit->setText(annotation_file);
+        settings->setValue("annotation_file", annotation_file);
+    }
+
+    checkOK();
+}
+
 bool ImportDialog::checkOK(){
 
-    // If output folder exists
-    if(!QDir(input_file).exists() || input_file == ""){
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setDisabled(true);
+
+    // If input file exists
+    if(!QFile(input_file).exists() || input_file == ""){
         qDebug() << "Import file/folder doesn't exist";
         return false;
     }
 
+    if(ui->importSelectComboBox->currentText() == "Coco"){
+        ui->namesFileLineEdit->setDisabled(true);
+        ui->namesFilePushButton->setDisabled(true);
+        ui->inputListLineEdit->setDisabled(true);
+        ui->inputListPushButton->setDisabled(true);
+        ui->annotationLineEdit->setEnabled(true);
+        ui->annotationPushButton->setEnabled(true);
+
+        if(!QFile::exists(annotation_file)){
+            qDebug() << "Names file doesn't exist";
+            return false;
+        }
+    }
+
     if(ui->importSelectComboBox->currentText() == "Darknet"){
+        ui->namesFileLineEdit->setEnabled(true);
+        ui->namesFilePushButton->setEnabled(true);
+        ui->inputListLineEdit->setEnabled(true);
+        ui->inputListPushButton->setEnabled(true);
+        ui->annotationLineEdit->setDisabled(true);
+        ui->annotationPushButton->setDisabled(true);
+
         // If we're using darknet, check the names
         // file exists and contains something
         if(!QFile::exists(names_file)){
@@ -131,6 +187,7 @@ bool ImportDialog::checkOK(){
         }
     }
 
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
     return true;
 }
 

@@ -10,7 +10,7 @@ class BaseImporter : public QObject
     Q_OBJECT
 public:
     explicit BaseImporter(QObject *parent = nullptr);
-    virtual void import(QString input_file, QString label_file) = 0;
+    void import(){};
 
     void setRootFolder(QString folder);
     void setImportUnlabelled(bool import);
