@@ -1,6 +1,7 @@
 #include "cocoimporter.h"
 #include <QJsonDocument>
 #include <QJsonArray>
+#include <QJsonObject>
 #include <boundingbox.h>
 
 void CocoImporter::import(QString annotation_file){
@@ -12,7 +13,7 @@ void CocoImporter::import(QString annotation_file){
     auto json = QJsonDocument::fromJson(json_data);
 
     // Load classes (categories)
-    auto categories = json["categories"];
+    auto categories = json.object().value("categories");
     if(categories == QJsonValue::Undefined){
         qDebug() << "Categories not found";
         return;
@@ -22,11 +23,11 @@ void CocoImporter::import(QString annotation_file){
     QJsonValue item;
     foreach(item, categories.toArray()){
 
-        auto item_name = item["name"];
+        auto item_name = item.toObject().value("name");
         if(item_name == QJsonValue::Undefined || !item_name.isString())
             continue;
 
-        auto item_id = item["id"];
+        auto item_id = item.toObject().value("id");
         if(item_id == QJsonValue::Undefined || !item_id.isDouble())
             continue;
 
@@ -38,7 +39,7 @@ void CocoImporter::import(QString annotation_file){
     }
 
     // Load images
-    auto images = json["images"];
+    auto images = json.object().value("images");
     if(images == QJsonValue::Undefined){
         qDebug() << "No images found";
         return;
@@ -51,11 +52,11 @@ void CocoImporter::import(QString annotation_file){
     QMap<int, QString> image_map;
     int i=0;
     foreach(image, images.toArray()){
-        auto file_name = image["file_name"];
+        auto file_name = image.toObject().value("file_name");
         if(file_name == QJsonValue::Undefined || !file_name.isString())
             continue;
 
-        auto file_id = image["id"];
+        auto file_id = image.toObject().value("id");
         if(file_id == QJsonValue::Undefined || !file_id.isDouble())
             continue;
 
@@ -68,7 +69,7 @@ void CocoImporter::import(QString annotation_file){
     }
 
     // Load labels
-    auto annotations = json["annotations"];
+    auto annotations = json.object().value("annotations");
     if(annotations == QJsonValue::Undefined){
         qDebug() << "No annotations found";
         return;
@@ -78,17 +79,17 @@ void CocoImporter::import(QString annotation_file){
 
     foreach(annotation, annotations.toArray()){
 
-        auto image_id = annotation["image_id"];
+        auto image_id = annotation.toObject().value("image_id");
         if(image_id == QJsonValue::Undefined || !image_id.isDouble())
             continue;
 
-        auto category_id = annotation["category_id"];
+        auto category_id = annotation.toObject().value("category_id");
         if(category_id == QJsonValue::Undefined || !category_id.isDouble())
             continue;
 
         auto image_filename = image_map[image_id.toInt()];
 
-        auto bbox = annotation["bbox"];
+        auto bbox = annotation.toObject().value("bbox");
         if(bbox == QJsonValue::Undefined || !bbox.isArray()){
             qDebug() << "No bounding box found";
             continue;
