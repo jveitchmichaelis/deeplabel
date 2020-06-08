@@ -195,6 +195,8 @@ void ImageDisplay::updateDisplay()
 
     imageLabel->setPixmap(pixmap);
 
+    repaint();
+
 }
 
 
