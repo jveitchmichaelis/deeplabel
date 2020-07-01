@@ -135,11 +135,12 @@ On Mac, Homebrew automatically include pkg-config support and the contrib packag
 
 **Linux**
 
-Build opencv using your preferred method.
+Build opencv using your preferred method. You need Qt5 installed - not just Qt Creator.
 
 Clone the repository, then:
 
 ```bash
+git submodule update --init --recursive
 qmake -makefile -o Makefile DeepLabel.pro
 make -j4
 ```
@@ -155,6 +156,7 @@ Note that qt is not linked by default, so either force link it (`brew link -f qt
 Clone the repo, open the pro file in Qt Creator and build. Deployment is automatic on Windows and OS X. Alternatively:
 
 ```bash
+git submodule update --init --recursive
 qmake -makefile -o Makefile DeepLabel.pro
 make -j4
 ```
@@ -167,7 +169,7 @@ Unfortunately you need to install OpenCV from source, because the official binar
 
 Once you've installed OpenCV...(!)
 
-Clone the repo, open the pro file in Qt Creator and modify the paths to your opencv install. Build as normal. Make sure you copy all the OpenCV DLLs after install.
+Clone the repo, update the submodules to fetch QtAwesome, open the pro file in Qt Creator and modify the paths to your opencv install. Build as normal. Make sure you copy all the OpenCV DLLs after install.
 
 Usage
 --
