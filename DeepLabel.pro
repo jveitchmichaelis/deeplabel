@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = DeepLabel
 TEMPLATE = app
 
-CONFIG += c++14 #Qt will ignore anything higher at the moment
+CONFIG += c++17 #Qt will ignore anything higher at the moment
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
