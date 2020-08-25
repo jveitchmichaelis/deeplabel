@@ -2,6 +2,7 @@
 #define DARKNETEXPORTER_H
 
 #include <baseexporter.h>
+#include <algorithm>
 
 class DarknetExporter : public BaseExporter
 {
