@@ -48,10 +48,10 @@ void DarknetExporter::writeLabels(const cv::Mat &image, const QString label_file
                 continue;
             }
 
-            double x = std::clamp(static_cast<double>(label.rect.center().x())/image.cols, 0, 0.999);
-            double y = std::clamp(static_cast<double>(label.rect.center().y())/image.rows, 0, 0.999);
-            double width = std::clamp(static_cast<double>(label.rect.width())/image.cols, 0, 0.999);
-            double height = std::clamp(static_cast<double>(label.rect.height())/image.rows, 0, 0.999);
+            double x = std::clamp(static_cast<double>(label.rect.center().x())/image.cols, 0.0, 0.999);
+            double y = std::clamp(static_cast<double>(label.rect.center().y())/image.rows, 0.0, 0.999);
+            double width = std::clamp(static_cast<double>(label.rect.width())/image.cols, 0.0, 0.999);
+            double height = std::clamp(static_cast<double>(label.rect.height())/image.rows, 0.0, 0.999);
 
             text += QString("%1").arg(id_map[label.classname.toLower()]);
             text += QString(" %1").arg(x);
