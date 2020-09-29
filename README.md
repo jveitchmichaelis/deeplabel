@@ -4,17 +4,17 @@
 
 **If you use DeepLabel for research or commercial purposes, please cite here!** [![DOI](https://zenodo.org/badge/105791274.svg)](https://zenodo.org/badge/latestdoi/105791274)
 
-
 Download the [latest release](https://github.com/jveitchmichaelis/deeplabel/releases/latest)!
 
 DeepLabel is a cross-platform tool for annotating images with labelled bounding boxes. A typical use-case for the program is labelling ground truth data for object-detection machine learning applications. DeepLabel runs as a standalone app and compiles on Windows, Linux and Mac.
 
+Deeplabel also supports running inference using state-of-the-art object detection models like Faster-RCNN and YOLOv4. With support out-of-the-box for CUDA, you can quickly label an entire dataset using an existing model.
+
+**Note: Deeplabel for Windows now packages CUDA and CUDNN for inference. This results an enormous distributable size as the cudnn inference libraries are 600MB+ alone. The CUDA runtime adds another 300MB. I'm looking into uploading simultaneous non-CUDA releases to save space. The alternative is to ask you to install CUDA and CUDNN yourself, but you'd need the correct version which is a pain.**
+
 Ready made binaries for Windows and OS X are on the release page. It is recommended that you build for Linux yourself.
 
 ![Deeplabel Interface](gui_example.png)
-
-**Note: while this tool is functional for simple image labelling, it is under active development and things like GUI layout and functionality are likely to change!**
-
 
 DeepLabel was built with convenience in mind. Image locations, classes and labels are stored in a local sqlite database (called a _project_, in the application). When a label is added or removed, this is immediately reflected in the database.
 
