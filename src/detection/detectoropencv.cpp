@@ -48,6 +48,18 @@ void DetectorOpenCV::setTarget(int target){
             cv::ocl::Device(context.device(1));
         }
     }
+#ifdef WITH_CUDA
+    else if(preferable_target == cv::dnn::DNN_TARGET_CUDA || preferable_target == cv::dnn::DNN_TARGET_CUDA_FP16){
+        // Check for GPU
+        auto devinfo = cv::cuda::DeviceInfo();
+        if (!devinfo.isCompatible()){
+            qDebug() << "OpenCL is not available. Falling back to CPU";
+            preferable_target = cv::dnn::DNN_TARGET_CPU;
+        }else{
+            qDebug() << "NVIDIA GPU detected.";
+        }
+    }
+#endif
 }
 
 void DetectorOpenCV::loadNetwork(std::string names_file, std::string cfg_file, std::string model_file){
@@ -57,7 +69,14 @@ void DetectorOpenCV::loadNetwork(std::string names_file, std::string cfg_file, s
     // Infer network type automatically
     net = cv::dnn::readNet(model_file, cfg_file);
 
-    net.setPreferableBackend(cv::dnn::DNN_BACKEND_DEFAULT);
+    // Should default to DNN_BACKEND_OPENCV (otherwise Intel inference engine)
+    if(preferable_target == cv::dnn::DNN_TARGET_CUDA || preferable_target == cv::dnn::DNN_TARGET_CUDA_FP16){
+        net.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
+        qDebug() << "Set backend and target to CUDA";
+    }else{
+        net.setPreferableBackend(cv::dnn::DNN_BACKEND_OPENCV);
+    }
+
     net.setPreferableTarget(preferable_target);
 
     getOutputClassNames();
@@ -94,7 +113,7 @@ void DetectorOpenCV::postProcessTensorflow(cv::Mat& frame, const std::vector<cv:
     std::cout << "Number of detections: " << numDetections << std::endl;
 
     // batch id, class id, confidence, bbox (x4)
-    detections = detections.reshape(1, detections.total() / 7);
+    detections = detections.reshape(1, static_cast<int>(detections.total()) / 7);
 
     // There are top-k (= 100 typical) detections, most of which should have
     // more or less zero confidence.
@@ -233,7 +252,6 @@ void DetectorOpenCV::postProcess(cv::Mat& frame, const std::vector<cv::Mat>& out
 std::vector<BoundingBox> DetectorOpenCV::infer(cv::Mat image){
 
     std::vector<BoundingBox> detections;
-
 
     // Assume we have an alpha image if 4 channels
     if(image.channels() == 4){

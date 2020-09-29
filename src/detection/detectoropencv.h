@@ -8,6 +8,9 @@
 
 #include<opencv2/opencv.hpp>
 #include<opencv2/core/ocl.hpp>
+#ifdef WITH_CUDA
+#include <opencv2/core/cuda.hpp>
+#endif
 #include<opencv2/dnn.hpp>
 
 #include<boundingbox.h>

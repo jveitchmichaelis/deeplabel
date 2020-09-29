@@ -54,10 +54,10 @@ DetectorSetupDialog::DetectorSetupDialog(QWidget *parent) :
         ui->targetComboBox->setCurrentText("OpenCL FP16");
     }
 #ifdef WITH_CUDA
-    }else if(target == cv::dnn::DNN_TARGET_CUDA){
-        ui->targetComboBox->setCurrentText("OpenCL FP16");
+    else if(target == cv::dnn::DNN_TARGET_CUDA){
+        ui->targetComboBox->setCurrentText("CUDA");
     }else if(target == cv::dnn::DNN_TARGET_CUDA_FP16){
-        ui->targetComboBox->setCurrentText("OpenCL FP16");
+        ui->targetComboBox->setCurrentText("CUDA FP16");
     }
 #endif
     updateFields();
@@ -275,7 +275,14 @@ void DetectorSetupDialog::setTarget(void){
     }else if(ui->targetComboBox->currentText() == "OpenCL FP16"){
         target = cv::dnn::DNN_TARGET_OPENCL_FP16;
         settings->setValue("model_target", target);
+    }else if(ui->targetComboBox->currentText() == "CUDA"){
+        target = cv::dnn::DNN_TARGET_CUDA;
+        settings->setValue("model_target", target);
+    }else if(ui->targetComboBox->currentText() == "CUDA FP16"){
+        target = cv::dnn::DNN_TARGET_CUDA_FP16;
+        settings->setValue("model_target", target);
     }
+
 }
 
 int DetectorSetupDialog::getTarget(void){

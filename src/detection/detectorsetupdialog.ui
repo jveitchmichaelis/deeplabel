@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>216</height>
+    <height>314</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -47,17 +47,27 @@
       <widget class="QComboBox" name="targetComboBox">
        <item>
         <property name="text">
+         <string>CPU</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>CUDA</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>CUDA FP16</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>OpenCL</string>
         </property>
        </item>
        <item>
         <property name="text">
          <string>OpenCL FP16</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>CPU</string>
         </property>
        </item>
       </widget>

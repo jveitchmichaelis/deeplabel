@@ -11,8 +11,6 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = DeepLabel
 TEMPLATE = app
 
-CONFIG += c++17 #Qt will ignore anything higher at the moment
-
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -43,6 +41,7 @@ unix:!macx{
 message("Linux")
 #CONFIG += link_pkgconfig
 #PKGCONFIG += opencv4
+CONFIG += c++17
 INCLUDEPATH += /usr/local/include/opencv4
 LIBS += -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lopencv_tracking -lopencv_video -lopencv_videoio -lopencv_dnn
 }
@@ -51,10 +50,11 @@ win32{
 message("Windows")
 INCLUDEPATH += "C:/Users/Josh/Code/opencv/build/install/include"
 LIBS += -L"C:/Users/Josh/Code/opencv/build/install/x64/vc15/lib"
+QMAKE_CXXFLAGS += "/std:c++17"
 CONFIG(debug, debug|release) {
-LIBS += -lopencv_core410d -lopencv_highgui410d -lopencv_imgproc410d -lopencv_imgcodecs410d -lopencv_tracking410d -lopencv_video410d -lopencv_videoio410d -lopencv_dnn410d
+LIBS += -lopencv_world450d
 }else{
-LIBS += -lopencv_core410 -lopencv_highgui410 -lopencv_imgproc410 -lopencv_imgcodecs410 -lopencv_tracking410 -lopencv_video410 -lopencv_videoio410 -lopencv_dnn410
+LIBS += -lopencv_world450
 }
 }
 
@@ -148,7 +148,7 @@ CONFIG( debug, debug|release ) {
 }
 
 win32 {
-    DEPLOY_COMMAND = windeployqt
+    DEPLOY_COMMAND = windeployqt.exe
 }
 macx {
     DEPLOY_COMMAND = macdeployqt
