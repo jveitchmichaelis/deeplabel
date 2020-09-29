@@ -400,7 +400,7 @@
      <x>0</x>
      <y>0</y>
      <width>931</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -426,6 +426,9 @@
     <addaction name="actionJump_backward"/>
    </widget>
    <widget class="QMenu" name="menuDetection">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Detection</string>
     </property>
@@ -436,7 +439,7 @@
    </widget>
    <widget class="QMenu" name="menuImages">
     <property name="enabled">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
     <property name="title">
      <string>Images</string>
@@ -449,6 +452,9 @@
     <addaction name="actionRefine_image_range"/>
    </widget>
    <widget class="QMenu" name="menuLabeling">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Labeling</string>
     </property>
@@ -527,13 +533,16 @@
   </action>
   <action name="actionAdd_image">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Add image(s)</string>
    </property>
   </action>
   <action name="actionAdd_image_folder">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Add image folder</string>
    </property>
@@ -661,6 +670,9 @@
    </property>
   </action>
   <action name="actionSetup_detector">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Setup detector</string>
    </property>

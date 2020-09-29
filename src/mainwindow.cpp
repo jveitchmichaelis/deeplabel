@@ -388,6 +388,8 @@ void MainWindow::openProject(QString fileName)
         if(project->loadDatabase(fileName)){
             initDisplay();
             ui->menuImages->setEnabled(true);
+            ui->menuDetection->setEnabled(true);
+            ui->menuLabeling->setEnabled(true);
             ui->menuNavigation->setEnabled(true);
             ui->mainToolBar->setEnabled(true);
             ui->actionImport_Labels->setEnabled(true);
@@ -884,6 +886,8 @@ void MainWindow::updateDisplay(){
         current_index = ui->imageNumberSpinbox->value()-1;
         current_imagepath = images.at(current_index);
         display->setImagePath(current_imagepath);
+
+        ui->statusBar->showMessage(current_imagepath);
 
         updateLabels();
 
