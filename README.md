@@ -127,8 +127,8 @@ You need to compile OpenCV with contrib (`-DOPENCV_EXTRA_MODULES_PATH`) for obje
 ``` bash
 git clone https://github.com/opencv/opencv
 git clone https://github.com/opencv/opencv_contrib
-cd opencv && git checkout 4.0.0 && cd ../
-cd opencv_contrib && git checkout 4.0.0 && cd ../
+cd opencv && git checkout 4.1.0 && cd ../
+cd opencv_contrib && git checkout 4.1.0 && cd ../
 ```
 
 On Mac, Homebrew automatically include pkg-config support and the contrib packages.
