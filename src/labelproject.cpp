@@ -262,7 +262,7 @@ void LabelProject::cancelLoad(){
     should_cancel = true;
 }
 
-void LabelProject::addVideo(QString fileName, QString outputFolder){
+void LabelProject::addVideo(QString fileName, QString outputFolder, int frame_skip){
     cv::VideoCapture video(fileName.toStdString());
 
     QString base_name = QFileInfo(fileName).completeBaseName();
@@ -285,7 +285,10 @@ void LabelProject::addVideo(QString fileName, QString outputFolder){
         if(progress.wasCanceled() || frame.empty())
             break;
 
-        QString output_name = QString("%1_%2.jpg").arg(base_name).arg(frame_count++, 6, 10, QChar('0'));
+        if(frame_count++ % frame_skip != 0)
+            continue;
+
+        QString output_name = QString("%1_%2.jpg").arg(base_name).arg(frame_count, 6, 10, QChar('0'));
 
         output_name = dir.absoluteFilePath(output_name);
         cv::imwrite(output_name.toStdString(), frame);

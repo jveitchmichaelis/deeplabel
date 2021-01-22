@@ -786,7 +786,7 @@ void MainWindow::refineBoxes(){
 
     for(auto &bbox : bboxes){
         auto previous_area = bbox.rect.width()*bbox.rect.height();
-        auto updated = refineBoundingBoxSimple(image, bbox.rect, 5, true);
+        auto updated = refineBoundingBoxSimple(image, bbox.rect, 5, false);
 
         auto new_bbox = bbox;
         new_bbox.rect = updated;
@@ -935,7 +935,34 @@ void MainWindow::addVideo(void){
     QString output_folder = QFileDialog::getExistingDirectory(this, "Output folder", openDir);
 
     if(video_filename != ""){
-        project->addVideo(video_filename, output_folder);
+
+        auto dialog_box = new QDialog(this);
+
+        auto frame_skip_spin = new QSpinBox;
+        auto frame_skip_label = new QLabel;
+        auto layout = new QVBoxLayout;
+        auto accept_button = new QPushButton;
+
+        accept_button->setDefault(true);
+        accept_button->setText("OK");
+        connect(accept_button, SIGNAL(clicked()), dialog_box, SLOT(accept()));
+
+        frame_skip_spin->setValue(1);
+        frame_skip_spin->setMinimum(1);
+        frame_skip_spin->setMaximum(1000);
+
+        frame_skip_label->setText("Skip frames (1 to use all): ");
+
+        dialog_box->setWindowModality(Qt::WindowModal);
+        dialog_box->setLayout(layout);
+        dialog_box->layout()->addWidget(frame_skip_label);
+        dialog_box->layout()->addWidget(frame_skip_spin);
+        dialog_box->layout()->addWidget(accept_button);
+
+        if(dialog_box->exec()){
+            qDebug() << "Frame skip: " << frame_skip_spin->value();
+            project->addVideo(video_filename, output_folder, frame_skip_spin->value());
+        }
     }
 
     updateImageList();
