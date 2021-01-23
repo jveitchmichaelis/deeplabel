@@ -1151,7 +1151,7 @@ void MainWindow::computeStatistics(void){
         double s = 0;
         double total_hist = 0;
 
-        for(int i=0; i < histogram.total(); ++i){
+        for(long long i=0; i < static_cast<long long>(histogram.total()); ++i){
             s += histogram.at<float>(i) * (i + 0.5); // bin centre
             total_hist += histogram.at<float>(i);
         }
@@ -1159,7 +1159,7 @@ void MainWindow::computeStatistics(void){
         double mean = s / total_hist;
 
         double t = 0;
-        for(int i=0; i < histogram.total(); ++i){
+        for(long long i=0; i < static_cast<long long>(histogram.total()); ++i){
           double x = (i - mean);
           t += histogram.at<float>(i)*x*x;
         }
