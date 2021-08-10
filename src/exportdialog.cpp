@@ -13,9 +13,11 @@ ExportDialog::ExportDialog(QWidget *parent) :
     connect(ui->exportSelectComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(toggleExporter()));
     connect(ui->randomSplitCheckbox, SIGNAL(clicked(bool)), this, SLOT(toggleShuffle(bool)));
     connect(ui->validationSplitSpinbox, SIGNAL(valueChanged(int)), this, SLOT(setValidationSplit(int)));
-    connect(ui->exportLabelledCheckbox, SIGNAL(clicked(bool)), this, SLOT(setExportUnlabelled(bool)));
+    connect(ui->exportLabelledCheckbox, SIGNAL(clicked(bool)), this, SLOT(toggleExportUnlabelled(bool)));
+    connect(ui->trainValCheckbox, SIGNAL(clicked(bool)), this, SLOT(toggleValidationSplit(bool)));
     connect(ui->gcpBucketLineEdit, SIGNAL(textEdited(QString)), SLOT(setBucketUri(QString)));
 
+    connect(ui->filePrefixLineEdit, SIGNAL(textEdited(QString)), SLOT(setFilePrefix(QString)));
     connect(ui->namesFileLineEdit, SIGNAL(textEdited(QString)), SLOT(setNamesFile(QString)));
     connect(ui->namesFilePushButton, SIGNAL(clicked()), this, SLOT(setNamesFile()));
     connect(ui->outputFolderLineEdit, SIGNAL(textEdited(QString)), SLOT(setOutputFolder(QString)));
@@ -25,8 +27,15 @@ ExportDialog::ExportDialog(QWidget *parent) :
 
     ui->validationSplitSpinbox->setValue(settings->value("validation_split_pc", 80).toInt());
     toggleShuffle(settings->value("do_shuffle", false).toBool());
-    setExportUnlabelled(settings->value("export_unlabelled", false).toBool());
+
+    toggleExportUnlabelled(settings->value("export_unlabelled", false).toBool());
     ui->exportLabelledCheckbox->setChecked(export_unlabelled);
+
+    toggleValidationSplit(settings->value("validation_split_enable", false).toBool());
+    ui->trainValCheckbox->setChecked(validation_split_enable);
+
+    toggleAppendLabels(settings->value("append_labels", false).toBool());
+    ui->trainValCheckbox->setChecked(append_labels);
 
     if(settings->contains("output_folder")){
         auto path = settings->value("output_folder").toString();
@@ -41,6 +50,10 @@ ExportDialog::ExportDialog(QWidget *parent) :
             setNamesFile(path);
          }
     }
+
+    if(settings->contains("file_prefix")){
+        setFilePrefix(settings->value("file_prefix").toString());
+    }
 }
 
 ExportDialog::~ExportDialog()
@@ -53,7 +66,17 @@ bool ExportDialog::getExportUnlablled(void){
     return export_unlabelled;
 }
 
-void ExportDialog::setExportUnlabelled(bool res){
+bool ExportDialog::getValidationSplitEnabled(void){
+    return validation_split_enable;
+}
+
+
+QString ExportDialog::getFilePrefix(void){
+    return file_prefix;
+}
+
+
+void ExportDialog::toggleExportUnlabelled(bool res){
     export_unlabelled = res;
     settings->setValue("export_unlabelled", export_unlabelled);
 }
@@ -64,10 +87,27 @@ void ExportDialog::setValidationSplit(int value){
     settings->setValue("validation_split_pc", validation_split_pc);
 }
 
+void ExportDialog::toggleValidationSplit(bool enable){
+    validation_split_enable = enable;
+    settings->setValue("validation_split_enable", enable);
+}
+
+void ExportDialog::toggleAppendLabels(bool enable){
+    append_labels = enable;
+    settings->setValue("append_labels", enable);
+}
+
 void ExportDialog::toggleShuffle(bool shuffle){
     do_shuffle = shuffle;
     settings->setValue("do_shuffle", do_shuffle);
     ui->randomSplitCheckbox->setChecked(do_shuffle);
+}
+
+void ExportDialog::setFilePrefix(QString prefix){
+    if(prefix != ""){
+        file_prefix = prefix;
+    }
+    settings->setValue("validation_split_pc", validation_split_pc);
 }
 
 void ExportDialog::setOutputFolder(QString path){

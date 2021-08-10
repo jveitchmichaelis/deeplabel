@@ -1,6 +1,7 @@
 #ifndef PASCALVOCEXPORTER_H
 #define PASCALVOCEXPORTER_H
 
+#include <baseexporter.h>
 #include <QObject>
 #include <QImageReader>
 #include <QFileDialog>
@@ -10,12 +11,11 @@
 #include <labelproject.h>
 #include <random>
 
-class PascalVocExporter : public QObject
+class PascalVocExporter : public BaseExporter
 {
     Q_OBJECT
 public:
-    explicit PascalVocExporter(LabelProject *project, QObject *parent = nullptr);
-
+    explicit PascalVocExporter(LabelProject *project, QObject *parent = nullptr) : BaseExporter(project, parent){}
 
 signals:
     void export_progress(int);
@@ -24,7 +24,8 @@ public slots:
     void splitData(float split=1, bool shuffle=false, int seed=42);
     bool setOutputFolder(QString folder);
     void setExportUnlabelled(bool res){export_unlabelled = res;}
-    void process(bool export_map = true);
+    void setExportMap(bool map){export_map = map;}
+    void process();
 
 private:
     LabelProject *project;
@@ -42,6 +43,7 @@ private:
 
     QString output_folder;
     bool export_unlabelled = false;
+    bool export_map;
 
 
     std::map<QString, int> id_map;

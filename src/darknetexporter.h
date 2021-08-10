@@ -19,7 +19,7 @@ public slots:
 
 protected:
     void writeLabels(const cv::Mat &image, const QString file, const QList<BoundingBox> labels);
-    bool processImages(const QString folder, const QList<QString> images);
+    bool processImages(const QString folder, const QList<QString> images, export_image_type split_type=EXPORT_TRAIN);
 };
 
 #endif // DARKNETEXPORTER_H

@@ -83,6 +83,7 @@ int KittiExporter::processSet(QString folder, QList<QString> images, int i){
         appendLabel(label_filename, labels, scale_x, scale_y);
 
         i++;
+        emit export_progress((100 * i)/images.size());
 
     }
 

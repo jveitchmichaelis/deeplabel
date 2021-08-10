@@ -779,7 +779,7 @@ QRect MainWindow::refineBoundingBox(cv::Mat image, QRect bbox, int margin, bool 
     return new_box;
 }
 
-void MainWindow::refineBoxes(){
+void MainWindow::refineBoxes(double min_new_area, double max_new_area){
 
     auto bboxes = currentImage->getBoundingBoxes();
     const auto image = currentImage->getImage();
@@ -792,7 +792,13 @@ void MainWindow::refineBoxes(){
         new_bbox.rect = updated;
         auto new_area = new_bbox.rect.width()*new_bbox.rect.height();
 
-        if(!updated.size().isEmpty() && new_area >= 0.5*previous_area) updateLabel(bbox, new_bbox);
+        // Make sure that new bbox isn't changed
+        // too much
+        if(!updated.size().isEmpty()
+                && new_area >= min_new_area*previous_area
+                && new_area <= max_new_area*previous_area){
+            updateLabel(bbox, new_bbox);
+        }
     }
 
     updateLabels();
@@ -1024,44 +1030,58 @@ void MainWindow::handleExportDialog(){
     if(export_dialog->result() != QDialog::Accepted ) return;
 
     QThread* export_thread = new QThread;
+    BaseExporter* exporter;
 
     if(export_dialog->getExporter() == "Kitti"){
-        KittiExporter exporter(project);
-        exporter.moveToThread(export_thread);
-        exporter.setOutputFolder(export_dialog->getOutputFolder());
-        exporter.splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
-        exporter.setExportUnlabelled(export_dialog->getExportUnlablled());
-        exporter.process();
+        exporter = new KittiExporter(project);
+        exporter->moveToThread(export_thread);
+        exporter->setFilenamePrefix(export_dialog->getFilePrefix());
+        exporter->setAppendLabels(export_dialog->getAppendLabels());
+        exporter->setOutputFolder(export_dialog->getOutputFolder());
+        exporter->splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
+        exporter->setExportUnlabelled(export_dialog->getExportUnlablled());
+        exporter->process();
     }else if(export_dialog->getExporter() == "Darknet"){
-        DarknetExporter exporter(project);
-        exporter.moveToThread(export_thread);
-        exporter.generateLabelIds(export_dialog->getNamesFile());
-        exporter.setOutputFolder(export_dialog->getOutputFolder());
-        exporter.splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
-        exporter.setExportUnlabelled(export_dialog->getExportUnlablled());
-        exporter.process();
+        DarknetExporter* exporter = new DarknetExporter(project);
+        exporter->moveToThread(export_thread);
+        exporter->setFilenamePrefix(export_dialog->getFilePrefix());
+        exporter->setAppendLabels(export_dialog->getAppendLabels());
+        exporter->generateLabelIds(export_dialog->getNamesFile());
+        exporter->setOutputFolder(export_dialog->getOutputFolder());
+        exporter->splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
+        exporter->setExportUnlabelled(export_dialog->getExportUnlablled());
+        exporter->process();
     }else if(export_dialog->getExporter() == "Pascal VOC"){
-        PascalVocExporter exporter(project);
-        exporter.moveToThread(export_thread);
-        exporter.setOutputFolder(export_dialog->getOutputFolder());
-        exporter.splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
-        exporter.process(export_dialog->getCreateLabelMap());
+        PascalVocExporter* exporter = new PascalVocExporter(project);
+        exporter->moveToThread(export_thread);
+        exporter->setFilenamePrefix(export_dialog->getFilePrefix());
+        exporter->setAppendLabels(export_dialog->getAppendLabels());
+        exporter->setOutputFolder(export_dialog->getOutputFolder());
+        exporter->splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
+        exporter->setExportMap(export_dialog->getCreateLabelMap());
+        exporter->process();
     }else if(export_dialog->getExporter().startsWith("COCO")){
-        CocoExporter exporter(project);
-        exporter.moveToThread(export_thread);
-        exporter.setOutputFolder(export_dialog->getOutputFolder());
-        exporter.splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
-        exporter.setExportUnlabelled(export_dialog->getExportUnlablled());
-        exporter.process();
+        exporter = new CocoExporter(project);
+        exporter->moveToThread(export_thread);
+        exporter->setFilenamePrefix(export_dialog->getFilePrefix());
+        exporter->setAppendLabels(export_dialog->getAppendLabels());
+        exporter->setOutputFolder(export_dialog->getOutputFolder());
+        exporter->splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
+        exporter->setExportUnlabelled(export_dialog->getExportUnlablled());
+        exporter->process();
     }else if(export_dialog->getExporter().startsWith("GCP")){
-        GCPExporter exporter(project);
-        exporter.moveToThread(export_thread);
-        exporter.setBucket(export_dialog->getBucket());
-        exporter.setOutputFolder(export_dialog->getOutputFolder());
-        exporter.splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
-        exporter.setExportUnlabelled(export_dialog->getExportUnlablled());
-        exporter.process();
-        }
+        GCPExporter* exporter = new GCPExporter(project);
+        exporter->moveToThread(export_thread);
+        exporter->setFilenamePrefix(export_dialog->getFilePrefix());
+        exporter->setAppendLabels(export_dialog->getAppendLabels());
+        exporter->setBucket(export_dialog->getBucket());
+        exporter->setOutputFolder(export_dialog->getOutputFolder());
+        exporter->splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
+        exporter->setExportUnlabelled(export_dialog->getExportUnlablled());
+        exporter->process();
+    }else{
+        return;
+    }
 }
 
 void MainWindow::launchExportDialog(){

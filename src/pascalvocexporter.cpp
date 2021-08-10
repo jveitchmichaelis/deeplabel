@@ -1,11 +1,5 @@
 #include "pascalvocexporter.h"
 
-PascalVocExporter::PascalVocExporter(LabelProject *project, QObject *parent) : QObject(parent)
-{
-    this->project = project;
-    project->getImageList(images);
-}
-
 void PascalVocExporter::splitData(float split, bool shuffle, int seed){
 
     if(split < 0 || split > 1){
@@ -161,12 +155,12 @@ bool PascalVocExporter::processImages(const QString folder, const QList<QString>
 
         QString extension = QFileInfo(image_path).suffix();
         QString filename_noext = QFileInfo(image_path).completeBaseName();
-        QString image_filename = QString("%1/%2.%3").arg(folder).arg(filename_noext).arg(extension);
+        QString image_filename = QString("%1/%2%3.%4").arg(folder).arg(filename_prefix).arg(filename_noext).arg(extension);
 
         // Correct for duplicate file names in output
         int dupe_file = 1;
         while(QFile(image_filename).exists()){
-            image_filename = QString("%1/%2_%3.%4").arg(folder).arg(filename_noext).arg(dupe_file++).arg(extension);
+            image_filename = QString("%1/%2%3_%4.%5").arg(folder).arg(filename_prefix).arg(filename_noext).arg(dupe_file++).arg(extension);
         }
 
         cv::Mat image = cv::imread(image_path.toStdString());
@@ -207,10 +201,9 @@ void PascalVocExporter::saveLabelMap(QString filename){
 
 }
 
-void PascalVocExporter::process(bool export_map){
+void PascalVocExporter::process(){
     processImages(train_folder, train_set);
     processImages(val_folder, validation_set);
-
     if(export_map){
         saveLabelMap(QString("%1/%2").arg(output_folder).arg("label_map.pbtxt"));
     }

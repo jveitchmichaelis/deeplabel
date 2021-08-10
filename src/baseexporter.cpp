@@ -22,8 +22,8 @@ void BaseExporter::splitData(float split, bool shuffle, int seed){
     }
 
     int pivot = static_cast<int>(images.size() * split);
-    train_set = images.mid(0, pivot);
-    validation_set = images.mid(pivot);
+    validation_set = images.mid(0, pivot);
+    train_set = images.mid(pivot);
 
     qDebug() << "Split: " << split;
     qDebug() << train_set.size() << " images selected for train set.";
@@ -50,19 +50,28 @@ bool BaseExporter::setOutputFolder(const QString folder){
         QDir().mkpath(train_folder);
     }
 
-    val_folder = QDir::cleanPath(output_folder+"/val");
-    if (!QDir(val_folder).exists()){
-        qDebug() << "Making validation folder" << val_folder;
-        QDir().mkpath(val_folder);
+    if(validation_split){
+        val_folder = QDir::cleanPath(output_folder+"/val");
+        if (!QDir(val_folder).exists()){
+            qDebug() << "Making validation folder" << val_folder;
+            QDir().mkpath(val_folder);
+        }
+
+        val_label_folder = QDir::cleanPath(val_folder);
+        val_image_folder = QDir::cleanPath(val_folder);
     }
 
     train_label_folder = QDir::cleanPath(train_folder);
     train_image_folder = QDir::cleanPath(train_folder);
-    val_label_folder = QDir::cleanPath(val_folder);
-    val_image_folder = QDir::cleanPath(val_folder);
 
     return true;
 
+}
+
+void BaseExporter::setFilenamePrefix(QString prefix){
+    if(prefix != ""){
+        filename_prefix = prefix;
+    }
 }
 
 bool BaseExporter::saveImage(cv::Mat &image, const QString output, const double scale_x, const double scale_y){

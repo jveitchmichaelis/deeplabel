@@ -3,13 +3,6 @@
 
 #include<baseexporter.h>
 
-enum gcp_image_type{
-    GCP_UNASSIGNED,
-    GCP_TRAIN,
-    GCP_VAL,
-    GCP_TEST
-};
-
 class GCPExporter : public BaseExporter
 {
     Q_OBJECT
@@ -22,7 +15,7 @@ public slots:
     bool setOutputFolder(const QString folder);
 
 private:
-    bool processImages(const QString output_folder, QString filename, const QList<QString> images, gcp_image_type split_type);
+    bool processImages(const QString output_folder, QString filename, const QList<QString> images, export_image_type split_type=EXPORT_TRAIN);
     QString bucket_uri;
     QString image_folder;
 };

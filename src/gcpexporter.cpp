@@ -3,7 +3,7 @@
 bool GCPExporter::processImages(const QString folder,
                                 const QString filename,
                                 const QList<QString> images,
-                                gcp_image_type split_type){
+                                export_image_type split_type){
     QString image_path;
     QList<BoundingBox> labels;
     QString label_filename = QString("%1/%2.txt").arg(folder).arg(filename);
@@ -17,20 +17,18 @@ bool GCPExporter::processImages(const QString folder,
     progress.setWindowModality(Qt::WindowModal);
 
     QString split_text = "";
-    if(split_type == GCP_VAL){
+    if(split_type == EXPORT_VAL){
         split_text = "VAL";
         progress.setWindowTitle("Exporting validation images");
-    }else if(split_type == GCP_TRAIN){
+    }else if(split_type == EXPORT_TRAIN){
         split_text = "TRAIN";
         progress.setWindowTitle("Exporting train images");
-    }else if(split_type == GCP_TEST){
+    }else if(split_type == EXPORT_TEST){
         split_text = "TEST";
         progress.setWindowTitle("Exporting test images");
     }else{
         split_text = "UNASSIGNED";
     }
-
-
 
     int i=0;
 
@@ -131,6 +129,6 @@ void GCPExporter::setBucket(QString uri){
 }
 
 void GCPExporter::process(){
-    processImages(image_folder, "labels", train_set, GCP_TRAIN);
-    processImages(image_folder, "labels", validation_set, GCP_VAL);
+    processImages(image_folder, "labels", train_set, EXPORT_TRAIN);
+    processImages(image_folder, "labels", validation_set, EXPORT_VAL);
 }

@@ -122,7 +122,7 @@ private slots:
 
     QRect refineBoundingBox(cv::Mat image, QRect bbox, int margin=5, bool debug_save=false);
     QRect refineBoundingBoxSimple(cv::Mat image, QRect bbox, int margin=5, bool debug_save=false);
-    void refineBoxes();
+    void refineBoxes(double min_new_area = 0.5, double max_new_area = 1.5);
 
     void updateImageInfo();
     void jumpForward(int n = 10);

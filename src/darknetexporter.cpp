@@ -29,6 +29,12 @@ void DarknetExporter::generateLabelIds(const QString names_file){
     }
 }
 
+double clamp(double val, double min, double max){
+    if(val < min) val = min;
+    if(val > max) val = max;
+    return val;
+}
+
 void DarknetExporter::writeLabels(const cv::Mat &image, const QString label_filename, const QList<BoundingBox> labels){
 
     // Still make a label file even if there are no detections. This is important
@@ -48,10 +54,10 @@ void DarknetExporter::writeLabels(const cv::Mat &image, const QString label_file
                 continue;
             }
 
-            double x = std::clamp(static_cast<double>(label.rect.center().x())/image.cols, 0.0, 0.999);
-            double y = std::clamp(static_cast<double>(label.rect.center().y())/image.rows, 0.0, 0.999);
-            double width = std::clamp(static_cast<double>(label.rect.width())/image.cols, 0.0, 0.999);
-            double height = std::clamp(static_cast<double>(label.rect.height())/image.rows, 0.0, 0.999);
+            double x = clamp(static_cast<double>(label.rect.center().x())/image.cols, 0.0, 0.999);
+            double y = clamp(static_cast<double>(label.rect.center().y())/image.rows, 0.0, 0.999);
+            double width = clamp(static_cast<double>(label.rect.width())/image.cols, 0.0, 0.999);
+            double height = clamp(static_cast<double>(label.rect.height())/image.rows, 0.0, 0.999);
 
             text += QString("%1").arg(id_map[label.classname.toLower()]);
             text += QString(" %1").arg(x);
@@ -66,14 +72,36 @@ void DarknetExporter::writeLabels(const cv::Mat &image, const QString label_file
     }
 }
 
-bool DarknetExporter::processImages(const QString folder, const QList<QString> images){
+bool DarknetExporter::processImages(const QString folder, const QList<QString> images, export_image_type split_type){
 
     QString image_path;
     QList<BoundingBox> labels;
 
+    QProgressDialog progress("...", "Abort", 0, images.size(), static_cast<QWidget*>(parent()));
+    progress.setWindowModality(Qt::WindowModal);
+
+    QString split_text = "";
+    if(split_type == EXPORT_VAL){
+        split_text = "VAL";
+        progress.setWindowTitle("Exporting validation images");
+    }else if(split_type == EXPORT_TRAIN){
+        split_text = "TRAIN";
+        progress.setWindowTitle("Exporting train images");
+    }else if(split_type == EXPORT_TEST){
+        split_text = "TEST";
+        progress.setWindowTitle("Exporting test images");
+    }else{
+        split_text = "UNASSIGNED";
+    }
+
     int i = 0;
 
     foreach(image_path, images){
+
+        if(progress.wasCanceled()){
+            break;
+        }
+
         qDebug() << image_path;
         project->getLabels(image_path, labels);
 
@@ -81,12 +109,17 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
 
         QString extension = QFileInfo(image_path).suffix();
         QString filename_noext = QFileInfo(image_path).completeBaseName();
-        QString image_filename = QString("%1/%2.%3").arg(folder).arg(filename_noext).arg(extension);
+        QString image_filename = QString("%1/%2%3.%4").arg(folder).arg(filename_prefix).arg(filename_noext).arg(extension);
 
         // Correct for duplicate file names in output
         int dupe_file = 1;
         while(QFile(image_filename).exists()){
-            image_filename = QString("%1/%2_%3.%4").arg(folder).arg(filename_noext).arg(dupe_file++).arg(extension);
+            image_filename = QString("%1/%2%3_%4.%5")
+                                    .arg(folder)
+                                    .arg(filename_prefix)
+                                    .arg(filename_noext)
+                                    .arg(dupe_file++)
+                                    .arg(extension);
         }
 
         cv::Mat image = cv::imread(image_path.toStdString());
@@ -97,7 +130,8 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
         QString label_filename = QString("%1/%2.txt").arg(folder).arg(filename_noext);
         writeLabels(image, label_filename, labels);
 
-        emit export_progress((100 * i)/images.size());
+        progress.setValue(i++);
+        progress.setLabelText(image_filename);
 
     }
 
@@ -105,6 +139,6 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
 }
 
 void DarknetExporter::process(){
-    processImages(train_folder, train_set);
-    processImages(val_folder, validation_set);
+    processImages(train_folder, train_set, EXPORT_TRAIN);
+    processImages(val_folder, validation_set, EXPORT_VAL);
 }

@@ -200,6 +200,9 @@ bool LabelProject::getClassList(QList<QString> &classes)
 
             while (query.next()) {
                 QString name = query.value(0).toString();
+                if(name == ""){
+                    qDebug() << "Warning: empty classname found in db file";
+                }
                 classes.push_back(name);
             }
         }

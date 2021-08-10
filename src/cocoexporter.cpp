@@ -51,12 +51,21 @@ bool CocoExporter::processImages(const QString folder, const QString label_filen
         QString extension = QFileInfo(image_path).suffix();
         QString filename_noext = QFileInfo(image_path).completeBaseName();
 
-        QString image_filename = QString("%1/%2.%3").arg(folder).arg(filename_noext).arg(extension);
+        QString image_filename = QString("%1/%2%3.%4")
+                                        .arg(folder)
+                                        .arg(filename_prefix)
+                                        .arg(filename_noext)
+                                        .arg(extension);
 
         // Correct for duplicate file names in output
         int dupe_file = 1;
         while(QFile(image_filename).exists()){
-            image_filename = QString("%1/%2_%3.%4").arg(folder).arg(filename_noext).arg(dupe_file++).arg(extension);
+            image_filename = QString("%1/%2%3_%4.%5")
+                                    .arg(folder)
+                                    .arg(filename_prefix)
+                                    .arg(filename_noext)
+                                    .arg(dupe_file++)
+                                    .arg(extension);
         }
 
         cv::Mat image = cv::imread(image_path.toStdString());
