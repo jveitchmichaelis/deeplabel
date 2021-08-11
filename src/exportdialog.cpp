@@ -204,6 +204,7 @@ bool ExportDialog::checkOK(){
     }
 
     ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
+    return true;
 }
 
 bool ExportDialog::getCreateLabelMap(void){

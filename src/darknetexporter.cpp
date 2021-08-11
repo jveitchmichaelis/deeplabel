@@ -109,25 +109,31 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
 
         QString extension = QFileInfo(image_path).suffix();
         QString filename_noext = QFileInfo(image_path).completeBaseName();
-        QString image_filename = QString("%1/%2%3.%4").arg(folder).arg(filename_prefix).arg(filename_noext).arg(extension);
+        filename_noext = filename_noext.prepend(filename_prefix);
+
+        QString image_filename = QString("%1.%2").arg(filename_noext).arg(extension);
+        QString label_filename = QString("%1.txt").arg(filename_noext);
 
         // Correct for duplicate file names in output
         int dupe_file = 1;
         while(QFile(image_filename).exists()){
-            image_filename = QString("%1/%2%3_%4.%5")
-                                    .arg(folder)
-                                    .arg(filename_prefix)
+            image_filename = QString("%1%2.%3")
                                     .arg(filename_noext)
-                                    .arg(dupe_file++)
+                                    .arg(dupe_file)
                                     .arg(extension);
+
+            label_filename = QString("%1.txt").arg(filename_noext).arg(dupe_file);
+
+            dupe_file++;
         }
+
+        image_filename = QString("%1/%2").arg(folder).arg(image_filename);
+        label_filename = QString("%1/%2").arg(folder).arg(label_filename);
 
         cv::Mat image = cv::imread(image_path.toStdString());
         //saveImage(image, image_filename);
 
         QFile::copy(image_path, image_filename);
-
-        QString label_filename = QString("%1/%2.txt").arg(folder).arg(filename_noext);
         writeLabels(image, label_filename, labels);
 
         progress.setValue(i++);
