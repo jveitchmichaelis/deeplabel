@@ -1030,62 +1030,44 @@ void MainWindow::handleExportDialog(){
     if(export_dialog->result() != QDialog::Accepted ) return;
 
     QThread* export_thread = new QThread;
-    BaseExporter* exporter;
+    BaseExporter* exporter = nullptr;
 
     if(export_dialog->getExporter() == "Kitti"){
         exporter = new KittiExporter(project);
-        exporter->moveToThread(export_thread);
-        exporter->setFilenamePrefix(export_dialog->getFilePrefix());
-        exporter->setAppendLabels(export_dialog->getAppendLabels());
-        exporter->splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
-        exporter->setExportUnlabelled(export_dialog->getExportUnlablled());
-        exporter->setOutputFolder(export_dialog->getOutputFolder());
-        exporter->process();
     }else if(export_dialog->getExporter() == "Darknet"){
         DarknetExporter* exporter = new DarknetExporter(project);
-        exporter->moveToThread(export_thread);
-        exporter->setFilenamePrefix(export_dialog->getFilePrefix());
-        exporter->setAppendLabels(export_dialog->getAppendLabels());
-        exporter->generateLabelIds(export_dialog->getNamesFile());
-        exporter->setValidationSplit(export_dialog->getValidationSplitEnabled());
-        exporter->splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
-        exporter->setExportUnlabelled(export_dialog->getExportUnlablled());
-        exporter->setOutputFolder(export_dialog->getOutputFolder());
-        exporter->process();
+        static_cast<DarknetExporter*>(exporter)->generateLabelIds(export_dialog->getNamesFile());
     }else if(export_dialog->getExporter() == "Pascal VOC"){
         PascalVocExporter* exporter = new PascalVocExporter(project);
-        exporter->moveToThread(export_thread);
-        exporter->setFilenamePrefix(export_dialog->getFilePrefix());
-        exporter->setAppendLabels(export_dialog->getAppendLabels());
-        exporter->setValidationSplit(export_dialog->getValidationSplitEnabled());
-        exporter->splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
-        exporter->setOutputFolder(export_dialog->getOutputFolder());
-        exporter->setExportMap(export_dialog->getCreateLabelMap());
+        static_cast<PascalVocExporter*>(exporter)->setExportMap(export_dialog->getCreateLabelMap());
         exporter->process();
     }else if(export_dialog->getExporter().startsWith("COCO")){
         exporter = new CocoExporter(project);
-        exporter->moveToThread(export_thread);
-        exporter->setFilenamePrefix(export_dialog->getFilePrefix());
-        exporter->setAppendLabels(export_dialog->getAppendLabels());
-        exporter->setValidationSplit(export_dialog->getValidationSplitEnabled());
-        exporter->splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
-        exporter->setExportUnlabelled(export_dialog->getExportUnlablled());
-        exporter->setOutputFolder(export_dialog->getOutputFolder());
-        exporter->process();
     }else if(export_dialog->getExporter().startsWith("GCP")){
         GCPExporter* exporter = new GCPExporter(project);
-        exporter->moveToThread(export_thread);
-        exporter->setFilenamePrefix(export_dialog->getFilePrefix());
-        exporter->setAppendLabels(export_dialog->getAppendLabels());
-        exporter->setBucket(export_dialog->getBucket());
-        exporter->setValidationSplit(export_dialog->getValidationSplitEnabled());
-        exporter->splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
-        exporter->setExportUnlabelled(export_dialog->getExportUnlablled());
-        exporter->setOutputFolder(export_dialog->getOutputFolder());
-        exporter->process();
+        static_cast<GCPExporter*>(exporter)->setBucket(export_dialog->getBucket());
     }else{
         return;
     }
+
+    if(exporter != nullptr){
+        exporter->moveToThread(export_thread);
+        exporter->setFilenamePrefix(export_dialog->getFilePrefix());
+        exporter->setAppendLabels(export_dialog->getAppendLabels());
+
+        if(export_dialog->getValidationSplitEnabled()){
+            exporter->setValidationSplit(true);
+            exporter->splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
+        }else{
+            exporter->setValidationSplit(false);
+            exporter->splitData(0, export_dialog->getShuffle());
+        }
+
+        exporter->setExportUnlabelled(export_dialog->getExportUnlablled());
+        exporter->setOutputFolder(export_dialog->getOutputFolder());
+        exporter->process();
+    }
+
 }
 
 void MainWindow::launchExportDialog(){
