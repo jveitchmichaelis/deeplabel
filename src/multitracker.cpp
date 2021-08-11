@@ -62,8 +62,12 @@ void MultiTrackerCV::update(const cv::Mat &image){
 
     QtConcurrent::blockingMap(trackers.begin(), trackers.end(), [&](auto&& tracker)
     {
-        cv::Rect2d bbox;
 
+#if (CV_VERSION_MAJOR >= 4) && (CV_VERSION_MINOR >= 5) && (CV_VERSION_SUBMINOR >= 1)
+        cv::Rect bbox;
+#else
+        cv::Rect2d bbox;
+#endif
         if( tracker.first->update(image, bbox)){
 
             QRect new_roi;
