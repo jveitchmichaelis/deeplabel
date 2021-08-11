@@ -7,7 +7,7 @@ addons:
     packages:
     - qt
     - opencv
-    update: false
+    update: true
     
 before_install:
     - brew link qt --force
