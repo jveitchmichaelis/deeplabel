@@ -10,6 +10,7 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 #include <QSqlError>
+#include <QRegExp>
 #include <QMutex>
 #include <QMutexLocker>
 #include <QThread>

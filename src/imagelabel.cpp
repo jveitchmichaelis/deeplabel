@@ -28,7 +28,9 @@ void ImageLabel::setPixmap ( QPixmap & p)
     base_pixmap = p;
 
     drawLabel();
-    resize(pixmap()->size());
+
+    QPixmap pixmap;
+    resize(pixmap.size());
 }
 
 int ImageLabel::heightForWidth( int width ) const

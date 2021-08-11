@@ -408,7 +408,7 @@ void MainWindow::updateLabels(){
     QList<BoundingBox> bboxes;
     project->getLabels(current_imagepath, bboxes);
 
-    ui->instanceCountLabel->setNum(bboxes.size());
+    ui->instanceCountLabel->setNum(static_cast<int>(bboxes.size()));
     currentImage->setBoundingBoxes(bboxes);
 }
 
