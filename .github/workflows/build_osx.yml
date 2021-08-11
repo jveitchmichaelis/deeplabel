@@ -10,8 +10,8 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install Qt + OpenCV
-        run: brew install qt opencv
+      - name: Install Qt 5 + OpenCV
+        run: brew install qt@5 opencv
 
       - name: Force link Qt
         run: brew link qt --force
