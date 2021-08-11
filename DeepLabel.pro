@@ -24,8 +24,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 macx{
 message("Mac")
-PKG_CONFIG = /usr/local/bin/pkg-config
-QMAKE_CXXFLAGS += -mmacosx-version-min=10.12 -std=c++17
+#PKG_CONFIG = /usr/local/bin/pkg-config
+CONFIG += c++17
 
 # Build without FFMPEG unless you want a lot of pain later
 #CONFIG += link_pkgconfig
