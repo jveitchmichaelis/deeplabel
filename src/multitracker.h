@@ -7,7 +7,7 @@
 
 #include <opencv2/opencv.hpp>
 
-#if (CV_VERSION_MAJOR >= 4) && (CV_VERSION_MINOR >= 5) && (CV_VERSION_SUBMINOR >= 3)
+#if (CV_VERSION_MAJOR >= 4) && (CV_VERSION_MINOR >= 5) && (CV_VERSION_SUBMINOR >= 1)
 #include <opencv2/tracking/tracking_legacy.hpp>
 #else
 #include <opencv2/tracking.hpp>
