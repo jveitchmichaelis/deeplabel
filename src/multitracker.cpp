@@ -11,6 +11,7 @@ cv::Ptr<cv::Tracker> MultiTrackerCV::createTrackerByName(OpenCVTrackerType type)
     using namespace cv;
 
     Ptr<Tracker> tracker;
+    /*
     if (type == BOOSTING)
       tracker = TrackerBoosting::create();
     else if (type == MIL)
@@ -29,7 +30,10 @@ cv::Ptr<cv::Tracker> MultiTrackerCV::createTrackerByName(OpenCVTrackerType type)
       tracker = TrackerCSRT::create();
     else {
       std::cerr << "Incorrect tracker specified";
-    }
+    }*/
+
+    tracker = TrackerCSRT::create();
+
     return tracker;
 }
 
