@@ -7,6 +7,10 @@ BaseExporter::BaseExporter(LabelProject *project, QObject *parent) : QObject(par
     project->getImageList(images);
 }
 
+void BaseExporter::setValidationSplit(bool split){
+    validation_split = split;
+}
+
 void BaseExporter::splitData(float split, bool shuffle, int seed){
 
     if(split < 0 || split > 1){

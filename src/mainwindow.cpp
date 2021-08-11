@@ -1037,9 +1037,9 @@ void MainWindow::handleExportDialog(){
         exporter->moveToThread(export_thread);
         exporter->setFilenamePrefix(export_dialog->getFilePrefix());
         exporter->setAppendLabels(export_dialog->getAppendLabels());
-        exporter->setOutputFolder(export_dialog->getOutputFolder());
         exporter->splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
         exporter->setExportUnlabelled(export_dialog->getExportUnlablled());
+        exporter->setOutputFolder(export_dialog->getOutputFolder());
         exporter->process();
     }else if(export_dialog->getExporter() == "Darknet"){
         DarknetExporter* exporter = new DarknetExporter(project);
@@ -1047,17 +1047,19 @@ void MainWindow::handleExportDialog(){
         exporter->setFilenamePrefix(export_dialog->getFilePrefix());
         exporter->setAppendLabels(export_dialog->getAppendLabels());
         exporter->generateLabelIds(export_dialog->getNamesFile());
-        exporter->setOutputFolder(export_dialog->getOutputFolder());
+        exporter->setValidationSplit(export_dialog->getValidationSplitEnabled());
         exporter->splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
         exporter->setExportUnlabelled(export_dialog->getExportUnlablled());
+        exporter->setOutputFolder(export_dialog->getOutputFolder());
         exporter->process();
     }else if(export_dialog->getExporter() == "Pascal VOC"){
         PascalVocExporter* exporter = new PascalVocExporter(project);
         exporter->moveToThread(export_thread);
         exporter->setFilenamePrefix(export_dialog->getFilePrefix());
         exporter->setAppendLabels(export_dialog->getAppendLabels());
-        exporter->setOutputFolder(export_dialog->getOutputFolder());
+        exporter->setValidationSplit(export_dialog->getValidationSplitEnabled());
         exporter->splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
+        exporter->setOutputFolder(export_dialog->getOutputFolder());
         exporter->setExportMap(export_dialog->getCreateLabelMap());
         exporter->process();
     }else if(export_dialog->getExporter().startsWith("COCO")){
@@ -1065,9 +1067,10 @@ void MainWindow::handleExportDialog(){
         exporter->moveToThread(export_thread);
         exporter->setFilenamePrefix(export_dialog->getFilePrefix());
         exporter->setAppendLabels(export_dialog->getAppendLabels());
-        exporter->setOutputFolder(export_dialog->getOutputFolder());
+        exporter->setValidationSplit(export_dialog->getValidationSplitEnabled());
         exporter->splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
         exporter->setExportUnlabelled(export_dialog->getExportUnlablled());
+        exporter->setOutputFolder(export_dialog->getOutputFolder());
         exporter->process();
     }else if(export_dialog->getExporter().startsWith("GCP")){
         GCPExporter* exporter = new GCPExporter(project);
@@ -1075,9 +1078,10 @@ void MainWindow::handleExportDialog(){
         exporter->setFilenamePrefix(export_dialog->getFilePrefix());
         exporter->setAppendLabels(export_dialog->getAppendLabels());
         exporter->setBucket(export_dialog->getBucket());
-        exporter->setOutputFolder(export_dialog->getOutputFolder());
+        exporter->setValidationSplit(export_dialog->getValidationSplitEnabled());
         exporter->splitData(export_dialog->getValidationSplit(), export_dialog->getShuffle());
         exporter->setExportUnlabelled(export_dialog->getExportUnlablled());
+        exporter->setOutputFolder(export_dialog->getOutputFolder());
         exporter->process();
     }else{
         return;

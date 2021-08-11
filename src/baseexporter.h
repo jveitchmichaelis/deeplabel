@@ -33,6 +33,7 @@ public slots:
     bool setOutputFolder(QString folder);
     void setExportUnlabelled(bool res){export_unlabelled = res;}
     void setAppendLabels(bool res){append_labels = res;}
+    void setValidationSplit(bool split);
     void setFilenamePrefix(QString prefix);
     virtual void process() = 0;
 
