@@ -120,7 +120,7 @@ void ImageDisplay::loadPixmap(){
         format = QImage::Format_RGB888;
     }
 
-    pixmap = QPixmap::fromImage(QImage(display_image.data, display_image.cols, display_image.rows, display_image.step, format));
+    pixmap = QPixmap::fromImage(QImage(display_image.data, display_image.cols, display_image.rows, static_cast<int>(display_image.step), format));
 
     imageLabel->setImage(display_image);
     updateDisplay();
