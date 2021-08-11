@@ -1,6 +1,6 @@
 # DeepLabel
 
-**Mac CI:** [![Build Status](https://travis-ci.org/jveitchmichaelis/deeplabel.svg?branch=master)](https://travis-ci.org/jveitchmichaelis/deeplabel)
+[![Build OS X](https://github.com/jveitchmichaelis/deeplabel/actions/workflows/build_osx.yml/badge.svg)](https://github.com/jveitchmichaelis/deeplabel/actions/workflows/build_osx.yml)
 
 **If you use DeepLabel for research or commercial purposes, please cite here!** [![DOI](https://zenodo.org/badge/105791274.svg)](https://zenodo.org/badge/latestdoi/105791274)
 
@@ -39,8 +39,9 @@ Currently you can export in:
 
 * KITTI (e.g. for Nvidia DIGITS)
 * Darknet for YOLO
-* Pascal VOC
+* Pascal
 * COCO (experimental)
+* Google Cloud Platform (e.g. for AutoML)
 
 Deeplabel treats your data as "golden" and does not make any attempt to modify it directly. This is a safe approach to avoid accidental corruption of a dataset that you spent months collating. As such, when you export labels, a copy of your data will be created with associated label files. For example, KITTI requires frames to be numerically labelled. In the future, augmentation may also be added, which is another reason to **not** modify your existing images.
 
