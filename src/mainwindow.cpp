@@ -1035,18 +1035,19 @@ void MainWindow::handleExportDialog(){
     if(export_dialog->getExporter() == "Kitti"){
         exporter = new KittiExporter(project);
     }else if(export_dialog->getExporter() == "Darknet"){
-        DarknetExporter* exporter = new DarknetExporter(project);
+        exporter = new DarknetExporter(project);
         static_cast<DarknetExporter*>(exporter)->generateLabelIds(export_dialog->getNamesFile());
     }else if(export_dialog->getExporter() == "Pascal VOC"){
-        PascalVocExporter* exporter = new PascalVocExporter(project);
+        exporter = new PascalVocExporter(project);
         static_cast<PascalVocExporter*>(exporter)->setExportMap(export_dialog->getCreateLabelMap());
         exporter->process();
     }else if(export_dialog->getExporter().startsWith("COCO")){
         exporter = new CocoExporter(project);
     }else if(export_dialog->getExporter().startsWith("GCP")){
-        GCPExporter* exporter = new GCPExporter(project);
+        exporter = new GCPExporter(project);
         static_cast<GCPExporter*>(exporter)->setBucket(export_dialog->getBucket());
     }else{
+        qDebug() << "Invalid exporter type";
         return;
     }
 
@@ -1066,6 +1067,8 @@ void MainWindow::handleExportDialog(){
         exporter->setExportUnlabelled(export_dialog->getExportUnlablled());
         exporter->setOutputFolder(export_dialog->getOutputFolder());
         exporter->process();
+    }else{
+        qDebug() << "Failed to instantiate exporter";
     }
 
 }
