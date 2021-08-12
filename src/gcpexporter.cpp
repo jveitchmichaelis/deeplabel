@@ -48,7 +48,13 @@ bool GCPExporter::processImages(const QString folder,
         project->getLabels(image_path, labels);
 
         // Check labels
-        if(!export_unlabelled && labels.size() == 0) continue;
+        if(!export_unlabelled && labels.size() == 0){
+            progress.setValue(i);
+            progress.setLabelText(QString("%1 is unlabelled").arg(image_path));
+            progress.repaint();
+            QApplication::processEvents();
+            continue;
+        }
 
         // Deal with duplicate filenames, etc
         QString extension = QFileInfo(image_path).suffix();

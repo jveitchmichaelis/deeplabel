@@ -54,7 +54,7 @@ void KittiExporter::appendLabel(QString label_filename, QList<BoundingBox> label
     }
 }
 
-int KittiExporter::processSet(QString folder, QList<QString> images, int i){
+int KittiExporter::processSet(QString folder, QList<QString> images, int n_images){
 
     int base = 10;
     int pad = 5;
@@ -63,10 +63,25 @@ int KittiExporter::processSet(QString folder, QList<QString> images, int i){
     QList<BoundingBox> labels;
     double scale_x=1, scale_y=1;
 
+    QProgressDialog progress("...", "Abort", 0, images.size(), static_cast<QWidget*>(parent()));
+    progress.setWindowModality(Qt::WindowModal);
+    int progress_count = 0;
+
     foreach(image, images){
+
+        if(progress.wasCanceled()){
+            break;
+        }
+
         project->getLabels(image, labels);
 
-        if(!export_unlabelled && labels.size() == 0) continue;
+        if(!export_unlabelled && labels.size() == 0){
+            progress.setValue(progress_count);
+            progress.setLabelText(QString("%1 is unlabelled").arg(image));
+            progress.repaint();
+            QApplication::processEvents();
+            continue;
+        }
 
         QString extension = QFileInfo(image).suffix();
         QString filename_noext = QFileInfo(image).completeBaseName();
@@ -79,24 +94,24 @@ int KittiExporter::processSet(QString folder, QList<QString> images, int i){
             image_filename = QString("%1/%2_%3.%4").arg(folder).arg(filename_noext).arg(dupe_file++).arg(extension);
         }
 
-        QString label_filename = QString("%1/labels/%2.txt").arg(folder).arg(i, pad, base, QChar('0'));
+        QString label_filename = QString("%1/labels/%2.txt").arg(folder).arg(n_images, pad, base, QChar('0'));
         appendLabel(label_filename, labels, scale_x, scale_y);
 
-        i++;
-        emit export_progress((100 * i)/images.size());
+        progress.setValue(progress_count++);
+        progress.setLabelText(image_filename);
+        QApplication::processEvents();
 
     }
 
-    return i;
+    return n_images;
 }
 
 void KittiExporter::process(){
 
-    int i = 0;
+    int n_images = 0;
 
-    i = processSet(train_folder, train_set, i);
-
-    processSet(val_folder, validation_set, i);
+    n_images = processSet(train_folder, train_set, 0);
+    processSet(val_folder, validation_set, n_images);
 
 }
 

@@ -105,7 +105,13 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
         qDebug() << image_path;
         project->getLabels(image_path, labels);
 
-        if(!export_unlabelled && labels.size() == 0) continue;
+        if(!export_unlabelled && labels.size() == 0){
+            progress.setValue(i);
+            progress.setLabelText(QString("%1 is unlabelled").arg(image_path));
+            progress.repaint();
+            QApplication::processEvents();
+            continue;
+        }
 
         QString extension = QFileInfo(image_path).suffix();
         QString filename_noext = QFileInfo(image_path).completeBaseName();
