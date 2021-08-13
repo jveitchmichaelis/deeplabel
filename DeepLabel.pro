@@ -52,9 +52,9 @@ INCLUDEPATH += "C:/Users/Josh/Code/opencv/build/install/include"
 LIBS += -L"C:/Users/Josh/Code/opencv/build/install/x64/vc15/lib"
 QMAKE_CXXFLAGS += "/std:c++17"
 CONFIG(debug, debug|release) {
-LIBS += -lopencv_world450d
+LIBS += -lopencv_world453d
 }else{
-LIBS += -lopencv_world450
+LIBS += -lopencv_world453
 }
 }
 

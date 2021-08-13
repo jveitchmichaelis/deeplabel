@@ -11,26 +11,18 @@ cv::Ptr<cv::Tracker> MultiTrackerCV::createTrackerByName(OpenCVTrackerType type)
     using namespace cv;
 
     Ptr<Tracker> tracker;
-    /*
-    if (type == BOOSTING)
-      tracker = TrackerBoosting::create();
-    else if (type == MIL)
+
+    if (type == MIL)
       tracker = TrackerMIL::create();
     else if (type == KCF)
       tracker = TrackerKCF::create();
-    else if (type == TLD)
-      tracker = TrackerTLD::create();
-    else if (type == MEDIANFLOW)
-      tracker = TrackerMedianFlow::create();
     else if (type == GOTURN)
       tracker = TrackerGOTURN::create();
-    else if (type == MOSSE)
-      tracker = TrackerMOSSE::create();
     else if (type == CSRT)
       tracker = TrackerCSRT::create();
     else {
       std::cerr << "Incorrect tracker specified";
-    }*/
+    }
 
     tracker = TrackerCSRT::create();
 
@@ -63,11 +55,7 @@ void MultiTrackerCV::update(const cv::Mat &image){
     QtConcurrent::blockingMap(trackers.begin(), trackers.end(), [&](auto&& tracker)
     {
 
-#if (CV_VERSION_MAJOR >= 4) && (CV_VERSION_MINOR >= 5) && (CV_VERSION_SUBMINOR >= 1)
         cv::Rect bbox;
-#else
-        cv::Rect2d bbox;
-#endif
         if( tracker.first->update(image, bbox)){
 
             QRect new_roi;

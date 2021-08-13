@@ -6,12 +6,7 @@
 #include <boundingbox.h>
 
 #include <opencv2/opencv.hpp>
-
-#if (CV_VERSION_MAJOR >= 4) && (CV_VERSION_MINOR >= 5) && (CV_VERSION_SUBMINOR >= 1)
-#include <opencv2/tracking/tracking_legacy.hpp>
-#else
-#include <opencv2/tracking.hpp>
-#endif
+#include <opencv2/tracking/tracking.hpp>
 
 enum OpenCVTrackerType {BOOSTING, MIL, KCF, TLD, MEDIANFLOW, GOTURN, MOSSE, CSRT};
 enum MultiTrackerType {OPENCV, CAMSHIFT};
