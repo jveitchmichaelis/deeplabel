@@ -17,7 +17,6 @@
 #include <imagelabel.h>
 #include <labelproject.h>
 #include <exporter.h>
-
 #include <darknetimporter.h>
 #include <cocoimporter.h>
 

@@ -83,6 +83,7 @@ SOURCES += \
         multitracker.cpp \
     src/baseexporter.cpp \
     src/baseimporter.cpp \
+    src/cliparser.cpp \
     src/cocoexporter.cpp \
     src/darknetimporter.cpp \
     src/gcpexporter.cpp \
@@ -105,6 +106,7 @@ HEADERS += \
         multitracker.h \
     src/baseexporter.h \
     src/baseimporter.h \
+    src/cliparser.h \
     src/cocoexporter.h \
     src/darknetimporter.h \
     src/exporter.h \
