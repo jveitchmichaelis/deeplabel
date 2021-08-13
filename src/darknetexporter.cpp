@@ -80,6 +80,11 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
     QProgressDialog progress("...", "Abort", 0, images.size(), static_cast<QWidget*>(parent()));
     progress.setWindowModality(Qt::WindowModal);
 
+    if(folder == ""){
+        qDebug() << "Invalid folder specified.";
+        return false;
+    }
+
     QString split_text = "";
     if(split_type == EXPORT_VAL){
         split_text = "VAL";
@@ -120,7 +125,6 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
             continue;
         }else{
             qDebug() << "Processing:" << image_path;
-
         }
 
 
@@ -146,7 +150,6 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
 
         image_filename = QString("%1/%2").arg(folder).arg(image_filename);
         label_filename = QString("%1/%2").arg(folder).arg(label_filename);
-
         cv::Mat image = cv::imread(image_path.toStdString());
         //saveImage(image, image_filename);
 

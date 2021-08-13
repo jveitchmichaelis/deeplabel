@@ -121,7 +121,7 @@ bool CliParser::handleExport(){
             qDebug() << "Please specify an output folder";
             return false;
         }else{
-            exporter->setOutputFolder(parser.value(*exportOutputFolder));
+            exporter->setOutputFolder(parser.value(*exportOutputFolder), parser.isSet(*exportNoSubfolders));
         }
 
         exporter->process();

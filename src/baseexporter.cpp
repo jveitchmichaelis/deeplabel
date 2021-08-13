@@ -39,7 +39,7 @@ void BaseExporter::splitData(float split, bool shuffle, int seed){
 
 }
 
-bool BaseExporter::setOutputFolder(const QString folder){
+bool BaseExporter::setOutputFolder(const QString folder, bool no_subfolders){
 
     if(folder == "") return false;
 
@@ -51,26 +51,37 @@ bool BaseExporter::setOutputFolder(const QString folder){
         QDir().mkpath(output_folder);
     }
 
-    //Make the training and validation folders
-    train_folder = QDir::cleanPath(output_folder+"/train");
-    if (!QDir(train_folder).exists()){
-        qDebug() << "Making training folder" << train_folder;
-        QDir().mkpath(train_folder);
-    }
-
-    if(validation_split){
-        val_folder = QDir::cleanPath(output_folder+"/val");
-        if (!QDir(val_folder).exists()){
-            qDebug() << "Making validation folder" << val_folder;
-            QDir().mkpath(val_folder);
+    if(!no_subfolders){
+        //Make the training and validation folders
+        train_folder = QDir::cleanPath(output_folder+"/train");
+        if (!QDir(train_folder).exists()){
+            qDebug() << "Making training folder" << train_folder;
+            QDir().mkpath(train_folder);
         }
 
-        val_label_folder = QDir::cleanPath(val_folder);
-        val_image_folder = QDir::cleanPath(val_folder);
+        if(validation_split){
+            val_folder = QDir::cleanPath(output_folder+"/val");
+            if (!QDir(val_folder).exists()){
+                qDebug() << "Making validation folder" << val_folder;
+                QDir().mkpath(val_folder);
+            }
+
+            val_label_folder = QDir::cleanPath(val_folder);
+            val_image_folder = QDir::cleanPath(val_folder);
+        }
+
+        train_label_folder = QDir::cleanPath(train_folder);
+        train_image_folder = QDir::cleanPath(train_folder);
+    }else{
+        train_folder = QDir::cleanPath(output_folder);
+        val_folder = QDir::cleanPath(output_folder);
+        val_label_folder = QDir::cleanPath(output_folder);
+        val_image_folder = QDir::cleanPath(output_folder);
+        train_label_folder = QDir::cleanPath(output_folder);
+        train_image_folder = QDir::cleanPath(output_folder);
+        qDebug() << "Output all to" << train_image_folder;
     }
 
-    train_label_folder = QDir::cleanPath(train_folder);
-    train_image_folder = QDir::cleanPath(train_folder);
 
     return true;
 

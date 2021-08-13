@@ -30,7 +30,7 @@ signals:
 
 public slots:
     void splitData(float split=1, bool shuffle=false, int seed=42);
-    bool setOutputFolder(QString folder);
+    bool setOutputFolder(QString folder, bool no_subfolders=false);
     void setExportUnlabelled(bool res){export_unlabelled = res;}
     void setAppendLabels(bool res){append_labels = res;}
     void setValidationSplit(bool split);
