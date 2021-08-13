@@ -5,7 +5,6 @@
 #include <darknetexporter.h>
 #include <pascalvocexporter.h>
 #include <cocoexporter.h>
-#include <cocoexporter.h>
 #include <gcpexporter.h>
 
 #endif // EXPORTER_H

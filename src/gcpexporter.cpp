@@ -16,18 +16,23 @@ bool GCPExporter::processImages(const QString folder,
     QProgressDialog progress("...", "Abort", 0, images.size(), static_cast<QWidget*>(parent()));
     progress.setWindowModality(Qt::WindowModal);
 
-    QString split_text = "";
-    if(split_type == EXPORT_VAL){
-        split_text = "VAL";
-        progress.setWindowTitle("Exporting validation images");
-    }else if(split_type == EXPORT_TRAIN){
-        split_text = "TRAIN";
-        progress.setWindowTitle("Exporting train images");
-    }else if(split_type == EXPORT_TEST){
-        split_text = "TEST";
-        progress.setWindowTitle("Exporting test images");
+
+    if(!disable_progress){
+        QString split_text = "";
+        if(split_type == EXPORT_VAL){
+            split_text = "VAL";
+            progress.setWindowTitle("Exporting validation images");
+        }else if(split_type == EXPORT_TRAIN){
+            split_text = "TRAIN";
+            progress.setWindowTitle("Exporting train images");
+        }else if(split_type == EXPORT_TEST){
+            split_text = "TEST";
+            progress.setWindowTitle("Exporting test images");
+        }else{
+            split_text = "UNASSIGNED";
+        }
     }else{
-        split_text = "UNASSIGNED";
+        progress.hide();
     }
 
     int i=0;
@@ -49,10 +54,12 @@ bool GCPExporter::processImages(const QString folder,
 
         // Check labels
         if(!export_unlabelled && labels.size() == 0){
-            progress.setValue(i);
-            progress.setLabelText(QString("%1 is unlabelled").arg(image_path));
-            progress.repaint();
-            QApplication::processEvents();
+            if(!disable_progress){
+                progress.setValue(i);
+                progress.setLabelText(QString("%1 is unlabelled").arg(image_path));
+                progress.repaint();
+                QApplication::processEvents();
+            }
             continue;
         }
 
@@ -79,7 +86,7 @@ bool GCPExporter::processImages(const QString folder,
 
         for(auto &label : labels){
             auto gcp_label = QString("%1,%2,%3,%4,%5,,,%6,%7,,\n")
-                    .arg(split_text)
+                    .arg(split_type)
                     .arg(bucket_path)
                     .arg(label.classname)
                     .arg(QString::number(static_cast<double>(label.rect.topLeft().x())/width))
@@ -93,9 +100,11 @@ bool GCPExporter::processImages(const QString folder,
 
         }
 
-        progress.setValue(i++);
-        progress.setLabelText(image_filename);
-        QApplication::processEvents();
+        if(!disable_progress){
+            progress.setValue(i++);
+            progress.setLabelText(image_filename);
+            QApplication::processEvents();
+        }
     }
 
     return true;

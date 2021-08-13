@@ -147,6 +147,11 @@ bool PascalVocExporter::processImages(const QString folder, const QList<QString>
 
     QProgressDialog progress("...", "Abort", 0, images.size(), static_cast<QWidget*>(parent()));
     progress.setWindowModality(Qt::WindowModal);
+
+    if(disable_progress){
+        progress.hide();
+    }
+
     int i = 0;
 
     foreach(image_path, images){
@@ -158,10 +163,12 @@ bool PascalVocExporter::processImages(const QString folder, const QList<QString>
         project->getLabels(image_path, labels);
 
         if(!export_unlabelled && labels.size() == 0){
-            progress.setValue(i);
-            progress.setLabelText(QString("%1 is unlabelled").arg(image_path));
-            progress.repaint();
-            QApplication::processEvents();
+            if(!disable_progress){
+                progress.setValue(i);
+                progress.setLabelText(QString("%1 is unlabelled").arg(image_path));
+                progress.repaint();
+                QApplication::processEvents();
+            }
             continue;
         }
 
@@ -184,9 +191,11 @@ bool PascalVocExporter::processImages(const QString folder, const QList<QString>
         QString label_filename = QString("%1/%2.xml").arg(folder).arg(filename_noext);
         writeLabels(image, image_filename, label_filename, labels);
 
-        progress.setValue(i++);
-        progress.setLabelText(image_filename);
-        QApplication::processEvents();
+        if(!disable_progress){
+            progress.setValue(i++);
+            progress.setLabelText(image_filename);
+            QApplication::processEvents();
+        }
     }
 
     return true;

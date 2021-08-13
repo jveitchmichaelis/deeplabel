@@ -24,7 +24,7 @@ class BaseExporter : public QObject
     Q_OBJECT
 public:
     explicit BaseExporter(LabelProject *project, QObject *parent = nullptr);
-
+    void disableProgress(bool disable);
 signals:
     void export_progress(int);
 
@@ -59,6 +59,7 @@ protected:
     int image_id;
     int label_id;
 
+    bool disable_progress = false;
     bool append_labels = false;
     bool validation_split = false;
     bool export_unlabelled = false;

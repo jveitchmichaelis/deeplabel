@@ -7,6 +7,10 @@ BaseExporter::BaseExporter(LabelProject *project, QObject *parent) : QObject(par
     project->getImageList(images);
 }
 
+void BaseExporter::disableProgress(bool disable){
+    disable_progress = disable;
+}
+
 void BaseExporter::setValidationSplit(bool split){
     validation_split = split;
 }

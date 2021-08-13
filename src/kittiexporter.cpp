@@ -65,6 +65,11 @@ int KittiExporter::processSet(QString folder, QList<QString> images, int n_image
 
     QProgressDialog progress("...", "Abort", 0, images.size(), static_cast<QWidget*>(parent()));
     progress.setWindowModality(Qt::WindowModal);
+
+    if(disable_progress){
+        progress.hide();
+    }
+
     int progress_count = 0;
 
     foreach(image, images){
@@ -76,10 +81,12 @@ int KittiExporter::processSet(QString folder, QList<QString> images, int n_image
         project->getLabels(image, labels);
 
         if(!export_unlabelled && labels.size() == 0){
-            progress.setValue(progress_count);
-            progress.setLabelText(QString("%1 is unlabelled").arg(image));
-            progress.repaint();
-            QApplication::processEvents();
+            if(!disable_progress){
+                progress.setValue(progress_count);
+                progress.setLabelText(QString("%1 is unlabelled").arg(image));
+                progress.repaint();
+                QApplication::processEvents();
+            }
             continue;
         }
 
@@ -97,9 +104,11 @@ int KittiExporter::processSet(QString folder, QList<QString> images, int n_image
         QString label_filename = QString("%1/labels/%2.txt").arg(folder).arg(n_images, pad, base, QChar('0'));
         appendLabel(label_filename, labels, scale_x, scale_y);
 
-        progress.setValue(progress_count++);
-        progress.setLabelText(image_filename);
-        QApplication::processEvents();
+        if(!disable_progress){
+            progress.setValue(progress_count++);
+            progress.setLabelText(image_filename);
+            QApplication::processEvents();
+        }
 
     }
 

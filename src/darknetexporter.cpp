@@ -94,6 +94,10 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
         split_text = "UNASSIGNED";
     }
 
+    if(!disable_progress){
+        progress.hide();
+    }
+
     int i = 0;
 
     foreach(image_path, images){
@@ -102,16 +106,23 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
             break;
         }
 
-        qDebug() << image_path;
         project->getLabels(image_path, labels);
 
         if(!export_unlabelled && labels.size() == 0){
-            progress.setValue(i);
-            progress.setLabelText(QString("%1 is unlabelled").arg(image_path));
-            progress.repaint();
-            QApplication::processEvents();
+            if(!disable_progress){
+                progress.setValue(i);
+                progress.setLabelText(QString("%1 is unlabelled").arg(image_path));
+                progress.repaint();
+                QApplication::processEvents();
+            }
+            qDebug() << image_path << "is unlabelled";
+
             continue;
+        }else{
+            qDebug() << "Processing:" << image_path;
+
         }
+
 
         QString extension = QFileInfo(image_path).suffix();
         QString filename_noext = QFileInfo(image_path).completeBaseName();
@@ -142,8 +153,10 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
         QFile::copy(image_path, image_filename);
         writeLabels(image, label_filename, labels);
 
-        progress.setValue(i++);
-        progress.setLabelText(image_filename);
+        if(!disable_progress){
+            progress.setValue(i++);
+            progress.setLabelText(image_filename);
+        }
 
     }
 
