@@ -71,12 +71,11 @@ public slots:
     void addFolderRecursive(QString path_filter);
 
 private:
-    QSqlDatabase db;
     QMutex mutex;
     bool checkDatabase();
     bool should_cancel;
     QString connection_name;
-
+    QSqlDatabase getDatabase();
 };
 
 #endif // LABELPROJECT_H
