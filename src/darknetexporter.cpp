@@ -127,7 +127,6 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
             qDebug() << "Processing:" << image_path;
         }
 
-
         QString extension = QFileInfo(image_path).suffix();
         QString filename_noext = QFileInfo(image_path).completeBaseName();
         filename_noext = filename_noext.prepend(filename_prefix);
@@ -153,7 +152,7 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
         cv::Mat image = cv::imread(image_path.toStdString());
         //saveImage(image, image_filename);
 
-        QFile::copy(image_path, image_filename);
+        QFile::copy(QFileInfo(image_path).absoluteFilePath(), image_filename);
         writeLabels(image, label_filename, labels);
 
         if(!disable_progress){
