@@ -24,3 +24,17 @@ void BaseImporter::addAsset(QString image_path, QList<BoundingBox> boxes){
         }
     }
 }
+
+QList<QString> BaseImporter::readLines(QString path){
+    QFile file(path);
+    QList<QString> lines = {};
+
+    if (file.open(QFile::ReadOnly)) {
+        while (!file.atEnd()){
+            auto line = QString(file.readLine()).simplified();
+            lines.append(line);
+        }
+    }
+
+    return lines;
+}

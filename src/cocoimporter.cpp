@@ -1,8 +1,4 @@
 #include "cocoimporter.h"
-#include <QJsonDocument>
-#include <QJsonArray>
-#include <QJsonObject>
-#include <boundingbox.h>
 
 void CocoImporter::import(QString annotation_file){
     // Load Json

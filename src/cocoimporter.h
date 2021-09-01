@@ -2,6 +2,9 @@
 #define COCOIMPORTER_H
 
 #include<baseimporter.h>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
 
 class CocoImporter : public BaseImporter
 {

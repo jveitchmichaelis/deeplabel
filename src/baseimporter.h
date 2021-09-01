@@ -4,10 +4,12 @@
 #include <QObject>
 #include <QFile>
 #include <labelproject.h>
+#include <boundingbox.h>
 
 class BaseImporter : public QObject
 {
     Q_OBJECT
+
 public:
     explicit BaseImporter(QObject *parent = nullptr);
     void import(){};
@@ -22,7 +24,10 @@ protected:
     LabelProject *project;
 
     void addAsset(QString image_path, QList<BoundingBox> boxes);
+    QList<QString> readLines(QString path);
+
 public slots:
+
 };
 
 #endif // BASEIMPORTER_H

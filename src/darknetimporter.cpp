@@ -1,19 +1,5 @@
 #include "darknetimporter.h"
 
-QList<QString> readLines(QString path){
-    QFile file(path);
-    QList<QString> lines = {};
-
-    if (file.open(QFile::ReadOnly)) {
-        while (!file.atEnd()){
-            auto line = QString(file.readLine()).simplified();
-            lines.append(line);
-        }
-    }
-
-    return lines;
-}
-
 void DarknetImporter::import(QString image_list, QString names_file){
 
     loadClasses(names_file);
