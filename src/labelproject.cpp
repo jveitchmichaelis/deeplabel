@@ -154,7 +154,7 @@ void LabelProject::addFolderRecursive(QString path_filter){
 
 }
 
-bool LabelProject::getImageList(QList<QString> &images)
+bool LabelProject::getImageList(QList<QString> &images, bool relative)
 {
     /*!
      * Get a list of all images in the database with absolute paths, which is cleared prior to retrieval. Returns false if the database query failed.
@@ -174,7 +174,11 @@ bool LabelProject::getImageList(QList<QString> &images)
             while (query.next()) {
                 QString path = query.value(0).toString();
                 // Push absolute file path
-                images.push_back(QDir::cleanPath(QDir(db.databaseName()).path() + QDir::separator() + path));
+                if(!relative){
+                    images.push_back(QDir::cleanPath(QDir(db.databaseName()).path() + QDir::separator() + path));
+                }else{
+                    images.push_back(QDir(db.databaseName()).relativeFilePath(path));
+                }
             }
         }
     }

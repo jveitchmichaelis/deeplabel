@@ -4,7 +4,8 @@ BaseExporter::BaseExporter(LabelProject *project, QObject *parent) : QObject(par
 {
 
     this->project = project;
-    project->getImageList(images);
+    bool relative_path = true;
+    project->getImageList(images, relative_path);
 }
 
 void BaseExporter::disableProgress(bool disable){
