@@ -152,6 +152,8 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
         cv::Mat image = cv::imread(image_path.toStdString());
         //saveImage(image, image_filename);
 
+        qDebug() << "Copy:" << QFileInfo(image_path).absoluteFilePath() << " to: " << image_filename;
+
         QFile::copy(QFileInfo(image_path).absoluteFilePath(), image_filename);
         writeLabels(image, label_filename, labels);
 
