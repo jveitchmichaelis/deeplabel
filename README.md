@@ -128,15 +128,21 @@ You need to compile OpenCV with contrib (`-DOPENCV_EXTRA_MODULES_PATH`) for obje
 ``` bash
 git clone https://github.com/opencv/opencv
 git clone https://github.com/opencv/opencv_contrib
-cd opencv && git checkout 4.1.0 && cd ../
-cd opencv_contrib && git checkout 4.1.0 && cd ../
+cd opencv && git checkout 4.5.3 && cd ../
+cd opencv_contrib && git checkout 4.5.3 && cd ../
+
+cd opencv
+mkdir build && cd build
+cmake .. -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules
+make -j8 
+sudo make install
 ```
 
 On Mac, Homebrew automatically include pkg-config support and the contrib packages.
 
 **Linux**
 
-Build opencv using your preferred method. You need Qt5 installed - not just Qt Creator.
+Build opencv using your preferred method (e.g. above). You need Qt5 installed - not just Qt Creator.
 
 Clone the repository, then:
 
