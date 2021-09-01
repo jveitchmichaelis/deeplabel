@@ -53,6 +53,11 @@ public:
     int getNextUnlabelled(QString fileName);
     int getNextInstance(QString fileName, QString className);
 
+    QDir getDbFolder(){
+            auto db = getDatabase();
+            return QDir(db.databaseName());
+    }
+
     int getImageId(QString fileName);
     int getClassId(QString className);
     QString getClassName(int classID);
