@@ -88,7 +88,7 @@ bool CocoExporter::processImages(const QString folder, const QString label_filen
 
         auto copied = QFile::copy(image_path, image_filename);
         if(!copied){
-            qDebug() << "Failed to copy image" << image_filename;
+            qWarning() << "Failed to copy image" << image_filename;
         }
 
         QJsonObject image_info;

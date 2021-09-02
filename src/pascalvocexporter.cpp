@@ -3,7 +3,7 @@
 void PascalVocExporter::splitData(float split, bool shuffle, int seed){
 
     if(split < 0 || split > 1){
-        qDebug() << "Invalid split fraction, should be [0,1]";
+        qCritical() << "Invalid split fraction, should be [0,1]";
     }
 
     if(shuffle){
@@ -18,8 +18,8 @@ void PascalVocExporter::splitData(float split, bool shuffle, int seed){
     train_set = images.mid(0, pivot);
     validation_set = images.mid(pivot);
 
-    qDebug() << train_set.size() << " images selected for train set.";
-    qDebug() << validation_set.size() << " images selected for validation set.";
+    qInfo() << train_set.size() << " images selected for train set.";
+    qInfo() << validation_set.size() << " images selected for validation set.";
 
 }
 
@@ -31,20 +31,20 @@ bool PascalVocExporter::setOutputFolder(const QString folder){
 
     //Make output folder if it doesn't exist
     if (!QDir(output_folder).exists()){
-        qDebug() << "Making output folder" << output_folder;
+        qInfo() << "Making output folder" << output_folder;
         QDir().mkpath(output_folder);
     }
 
     //Make the training and validation folders
     train_folder = QDir::cleanPath(output_folder+"/train");
     if (!QDir(train_folder).exists()){
-        qDebug() << "Making training folder" << train_folder;
+        qInfo() << "Making training folder" << train_folder;
         QDir().mkpath(train_folder);
     }
 
     val_folder = QDir::cleanPath(output_folder+"/val");
     if (!QDir(val_folder).exists()){
-        qDebug() << "Making validation folder" << val_folder;
+        qInfo() << "Making validation folder" << val_folder;
         QDir().mkpath(val_folder);
     }
 
@@ -121,7 +121,7 @@ void PascalVocExporter::writeLabels(const cv::Mat &image, const QString image_fi
 bool PascalVocExporter::saveImage(cv::Mat &image, const QString output, const double scale_x, const double scale_y){
 
     if(image.rows == 0 || image.cols == 0){
-        qDebug() << "Empty image ";
+        qCritical() << "Empty image ";
         return false;
     }
 

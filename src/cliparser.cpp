@@ -55,10 +55,10 @@ bool CliParser::handleExport(){
 
     LabelProject project;
     if(!parser.isSet("input") || parser.value("input") == ""){
-        qDebug() << "No input file specified";
+        qCritical() << "No input file specified";
         return false;
     }else{
-        qDebug() << "Attemting to load: " << parser.value("input");
+        qInfo() << "Attemting to load: " << parser.value("input");
         project.loadDatabase(parser.value("input"));
     }
 
@@ -69,7 +69,7 @@ bool CliParser::handleExport(){
         if(parser.isSet(*exportNamesFile)){
             static_cast<DarknetExporter*>(exporter)->generateLabelIds(parser.value(*exportNamesFile));
         }else{
-            qDebug() << "No names file specifed.";
+            qCritical() << "No names file specifed.";
             return false;
         }
 
@@ -86,12 +86,12 @@ bool CliParser::handleExport(){
         if(parser.isSet(*exportGCPBucket)){
             static_cast<GCPExporter*>(exporter)->setBucket(parser.value(*exportGCPBucket));
         }else{
-            qDebug() << "No bucket path specifed.";
+            qCritical() << "No bucket path specifed.";
             return false;
         }
 
     }else{
-        qDebug() << "Invalid exporter type specified";
+        qCritical() << "Invalid exporter type specified";
         return false;
     }
 
@@ -118,7 +118,7 @@ bool CliParser::handleExport(){
         exporter->setExportUnlabelled(parser.isSet(*exportUnlabelledImages));
 
         if(!parser.isSet(*exportOutputFolder) || parser.value(*exportOutputFolder) == ""){
-            qDebug() << "Please specify an output folder";
+            qCritical() << "Please specify an output folder";
             return false;
         }else{
             exporter->setOutputFolder(parser.value(*exportOutputFolder), parser.isSet(*exportNoSubfolders));
@@ -127,7 +127,7 @@ bool CliParser::handleExport(){
         exporter->process();
 
     }else{
-        qDebug() << "Failed to instantiate exporter";
+        qFatal("Failed to instantiate exporter");
         return false;
     }
 

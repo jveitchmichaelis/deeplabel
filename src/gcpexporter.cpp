@@ -79,7 +79,7 @@ bool GCPExporter::processImages(const QString folder,
 
         auto copied = QFile::copy(image_path, image_filename);
         if(!copied){
-            qDebug() << "Failed to copy image" << image_filename;
+            qCritical() << "Failed to copy image" << image_filename;
         }
 
         auto bucket_path = QString("%1/%2.%3").arg(bucket_uri).arg(filename_noext).arg(extension);
@@ -118,13 +118,13 @@ bool GCPExporter::setOutputFolder(const QString folder){
 
     //Make output folder if it doesn't exist
     if (!QDir(output_folder).exists()){
-        qDebug() << "Making output folder" << output_folder;
+        qInfo() << "Making output folder" << output_folder;
         QDir().mkpath(output_folder);
     }
 
     image_folder = QDir::cleanPath(output_folder+"/images");
     if (!QDir(image_folder).exists()){
-        qDebug() << "Making validation folder" << image_folder;
+        qInfo() << "Making validation folder" << image_folder;
         QDir().mkpath(image_folder);
     }
 

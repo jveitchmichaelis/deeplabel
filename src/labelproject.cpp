@@ -76,7 +76,7 @@ bool LabelProject::checkDatabase(){
         if(!class_record.contains("name")) return false;
     }
 
-    qDebug() << "Database structure looks good";
+    qInfo() << "Database structure looks good";
 
     return true;
 }
@@ -108,7 +108,7 @@ bool LabelProject::createDatabase(QString fileName)
                    "image_id int, class_id int, x int, y int, width int, height int, automatic int)");
 
         if(!res){
-            qDebug() << "Error: " << query.lastError();
+            qCritical() << "Error: " << query.lastError();
         }
     }
 
@@ -166,7 +166,7 @@ bool LabelProject::getImageList(QList<QString> &images, bool relative)
         res = query.exec("SELECT path FROM images");
 
         if(!res){
-            qDebug() << "Error: " << query.lastError();
+            qCritical() << "Error: " << query.lastError();
         }else{
 
             images.clear();
@@ -199,7 +199,7 @@ bool LabelProject::getClassList(QList<QString> &classes)
         res = query.exec("SELECT name FROM classes");
 
         if(!res){
-            qDebug() << "Error: " << query.lastError();
+            qCritical() << "Error: " << query.lastError();
         }else{
 
             classes.clear();
@@ -207,7 +207,7 @@ bool LabelProject::getClassList(QList<QString> &classes)
             while (query.next()) {
                 QString name = query.value(0).toString();
                 if(name == ""){
-                    qDebug() << "Warning: empty classname found in db file";
+                    qWarning() << "Warning: empty classname found in db file";
                 }
                 classes.push_back(name);
             }
@@ -233,7 +233,7 @@ bool LabelProject::classInDB(QString className){
         res = query.exec();
 
         if(!res){
-            qDebug() << "Error: " << query.lastError();
+            qCritical() << "Error: " << query.lastError();
             return false;
         }else{
             return query.next();
@@ -257,7 +257,7 @@ bool LabelProject::imageInDB(QString fileName){
         res = query.exec();
 
         if(!res){
-            qDebug() << "Error: " << query.lastError();
+            qCritical() << "Error: " << query.lastError();
         }else{
             return query.next();
         }
@@ -284,7 +284,7 @@ void LabelProject::addVideo(QString fileName, QString outputFolder, int frame_sk
     int n_frames = video.get(cv::CAP_PROP_FRAME_COUNT);
 
     if(!video.isOpened()){
-        qDebug() << "Failed to open" << fileName;
+        qCritical() << "Failed to open" << fileName;
     }
 
     QProgressDialog progress("...", "Abort", 0, n_frames, static_cast<QWidget*>(parent()));
@@ -326,7 +326,7 @@ bool LabelProject::addAsset(QString fileName)
     bool res = false;
 
     if(!QFile::exists(fileName)){
-        qDebug() << "File not found on disk " << fileName;
+        qCritical() << "File not found on disk " << fileName;
         return false;
     }
 
@@ -347,7 +347,7 @@ bool LabelProject::addAsset(QString fileName)
             res = query.exec();
 
             if(!res){
-                qDebug() << "Error: " << query.lastError();
+                qCritical() << "Error: " << query.lastError();
             }
         }
     }
@@ -370,7 +370,7 @@ int LabelProject::getImageId(QString fileName){
         bool res = query.exec();
 
         if(!res){
-            qDebug() << "Error: " << query.lastError();
+            qCritical() << "Error: " << query.lastError();
         }else{
             if(query.next()){
                 id = query.value(0).toInt();
@@ -394,7 +394,7 @@ int LabelProject::getClassId(QString className){
         bool res = query.exec();
 
         if(!res){
-            qDebug() << "Error: " << query.lastError();
+            qCritical() << "Error: " << query.lastError();
         }else{
             if(query.next()){
                 id = query.value(0).toInt();
@@ -418,7 +418,7 @@ QString LabelProject::getClassName(int classID){
         bool res = query.exec();
 
         if(!res){
-            qDebug() << "Error: " << query.lastError();
+            qCritical() << "Error: " << query.lastError();
         }else{
             if(query.next()){
                 className = query.value(0).toString();
@@ -454,7 +454,7 @@ bool LabelProject::getLabels(int image_id, QList<BoundingBox> &bboxes){
             res = query.exec();
 
             if(!res){
-                qDebug() << "Error: " << query.lastError();
+                qCritical() << "Error: " << query.lastError();
             }
 
             while(query.next()){
@@ -500,7 +500,7 @@ bool LabelProject::removeLabels(QString fileName){
             res = query.exec();
 
             if(!res){
-                qDebug() << "Error: " << query.lastError();
+                qCritical() << "Error: " << query.lastError();
             }
         }
 
@@ -536,7 +536,7 @@ bool LabelProject::removeLabel(QString fileName, BoundingBox bbox){
             res = query.exec();
 
             if(!res){
-                qDebug() << "Error: " << query.lastError();
+                qCritical() << "Error: " << query.lastError();
             }
         }
 
@@ -573,7 +573,7 @@ bool LabelProject::setOccluded(QString fileName, BoundingBox bbox, int occluded)
             res = query.exec();
 
             if(!res){
-                qDebug() << "Error: " << query.lastError();
+                qCritical() << "Error: " << query.lastError();
             }
         }
     }
@@ -602,7 +602,7 @@ bool LabelProject::removeClass(QString className){
             res = query.exec();
 
             if(!res){
-                qDebug() << "Error: " << query.lastError();
+                qCritical() << "Error: " << query.lastError();
             }
 
             // Delete the class itself
@@ -612,7 +612,7 @@ bool LabelProject::removeClass(QString className){
             res = query.exec();
 
             if(!res){
-                qDebug() << "Error: " << query.lastError();
+                qCritical() << "Error: " << query.lastError();
             }
         }
     }
@@ -685,7 +685,7 @@ bool LabelProject::removeImage(QString fileName){
             res = query.exec();
 
             if(!res){
-                qDebug() << "Error: " << query.lastError();
+                qCritical() << "Error: " << query.lastError();
             }
 
             // Delete the image itself
@@ -695,7 +695,7 @@ bool LabelProject::removeImage(QString fileName){
             res = query.exec();
 
             if(!res){
-                qDebug() << "Error: " << query.lastError();
+                qCritical() << "Error: " << query.lastError();
             }
         }
 
@@ -740,7 +740,7 @@ bool LabelProject::addLabel(QString fileName, BoundingBox bbox)
             res = query.exec();
 
             if(!res){
-                qDebug() << "Error: " << query.lastError();
+                qCritical() << "Error: " << query.lastError();
             }
         }
     }
@@ -784,7 +784,7 @@ int LabelProject::addImageFolder(QString path){
                 number_added++;
                 qDebug() << "Added image: " << image_path;
             }else{
-                qDebug() << "Failed to add image: " << image_path;
+                qCritical() << "Failed to add image: " << image_path;
             }
 
             progress.setValue(i++);
@@ -839,7 +839,7 @@ bool LabelProject::addClass(QString className)
     bool res = false;
 
     if(classInDB(className)){
-        qDebug() << "Class exists!";
+        qWarning() << "Class exists!";
         return true;
     }
 
@@ -853,7 +853,7 @@ bool LabelProject::addClass(QString className)
 
 
         if(!res){
-            qDebug() << "Error: " << query.lastError();
+            qCritical() << "Error: " << query.lastError();
         }
     }
 

@@ -314,7 +314,7 @@ void ImageLabel::keyPressEvent(QKeyEvent *event)
         if(rubberBand->width() > 0 && rubberBand->height() > 0){
 
             if(current_classname == ""){
-                qDebug() << "No class selected!";
+                qWarning() << "No class selected!";
             }else{
 
                 QRect bbox_rect;

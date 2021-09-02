@@ -91,7 +91,7 @@ void ImageDisplay::loadPixmap(){
     original_image = cv::imread(current_imagepath.toStdString(), cv::IMREAD_UNCHANGED|cv::IMREAD_ANYDEPTH);
 
     if(original_image.empty()){
-        qDebug() << "Failed to load image " << current_imagepath;
+        qCritical() << "Failed to load image " << current_imagepath;
         return;
     }
 

@@ -21,7 +21,7 @@ cv::Ptr<cv::Tracker> MultiTrackerCV::createTrackerByName(OpenCVTrackerType type)
     else if (type == CSRT)
       tracker = TrackerCSRT::create();
     else {
-      std::cerr << "Incorrect tracker specified";
+      qCritical() << "Incorrect tracker specified";
     }
 
     tracker = TrackerCSRT::create();

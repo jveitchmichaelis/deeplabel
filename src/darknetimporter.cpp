@@ -57,7 +57,7 @@ QList<BoundingBox> DarknetImporter::loadLabels(QString image_path){
         bbox.classname = project->getClassName(bbox.classid);
 
         if(bbox.classname == ""){
-            qDebug() << "Warning. Class" << bbox.classid << " not found in names file.";
+            qWarning() << "Class" << bbox.classid << " not found in names file.";
         }
 
         int center_x = static_cast<int>(label.at(1).toFloat() * width);
@@ -91,7 +91,7 @@ void DarknetImporter::loadClasses(QString names_file){
             if(QString(line) == "") continue;
 
             project->addClass(line.simplified());
-            qDebug() << line.simplified();
+            qInfo() << line.simplified();
         }
     }
 

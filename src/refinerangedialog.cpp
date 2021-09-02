@@ -38,6 +38,8 @@ bool RefineRangeDialog::check(){
     if(getStart() > getEnd()) return false;
 
     ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
+
+    return true;
 }
 
 RefineRangeDialog::~RefineRangeDialog()

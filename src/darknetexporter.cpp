@@ -17,7 +17,7 @@ void DarknetExporter::generateLabelIds(const QString names_file){
     }
 
     if(class_list.size() == 0){
-        qDebug() << "No classes found in names file.";
+        qWarning() << "No classes found in names file.";
         return;
     }
 
@@ -50,7 +50,7 @@ void DarknetExporter::writeLabels(const cv::Mat &image, const QString label_file
 
             // Check if this label exists in the database
             if(id_map.find(label.classname.toLower()) == id_map.end()){
-                qDebug() << "Couldn't find this label in the names file: " << label.classname.toLower();
+                qWarning() << "Couldn't find this label in the names file: " << label.classname.toLower();
                 continue;
             }
 
@@ -81,7 +81,7 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
     progress.setWindowModality(Qt::WindowModal);
 
     if(folder == ""){
-        qDebug() << "Invalid folder specified.";
+        qCritical() << "Invalid folder specified.";
         return false;
     }
 
@@ -152,11 +152,14 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
         cv::Mat image = cv::imread(image_path.toStdString());
 
         auto db_dir = project->getDbFolder();
-        auto abs_path = QDir::cleanPath(db_dir.filePath(image_path));
+        auto abs_path = QFileInfo(QDir::cleanPath(db_dir.filePath(image_path))).absoluteFilePath();
 
         qDebug() << "Copy:" << abs_path << " to: " << image_filename;
 
-        QFile::copy(QFileInfo(abs_path).absoluteFilePath(), image_filename);
+        auto copied = QFile::copy(abs_path, image_filename);
+        if(!copied){
+            qWarning() << "Failed to copy image" << image_filename;
+        }
         writeLabels(image, label_filename, labels);
 
         if(!disable_progress){

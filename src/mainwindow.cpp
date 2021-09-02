@@ -966,7 +966,7 @@ void MainWindow::addVideo(void){
         dialog_box->layout()->addWidget(accept_button);
 
         if(dialog_box->exec()){
-            qDebug() << "Frame skip: " << frame_skip_spin->value();
+            qInfo() << "Frame skip: " << frame_skip_spin->value();
             project->addVideo(video_filename, output_folder, frame_skip_spin->value());
         }
     }
@@ -1015,7 +1015,7 @@ void MainWindow::addImageFolder(void){
     if(path != ""){
         int number_added = project->addImageFolder(path);
         settings->setValue("data_folder", path);
-        qDebug() << "Added: " << number_added << " images";
+        qInfo() << "Added: " << number_added << " images";
     }
 
     updateImageList();
@@ -1047,7 +1047,7 @@ void MainWindow::handleExportDialog(){
         exporter = new GCPExporter(project);
         static_cast<GCPExporter*>(exporter)->setBucket(export_dialog->getBucket());
     }else{
-        qDebug() << "Invalid exporter type";
+        qCritical() << "Invalid exporter type";
         return;
     }
 
@@ -1068,7 +1068,7 @@ void MainWindow::handleExportDialog(){
         exporter->setOutputFolder(export_dialog->getOutputFolder());
         exporter->process();
     }else{
-        qDebug() << "Failed to instantiate exporter";
+        qCritical() << "Failed to instantiate exporter";
     }
 
 }
@@ -1086,7 +1086,6 @@ void MainWindow::launchExportDialog(){
 void MainWindow::handleRefineRange(){
 
     if(refine_range_dialog->result() != QDialog::Accepted ){
-        qDebug() << "Rejected";
         return;
     }
 
@@ -1174,8 +1173,8 @@ void MainWindow::computeStatistics(void){
         }
         double stdev = std::sqrt(t / total_hist);
 
-        qDebug() << "Mean: " << mean;
-        qDebug() << "Std: " << stdev;
+        qInfo() << "Mean: " << mean;
+        qInfo() << "Std: " << stdev;
     }
 }
 

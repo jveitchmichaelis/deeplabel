@@ -64,6 +64,7 @@ CONFIG(debug, debug|release) {
     OBJECTS_DIR = .obj_debug
     MOC_DIR     = .moc_debug
 }else {
+    DEFINES += QT_NO_DEBUG_OUTPUT
     DESTDIR = release
     OBJECTS_DIR = .obj
     MOC_DIR     = .moc

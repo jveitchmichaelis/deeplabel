@@ -2,7 +2,7 @@
 
 void CocoImporter::import(QString annotation_file){
     // Load Json
-    qDebug() << "Loading JSON";
+    qDebug() << "Loading COCO JSON";
     QFile loadFile(annotation_file);
     loadFile.open(QIODevice::ReadOnly | QIODevice::Text);
     QByteArray json_data = loadFile.readAll();
@@ -11,7 +11,7 @@ void CocoImporter::import(QString annotation_file){
     // Load classes (categories)
     auto categories = json.object().value("categories");
     if(categories == QJsonValue::Undefined){
-        qDebug() << "Categories not found";
+        qCritical() << "Categories not found";
         return;
     }
 
@@ -37,7 +37,7 @@ void CocoImporter::import(QString annotation_file){
     // Load images
     auto images = json.object().value("images");
     if(images == QJsonValue::Undefined){
-        qDebug() << "No images found";
+        qCritical() << "No images found";
         return;
     }
 
@@ -67,7 +67,7 @@ void CocoImporter::import(QString annotation_file){
     // Load labels
     auto annotations = json.object().value("annotations");
     if(annotations == QJsonValue::Undefined){
-        qDebug() << "No annotations found";
+        qCritical() << "No annotations found";
         return;
     }
 
@@ -87,7 +87,7 @@ void CocoImporter::import(QString annotation_file){
 
         auto bbox = annotation.toObject().value("bbox");
         if(bbox == QJsonValue::Undefined || !bbox.isArray()){
-            qDebug() << "No bounding box found";
+            qWarning() << "No bounding box found for" << image_id;
             continue;
         }
 

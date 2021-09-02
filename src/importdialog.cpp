@@ -136,7 +136,7 @@ bool ImportDialog::checkOK(){
 
     // If input file exists
     if(!QFile(input_file).exists() || input_file == ""){
-        qDebug() << "Import file/folder doesn't exist";
+        qCritical() << "Import file/folder doesn't exist";
         return false;
     }
 
@@ -149,7 +149,7 @@ bool ImportDialog::checkOK(){
         ui->annotationPushButton->setEnabled(true);
 
         if(!QFile::exists(annotation_file)){
-            qDebug() << "Names file doesn't exist";
+            qCritical() << "Names file doesn't exist";
             return false;
         }
     }
@@ -165,7 +165,7 @@ bool ImportDialog::checkOK(){
         // If we're using darknet, check the names
         // file exists and contains something
         if(!QFile::exists(names_file)){
-            qDebug() << "Names file doesn't exist";
+            qCritical() << "Names file doesn't exist";
             return false;
         }
 
@@ -182,7 +182,7 @@ bool ImportDialog::checkOK(){
         }
 
         if(class_list.size() == 0){
-            qDebug() << "No classes?";
+            qCritical() << "No classes found";
             return false;
         }
     }
