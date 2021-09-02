@@ -149,7 +149,7 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
 
         image_filename = QString("%1/%2").arg(folder).arg(image_filename);
         label_filename = QString("%1/%2").arg(folder).arg(label_filename);
-        cv::Mat image = cv::imread(image_path.toStdString());
+
 
         auto db_dir = project->getDbFolder();
         auto abs_path = QFileInfo(QDir::cleanPath(db_dir.filePath(image_path))).absoluteFilePath();
@@ -160,7 +160,14 @@ bool DarknetExporter::processImages(const QString folder, const QList<QString> i
         if(!copied){
             qWarning() << "Failed to copy image" << image_filename;
         }
-        writeLabels(image, label_filename, labels);
+
+        cv::Mat image = cv::imread(abs_path.toStdString());
+        if(image.empty()){
+            qCritical() << "Failed to load image!" << abs_path;
+        }else{
+            writeLabels(image, label_filename, labels);
+        }
+
 
         if(!disable_progress){
             progress.setValue(i++);
