@@ -5,6 +5,10 @@
 #include <QCommandLineParser>
 #include <exporter.h>
 #include <baseimporter.h>
+#include <darknetimporter.h>
+#include <motimporter.h>
+#include <birdsaiimporter.h>
+#include <cocoimporter.h>
 
 class CliParser : public QObject
 {
@@ -16,6 +20,7 @@ public:
 private:
     void SetupOptions();
     bool handleExport();
+    bool handleImport();
 
     QCommandLineParser parser;
 
@@ -31,6 +36,11 @@ private:
     QCommandLineOption *exportShuffleImages;
     QCommandLineOption *exportAppendLabels;
     QCommandLineOption *exportUnlabelledImages;
+
+    QCommandLineOption *importImages;
+    QCommandLineOption *importAnnotations;
+    QCommandLineOption *importUnlabelledImages;
+    QCommandLineOption *importOverwrite;
 
 signals:
 

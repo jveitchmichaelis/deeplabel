@@ -7,9 +7,9 @@ CliParser::CliParser(QObject *parent) : QObject(parent)
 
 void CliParser::SetupOptions(){
 
-    exportFormatOption = new QCommandLineOption({"f", "format"}, "export format", "[kitti, darknet, gcp, voc, coco]");
+    exportFormatOption = new QCommandLineOption({"f", "format"}, "export format", "[kitti, darknet, gcp, voc, coco, mot, birdsai]");
     exportOutputFolder = new QCommandLineOption({"o", "output"}, "output folder", "folder path");
-    exportInputFile = new QCommandLineOption({"i", "input"}, "input label database", "file path");
+    exportInputFile = new QCommandLineOption({"i", "input"}, "label database", "file path");
     exportValidationSplit = new QCommandLineOption({"s", "split"}, "validation split percentage", "percentage", "20");
     exportNoSubfolders = new QCommandLineOption("no-subfolders", "export directly to specified folder");
     exportFilePrefix = new QCommandLineOption("prefix", "filename prefix", "prefix", "");
@@ -19,12 +19,16 @@ void CliParser::SetupOptions(){
     exportShuffleImages = new QCommandLineOption("shuffle", "shuffle images when splitting");
     exportAppendLabels = new QCommandLineOption("append-labels", "append to label files");
     exportUnlabelledImages = new QCommandLineOption("export-unlabelled", "export images without labels");
+    importImages = new QCommandLineOption("images", "import image path/folder", "images");
+    importAnnotations = new QCommandLineOption("annotations", "import annotation path/folder", "annotations");
+    importUnlabelledImages = new QCommandLineOption("import-unlabelled", "import images without labels");
+    importOverwrite = new QCommandLineOption("overwrite", "overwrite existing databases");
 
     parser.addHelpOption();
     parser.addVersionOption();
     parser.setOptionsAfterPositionalArgumentsMode(QCommandLineParser::ParseAsOptions);
 
-    parser.addPositionalArgument("mode", "[export]");
+    parser.addPositionalArgument("mode", "[export, import]");
     parser.addOption(*exportFormatOption);
     parser.addOption(*exportOutputFolder);
     parser.addOption(*exportInputFile);
@@ -37,15 +41,114 @@ void CliParser::SetupOptions(){
     parser.addOption(*exportShuffleImages);
     parser.addOption(*exportAppendLabels);
     parser.addOption(*exportUnlabelledImages);
+    parser.addOption(*importImages);
+    parser.addOption(*importAnnotations);
+    parser.addOption(*importUnlabelledImages);
+    parser.addOption(*importOverwrite);
+
 }
 
 bool CliParser::Run(){
 
     parser.process(*QCoreApplication::instance());
 
-    auto res = handleExport();
+    bool res = false;
+    auto mode = parser.positionalArguments().at(0);
+
+    for(auto &option : parser.unknownOptionNames()){
+        qCritical() << "Unknown option: " << option;
+    }
+
+    if(mode == "export"){
+        res = handleExport();
+    }else if(mode == "import"){
+        res = handleImport();
+    }
 
     return res;
+}
+
+bool CliParser::handleImport(){
+
+    QString database = parser.value("input");
+
+    LabelProject project;
+    if(QFileInfo(database).exists()){
+        if(!parser.isSet("overwrite")){
+            qCritical() << "Database exists, will not ovewrite.";
+            return false;
+        }
+    }else{
+        project.createDatabase(database);
+    }
+
+    project.loadDatabase(database);
+
+    QThread* import_thread = new QThread;
+
+    bool import_unlabelled = parser.isSet(*importUnlabelledImages);
+
+    if(parser.value("format") == "darknet"){
+
+        if(parser.value("images") == ""){
+            qCritical() << "Image list doesn't exist";
+            return false;
+        }
+
+        DarknetImporter importer(&project);
+        importer.moveToThread(import_thread);
+        importer.setImportUnlabelled(import_unlabelled);
+        importer.import(parser.value("images"), parser.value("names"));
+    }else if(parser.value("format") == "coco"){
+
+        if(parser.value("annotations") == ""){
+            qCritical() << "Annotations file doesn't exist";
+            return false;
+        }
+
+        CocoImporter importer(&project);
+        importer.moveToThread(import_thread);
+        importer.setImportUnlabelled(import_unlabelled);
+        importer.import(parser.value("annotations"));
+    }else if(parser.value("format") == "mot"){
+
+        if(parser.value("annotations") == ""){
+            qCritical() << "Annotations file doesn't exist";
+            return false;
+        }
+
+        if(parser.value("images") == ""){
+            qCritical() << "Image folder doesn't exist";
+            return false;
+        }
+
+        MOTImporter importer(&project);
+        importer.moveToThread(import_thread);
+        importer.setImportUnlabelled(import_unlabelled);
+        importer.import(parser.value("images"),
+                        parser.value("annotations"),
+                        parser.value("names"));
+    }else if(parser.value("format") == "birdsai"){
+
+        if(parser.value("annotations") == ""){
+            qCritical() << "Annotations file doesn't exist";
+            return false;
+        }
+
+        if(parser.value("images") == ""){
+            qCritical() << "Image folder doesn't exist";
+            return false;
+        }
+
+        BirdsAIImporter importer(&project);
+        importer.moveToThread(import_thread);
+        importer.setImportUnlabelled(import_unlabelled);
+        importer.import(parser.value("images"),
+                        parser.value("annotations"),
+                        parser.value("names"));
+    }
+
+    return true;
 }
 
 bool CliParser::handleExport(){
