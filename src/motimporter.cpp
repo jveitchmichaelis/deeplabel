@@ -38,7 +38,7 @@ void MOTImporter::import(QString sequence_folder, QString annotation_folder, QSt
 
         if(annotation_dir.exists(annotation_file)){
             // Find images:
-            auto image_list = QDir(subfolder).entryList();
+            auto image_list = QDir(subfolder).entryList(QDir::Files);
             auto labels = getLabels(annotation_file);
 
             qInfo() << "Adding annotations from: " << annotation_file;
