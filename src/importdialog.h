@@ -43,6 +43,7 @@ private:
     QString annotation_file = "";
     QString current_importer = "Darknet";
     bool import_unlabelled;
+    bool checkNamesFile(QString names_file);
 };
 
 #endif // IMPORTDIALOG_H

@@ -1195,6 +1195,20 @@ void MainWindow::handleImportDialog(){
         importer.moveToThread(import_thread);
         importer.setImportUnlabelled(import_dialog->getImportUnlabelled());
         importer.import(import_dialog->getAnnotationFile());
+    }else if(import_dialog->getImporter() == "MOT"){
+        MOTImporter importer(project);
+        importer.moveToThread(import_thread);
+        importer.setImportUnlabelled(import_dialog->getImportUnlabelled());
+        importer.import(import_dialog->getInputFile(),
+                        import_dialog->getAnnotationFile(),
+                        import_dialog->getNamesFile());
+    }else if(import_dialog->getImporter() == "BirdsAI"){
+        BirdsAIImporter importer(project);
+        importer.moveToThread(import_thread);
+        importer.setImportUnlabelled(import_dialog->getImportUnlabelled());
+        importer.import(import_dialog->getInputFile(),
+                        import_dialog->getAnnotationFile(),
+                        import_dialog->getNamesFile());
     }
 
     initDisplay();

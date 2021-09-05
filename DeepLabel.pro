@@ -84,12 +84,14 @@ SOURCES += \
         multitracker.cpp \
     src/baseexporter.cpp \
     src/baseimporter.cpp \
+    src/birdsaiimporter.cpp \
     src/cliparser.cpp \
     src/cocoexporter.cpp \
     src/darknetimporter.cpp \
     src/gcpexporter.cpp \
     src/imagedisplay.cpp \
     src/importdialog.cpp \
+    src/motimporter.cpp \
     src/pascalvocexporter.cpp \
     detection/detectoropencv.cpp \
     detection/detectorsetupdialog.cpp \
@@ -107,6 +109,7 @@ HEADERS += \
         multitracker.h \
     src/baseexporter.h \
     src/baseimporter.h \
+    src/birdsaiimporter.h \
     src/cliparser.h \
     src/cocoexporter.h \
     src/darknetimporter.h \
@@ -114,6 +117,7 @@ HEADERS += \
     src/gcpexporter.h \
     src/imagedisplay.h \
     src/importdialog.h \
+    src/motimporter.h \
     src/pascalvocexporter.h \
     detection/detectoropencv.h \
     detection/detectorsetupdialog.h \

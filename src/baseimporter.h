@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QFile>
+#include <QRegularExpression>
 #include <labelproject.h>
 #include <boundingbox.h>
 

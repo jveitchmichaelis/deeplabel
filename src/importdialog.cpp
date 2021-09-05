@@ -69,8 +69,14 @@ void ImportDialog::setInputFile(QString path){
              openDir = QDir(input_file).path();
         }
 
-        path = QFileDialog::getOpenFileName(this, tr("Select input file"),
-                                                        openDir);
+        if(ui->importSelectComboBox->currentText() == "MOT"
+           || ui->importSelectComboBox->currentText() == "BirdsAI"){
+            path = QFileDialog::getExistingDirectory(this, tr("Select sequence folder"),
+                                                            openDir);
+        }else{
+            path = QFileDialog::getOpenFileName(this, tr("Select input file"),
+                                                            openDir);
+        }
     }
 
     if(path != ""){
@@ -117,8 +123,14 @@ void ImportDialog::setAnnotationFile(QString path){
              openDir = QFileInfo(annotation_file).absoluteDir().absolutePath();
         }
 
-        path = QFileDialog::getOpenFileName(this, tr("Select darknet names file"),
-                                                        openDir);
+        if(ui->importSelectComboBox->currentText() == "MOT"
+           || ui->importSelectComboBox->currentText() == "BirdsAI"){
+            path = QFileDialog::getExistingDirectory(this, tr("Select annotation folder"),
+                                                            openDir);
+        }else{
+            path = QFileDialog::getOpenFileName(this, tr("Select annotation file"),
+                                                            openDir);
+        }
     }
 
     if(path != ""){
@@ -149,9 +161,28 @@ bool ImportDialog::checkOK(){
         ui->annotationPushButton->setEnabled(true);
 
         if(!QFile::exists(annotation_file)){
-            qCritical() << "Names file doesn't exist";
+            qCritical() << "Annotation file doesn't exist";
             return false;
         }
+    }
+
+    if(ui->importSelectComboBox->currentText() == "MOT" ||
+        ui->importSelectComboBox->currentText() == "BirdsAI"){
+        ui->namesFileLineEdit->setEnabled(true);
+        ui->namesFilePushButton->setEnabled(true);
+        ui->inputListLineEdit->setEnabled(true);
+        ui->inputListPushButton->setEnabled(true);
+        ui->annotationLineEdit->setEnabled(true);
+        ui->annotationPushButton->setEnabled(true);
+
+        if(!QDir(annotation_file).exists()){
+            qCritical() << "Annotation folder doesn't exist";
+            return false;
+        }
+
+        if(!checkNamesFile(names_file))
+            return false;
+
     }
 
     if(ui->importSelectComboBox->currentText() == "Darknet"){
@@ -162,33 +193,38 @@ bool ImportDialog::checkOK(){
         ui->annotationLineEdit->setDisabled(true);
         ui->annotationPushButton->setDisabled(true);
 
-        // If we're using darknet, check the names
-        // file exists and contains something
-        if(!QFile::exists(names_file)){
-            qCritical() << "Names file doesn't exist";
+        if(!checkNamesFile(names_file))
             return false;
-        }
-
-        QStringList class_list;
-        QFile fh(names_file);
-
-        if (fh.open(QIODevice::ReadOnly)) {
-
-            while (!fh.atEnd()) {
-                // Darknet name file is just a newline delimited list of classes
-                QByteArray line = fh.readLine();
-                class_list.append(line);
-            }
-        }
-
-        if(class_list.size() == 0){
-            qCritical() << "No classes found";
-            return false;
-        }
     }
 
     ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
     return true;
+}
+
+bool ImportDialog::checkNamesFile(QString names_file){
+    // If we're using darknet, check the names
+    // file exists and contains something
+    if(!QFile::exists(names_file)){
+        qCritical() << "Names file doesn't exist";
+        return false;
+    }
+
+    QStringList class_list;
+    QFile fh(names_file);
+
+    if (fh.open(QIODevice::ReadOnly)) {
+
+        while (!fh.atEnd()) {
+            // Darknet name file is just a newline delimited list of classes
+            QByteArray line = fh.readLine();
+            class_list.append(line);
+        }
+    }
+
+    if(class_list.size() == 0){
+        qCritical() << "No classes found";
+        return false;
+    }
 }
 
 
@@ -196,7 +232,7 @@ void ImportDialog::toggleImporter(){
 
     current_importer = ui->importSelectComboBox->currentText();
 
-    ui->namesFileLineEdit->setEnabled(current_importer == "Darknet");
+    ui->namesFileLineEdit->setEnabled(current_importer != "Coco");
 
     checkOK();
 }
