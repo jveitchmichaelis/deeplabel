@@ -4,14 +4,13 @@ void MOTImporter::import(QString sequence_folder, QString annotation_folder, QSt
     QDir seq_dir(sequence_folder);
     loadClasses(names_file);
 
-    // Find all sequences
-    QDirIterator it(sequence_folder, QDir::Dirs, QDirIterator::Subdirectories);
+    // Find all sequence folders
+    QDirIterator it(sequence_folder, QDir::Dirs);
     QList<QString> subfolders;
 
     while (it.hasNext()) {
         auto subfolder = QDir(it.next()).canonicalPath();
         subfolders.append(subfolder);
-        qInfo() << "Found: " << subfolder;
     }
 
     if(subfolders.size() == 0){
