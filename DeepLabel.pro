@@ -8,7 +8,7 @@ QT       += core gui sql testlib concurrent
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = DeepLabel
+TARGET = deeplabel
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -50,7 +50,7 @@ win32{
 message("Windows")
 INCLUDEPATH += "C:/Users/Josh/Code/opencv/build/install/include"
 LIBS += -L"C:/Users/Josh/Code/opencv/build/install/x64/vc15/lib"
-QMAKE_CXXFLAGS += "/std:c++17"
+QMAKE_CXXFLAGS += "/std:c++17 /permissive-"
 CONFIG(debug, debug|release) {
 LIBS += -lopencv_world453d
 }else{
