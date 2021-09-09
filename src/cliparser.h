@@ -32,6 +32,7 @@ private:
     QCommandLineOption *exportFilePrefix;
     QCommandLineOption *exportNamesFile;
     QCommandLineOption *exportGCPBucket;
+    QCommandLineOption *exportGCPLocal;
     QCommandLineOption *exportPascalVOCLabelMap;
     QCommandLineOption *exportShuffleImages;
     QCommandLineOption *exportAppendLabels;

@@ -15,6 +15,7 @@ void CliParser::SetupOptions(){
     exportFilePrefix = new QCommandLineOption("prefix", "filename prefix", "prefix", "");
     exportNamesFile = new QCommandLineOption({"n", "names"}, "names file", "file path");
     exportGCPBucket = new QCommandLineOption("bucket", "GCP bucket");
+    exportGCPLocal = new QCommandLineOption("local", "use local paths for GCP export");
     exportPascalVOCLabelMap = new QCommandLineOption("export-map", "export label.pbtxt file");
     exportShuffleImages = new QCommandLineOption("shuffle", "shuffle images when splitting");
     exportAppendLabels = new QCommandLineOption("append-labels", "append to label files");
@@ -37,6 +38,7 @@ void CliParser::SetupOptions(){
     parser.addOption(*exportFilePrefix);
     parser.addOption(*exportNamesFile);
     parser.addOption(*exportGCPBucket);
+    parser.addOption(*exportGCPLocal);
     parser.addOption(*exportPascalVOCLabelMap);
     parser.addOption(*exportShuffleImages);
     parser.addOption(*exportAppendLabels);
@@ -157,6 +159,13 @@ bool CliParser::handleExport(){
     BaseExporter* exporter = nullptr;
 
     LabelProject project;
+    QString database = parser.value("input");
+
+    if(!QFileInfo(database).exists()){
+        qCritical() << "Database file does not exist.";
+        return false;
+    }
+
     if(!parser.isSet("input") || parser.value("input") == ""){
         qCritical() << "No input file specified";
         return false;
@@ -186,13 +195,15 @@ bool CliParser::handleExport(){
         exporter = new CocoExporter(&project);
     }else if(parser.value(*exportFormatOption) == "gcp"){
         exporter = new GCPExporter(&project);
-        if(parser.isSet(*exportGCPBucket)){
+        if(parser.isSet(*exportGCPLocal)){
+            bool local = true;
+            static_cast<GCPExporter*>(exporter)->setBucket("", local);
+        }else if(parser.isSet(*exportGCPBucket)){
             static_cast<GCPExporter*>(exporter)->setBucket(parser.value(*exportGCPBucket));
         }else{
-            qCritical() << "No bucket path specifed.";
+            qCritical() << "Using bucket and no path specifed.";
             return false;
         }
-
     }else{
         qCritical() << "Invalid exporter type specified";
         return false;

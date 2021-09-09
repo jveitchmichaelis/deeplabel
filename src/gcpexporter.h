@@ -11,7 +11,7 @@ public:
 
 public slots:
     void process();
-    void setBucket(QString uri);
+    void setBucket(QString uri, bool local=false);
     bool setOutputFolder(const QString folder);
 
 private:

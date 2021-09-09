@@ -225,6 +225,8 @@ bool ImportDialog::checkNamesFile(QString names_file){
         qCritical() << "No classes found";
         return false;
     }
+
+    return true;
 }
 
 

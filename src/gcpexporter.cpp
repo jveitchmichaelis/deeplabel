@@ -134,9 +134,9 @@ bool GCPExporter::setOutputFolder(const QString folder){
 
 }
 
-void GCPExporter::setBucket(QString uri){
+void GCPExporter::setBucket(QString uri, bool local){
 
-    if(!uri.startsWith("gs://")){
+    if(!uri.startsWith("gs://") && !local){
         bucket_uri = QString("gs://%1").arg(uri);
     }else{
         bucket_uri = uri;
