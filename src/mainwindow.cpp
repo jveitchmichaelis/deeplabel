@@ -135,7 +135,7 @@ void MainWindow::mergeProject(QString filename){
     QList<QString> new_classes;
     new_project.getClassList(new_classes);
 
-    qDebug() << "Found " << new_classes.size() << " classes.";
+    qInfo() << "Found " << new_classes.size() << " classes.";
 
     for(auto &classname : new_classes){
         project->addClass(classname);
@@ -145,14 +145,14 @@ void MainWindow::mergeProject(QString filename){
     QList<QString> new_images;
     new_project.getImageList(new_images);
 
-    qDebug() << "Found " << new_images.size() << " images.";
+    qInfo() << "Found " << new_images.size() << " images.";
 
     for(auto &image : new_images){
         // Add image
         auto res = project->addAsset(image);
 
         if(!res){
-            qDebug() << "Problem adding: " << image;
+            qWarning() << "Problem adding: " << image;
         }else{
             qDebug() << "Added: " << image;
         }
