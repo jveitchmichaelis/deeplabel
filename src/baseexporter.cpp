@@ -35,8 +35,12 @@ void BaseExporter::splitData(float split, bool shuffle, int seed){
     train_set = images.mid(pivot);
 
     qDebug() << "Split: " << split;
-    qInfo() << train_set.size() << " images selected for train set.";
-    qInfo() << validation_set.size() << " images selected for validation set.";
+    if(split > 0){
+        qInfo() << train_set.size() << " images selected for train set.";
+        qInfo() << validation_set.size() << " images selected for validation set.";
+    }else{
+        qInfo() << train_set.size() << " images selected for output.";
+    }
 
 }
 
