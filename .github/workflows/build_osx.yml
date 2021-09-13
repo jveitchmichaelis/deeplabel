@@ -11,10 +11,13 @@ jobs:
           submodules: recursive
 
       - name: Install Qt 5 + OpenCV
-        run: brew install qt@5 opencv
+        run: brew install qt@5 opencv protobuf
 
       - name: Force link Qt
         run: brew link qt@5 --force
+      
+      - name: Compile protobuf messages
+        run: protoc --proto_path ./src/proto --cpp_out ./src/proto -i feature.proto example.proto
 
       - name: Run QMake
         run: qmake -makefile -o Makefile DeepLabel.pro
