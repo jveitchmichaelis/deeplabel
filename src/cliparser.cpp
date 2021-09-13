@@ -7,7 +7,7 @@ CliParser::CliParser(QObject *parent) : QObject(parent)
 
 void CliParser::SetupOptions(){
 
-    exportFormatOption = new QCommandLineOption({"f", "format"}, "export format", "[kitti, darknet, gcp, voc, coco, mot, birdsai]");
+    exportFormatOption = new QCommandLineOption({"f", "format"}, "export format", "[kitti, darknet, gcp, voc, coco, mot, birdsai, tfrecord]");
     exportOutputFolder = new QCommandLineOption({"o", "output"}, "output folder", "folder path");
     exportInputFile = new QCommandLineOption({"i", "input"}, "label database", "file path");
     exportValidationSplit = new QCommandLineOption({"s", "split"}, "validation split percentage", "percentage", "20");
@@ -21,6 +21,7 @@ void CliParser::SetupOptions(){
     exportAppendLabels = new QCommandLineOption("append-labels", "append to label files");
     exportUnlabelledImages = new QCommandLineOption("export-unlabelled", "export images without labels");
     importImages = new QCommandLineOption("images", "import image path/folder", "images");
+    importTFRecordMask = new QCommandLineOption("records", "mask for TF Records (* wildcard)", "images");
     importAnnotations = new QCommandLineOption("annotations", "import annotation path/folder", "annotations");
     importUnlabelledImages = new QCommandLineOption("import-unlabelled", "import images without labels");
     importOverwrite = new QCommandLineOption("overwrite", "overwrite existing databases");
@@ -47,6 +48,7 @@ void CliParser::SetupOptions(){
     parser.addOption(*importAnnotations);
     parser.addOption(*importUnlabelledImages);
     parser.addOption(*importOverwrite);
+    parser.addOption(*importTFRecordMask);
 
 }
 
@@ -148,6 +150,13 @@ bool CliParser::handleImport(){
         importer.import(parser.value("images"),
                         parser.value("annotations"),
                         parser.value("names"));
+    }else if(parser.value("format") == "tfrecord"){
+
+        TFRecordImporter importer(&project);
+        importer.moveToThread(import_thread);
+        importer.setImportUnlabelled(import_unlabelled);
+
+        importer.import_records(parser.value("records"));
     }
 
     return true;
@@ -202,6 +211,14 @@ bool CliParser::handleExport(){
             static_cast<GCPExporter*>(exporter)->setBucket(parser.value(*exportGCPBucket));
         }else{
             qCritical() << "Using bucket and no path specifed.";
+            return false;
+        }
+    }else if(parser.value(*exportFormatOption) == "tfrecord"){
+        exporter = new TFRecordExporter(&project);
+        if(parser.isSet(*exportNamesFile)){
+            static_cast<TFRecordExporter*>(exporter)->generateLabelIds(parser.value(*exportNamesFile));
+        }else{
+            qCritical() << "No names file specifed.";
             return false;
         }
     }else{

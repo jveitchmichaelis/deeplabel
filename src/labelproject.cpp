@@ -435,6 +435,35 @@ bool LabelProject::getLabels(QString fileName, QList<BoundingBox> &bboxes){
     return getLabels(image_id, bboxes);
 }
 
+bool LabelProject::getClassCounts(QMap<int, int> &counts){
+    /*!
+     * Get class counts for the project.
+     */
+    bool res = false;
+
+    {
+        auto db = getDatabase();
+        QSqlQuery query(db);
+
+        query.prepare("SELECT class_id, COUNT(class_id) AS \"count\" FROM labels GROUP BY class_id");
+
+        res = query.exec();
+
+        if(!res){
+            qCritical() << "Error: " << query.lastError();
+        }
+
+        while(query.next()){
+            auto rec = query.record();
+            auto id = rec.value(rec.indexOf("class_id")).toInt();
+            auto count = rec.value(rec.indexOf("count")).toInt();
+            counts.insert(id, count);
+        }
+    }
+
+    return res;
+}
+
 bool LabelProject::getLabels(int image_id, QList<BoundingBox> &bboxes){
     /*!
      * Get the labels for a given image  (at absolute path \a fileName) and puts them in the provided list: \a bboxes. Note \a bboxes will be emptied.

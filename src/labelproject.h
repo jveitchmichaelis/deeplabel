@@ -32,6 +32,7 @@ public:
     bool createDatabase(QString fileName);
     bool addClass(QString className);
     bool getClassList(QList<QString> &classes);
+    bool getClassCounts(QMap<int, int> &counts);
     bool removeClass(QString className);
     bool classInDB(QString classname);
     bool addAsset(QString fileName);
@@ -74,7 +75,6 @@ public slots:
     int addImageFolder(QString path);
     void cancelLoad();
     void addFolderRecursive(QString path_filter);
-
 private:
     QMutex mutex;
     bool checkDatabase();

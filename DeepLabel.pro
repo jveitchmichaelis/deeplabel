@@ -48,13 +48,19 @@ LIBS += -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -lopenc
 
 win32{
 message("Windows")
+DEFINES += PROTOBUF_USE_DLLS
+
 INCLUDEPATH += "C:/Users/Josh/Code/opencv/build/install/include"
 LIBS += -L"C:/Users/Josh/Code/opencv/build/install/x64/vc15/lib"
+
+INCLUDEPATH += "C:/Program Files (x86)/protobuf/include"
+LIBS += -L"C:/Program Files (x86)/protobuf/lib"
+
 QMAKE_CXXFLAGS += "/std:c++17 /permissive-"
 CONFIG(debug, debug|release) {
-LIBS += -lopencv_world453d
+LIBS += -lopencv_world453d -llibprotobufd
 }else{
-LIBS += -lopencv_world453
+LIBS += -lopencv_world453 -llibprotobuf
 }
 }
 
@@ -74,39 +80,45 @@ INCLUDEPATH += "$$_PRO_FILE_PWD_/src"
 VPATH = "$$_PRO_FILE_PWD_/src"
 
 SOURCES += \
-        main.cpp \
-        mainwindow.cpp \
-        labelproject.cpp \
-        imagelabel.cpp \
-        kittiexporter.cpp \
-        darknetexporter.cpp \
-        exportdialog.cpp \
-        multitracker.cpp \
+    src/crc32.cpp \
+        src/main.cpp \
+        src/mainwindow.cpp \
+        src/labelproject.cpp \
+        src/imagelabel.cpp \
+        src/kittiexporter.cpp \
+        src/darknetexporter.cpp \
+        src/exportdialog.cpp \
+        src/multitracker.cpp \
     src/baseexporter.cpp \
     src/baseimporter.cpp \
     src/birdsaiimporter.cpp \
     src/cliparser.cpp \
     src/cocoexporter.cpp \
     src/darknetimporter.cpp \
+    src/proto/example.pb.cc \
+    src/proto/feature.pb.cc \
     src/gcpexporter.cpp \
     src/imagedisplay.cpp \
     src/importdialog.cpp \
     src/motimporter.cpp \
     src/pascalvocexporter.cpp \
-    detection/detectoropencv.cpp \
-    detection/detectorsetupdialog.cpp \
+    src/detection/detectoropencv.cpp \
+    src/detection/detectorsetupdialog.cpp \
     src/refinerangedialog.cpp \
-    src/cocoimporter.cpp
+    src/cocoimporter.cpp \
+    src/tfrecordexporter.cpp \
+    src/tfrecordimporter.cpp
 
 HEADERS += \
-        mainwindow.h \
-        labelproject.h \
-        imagelabel.h \
-        boundingbox.h \
-        kittiexporter.h \
-        darknetexporter.h \
-        exportdialog.h \
-        multitracker.h \
+    src/crc32.h \
+        src/mainwindow.h \
+        src/labelproject.h \
+        src/imagelabel.h \
+        src/boundingbox.h \
+        src/kittiexporter.h \
+        src/darknetexporter.h \
+        src/exportdialog.h \
+        src/multitracker.h \
     src/baseexporter.h \
     src/baseimporter.h \
     src/birdsaiimporter.h \
@@ -119,14 +131,18 @@ HEADERS += \
     src/importdialog.h \
     src/motimporter.h \
     src/pascalvocexporter.h \
-    detection/detectoropencv.h \
-    detection/detectorsetupdialog.h \
+    src/detection/detectoropencv.h \
+    src/detection/detectorsetupdialog.h \
+    src/proto/example.pb.h \
+    src/proto/feature.pb.h \
     src/refinerangedialog.h \
-    src/cocoimporter.h
+    src/cocoimporter.h \
+    src/tfrecordexporter.h \
+    src/tfrecordimporter.h
 
 FORMS += \
     src/importdialog.ui \
-        src/mainwindow.ui \
+    src/mainwindow.ui \
     src/exportdialog.ui \
     src/imagedisplay.ui \
     detection/detectorsetupdialog.ui \

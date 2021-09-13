@@ -9,6 +9,7 @@
 #include <motimporter.h>
 #include <birdsaiimporter.h>
 #include <cocoimporter.h>
+#include <tfrecordimporter.h>
 
 class CliParser : public QObject
 {
@@ -42,6 +43,7 @@ private:
     QCommandLineOption *importAnnotations;
     QCommandLineOption *importUnlabelledImages;
     QCommandLineOption *importOverwrite;
+    QCommandLineOption *importTFRecordMask;
 
 signals:
 
