@@ -28,8 +28,8 @@ message("Mac")
 CONFIG += c++17
 
 # Build without FFMPEG unless you want a lot of pain later
-#CONFIG += link_pkgconfig
-#PKGCONFIG += opencv4
+CONFIG += link_pkgconfig
+PKGCONFIG += protobuf
 
 # If you use pkg-config, *everything* gets linked. Wasteful.
 INCLUDEPATH += /usr/local/include/opencv4
@@ -43,7 +43,7 @@ message("Linux")
 #PKGCONFIG += opencv4
 CONFIG += c++17
 INCLUDEPATH += /usr/local/include/opencv4
-LIBS += -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lopencv_tracking -lopencv_video -lopencv_videoio -lopencv_dnn
+LIBS += -L/usr/local/lib -lprotobuf -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lopencv_tracking -lopencv_video -lopencv_videoio -lopencv_dnn
 }
 
 win32{

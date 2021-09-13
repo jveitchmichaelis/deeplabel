@@ -291,7 +291,6 @@ bool TFRecordExporter::processImages(const QString folder, const QString record_
         delete shard;
     }
 
-
     return true;
 }
 
