@@ -73,6 +73,9 @@ void ImportDialog::setInputFile(QString path){
            || ui->importSelectComboBox->currentText() == "BirdsAI"){
             path = QFileDialog::getExistingDirectory(this, tr("Select sequence folder"),
                                                             openDir);
+        }else if(ui->importSelectComboBox->currentText() == "Coco"){
+                  path = QFileDialog::getExistingDirectory(this, tr("Select image folder"),
+                                                                  openDir);
         }else{
             path = QFileDialog::getOpenFileName(this, tr("Select input file"),
                                                             openDir);
@@ -148,20 +151,22 @@ bool ImportDialog::checkOK(){
 
     // If input file exists
     if(!QFile(input_file).exists() || input_file == ""){
-        qCritical() << "Import file/folder doesn't exist";
+        //qCritical() << "Import file/folder doesn't exist";
         return false;
     }
 
     if(ui->importSelectComboBox->currentText() == "Coco"){
         ui->namesFileLineEdit->setDisabled(true);
         ui->namesFilePushButton->setDisabled(true);
-        ui->inputListLineEdit->setDisabled(true);
-        ui->inputListPushButton->setDisabled(true);
+        ui->inputListLineEdit->setEnabled(true);
+        ui->inputListPushButton->setEnabled(true);
         ui->annotationLineEdit->setEnabled(true);
         ui->annotationPushButton->setEnabled(true);
 
+        ui->ImagesLabel->setText("Image folder");
+
         if(!QFile::exists(annotation_file)){
-            qCritical() << "Annotation file doesn't exist";
+            //qCritical() << "Annotation file doesn't exist";
             return false;
         }
     }
@@ -176,9 +181,11 @@ bool ImportDialog::checkOK(){
         ui->annotationPushButton->setEnabled(true);
 
         if(!QDir(annotation_file).exists()){
-            qCritical() << "Annotation folder doesn't exist";
+            //qCritical() << "Annotation folder doesn't exist";
             return false;
         }
+
+        ui->ImagesLabel->setText("Image folder");
 
         if(!checkNamesFile(names_file))
             return false;
@@ -193,6 +200,8 @@ bool ImportDialog::checkOK(){
         ui->annotationLineEdit->setDisabled(true);
         ui->annotationPushButton->setDisabled(true);
 
+        ui->ImagesLabel->setText("Image list");
+
         if(!checkNamesFile(names_file))
             return false;
     }
@@ -205,7 +214,7 @@ bool ImportDialog::checkNamesFile(QString names_file){
     // If we're using darknet, check the names
     // file exists and contains something
     if(!QFile::exists(names_file)){
-        qCritical() << "Names file doesn't exist";
+        //qCritical() << "Names file doesn't exist";
         return false;
     }
 
@@ -222,7 +231,7 @@ bool ImportDialog::checkNamesFile(QString names_file){
     }
 
     if(class_list.size() == 0){
-        qCritical() << "No classes found";
+        //qCritical() << "No classes found";
         return false;
     }
 

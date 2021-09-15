@@ -1194,7 +1194,7 @@ void MainWindow::handleImportDialog(){
         CocoImporter importer(project);
         importer.moveToThread(import_thread);
         importer.setImportUnlabelled(import_dialog->getImportUnlabelled());
-        importer.import(import_dialog->getAnnotationFile());
+        importer.import(import_dialog->getAnnotationFile(), import_dialog->getInputFile());
     }else if(import_dialog->getImporter() == "MOT"){
         MOTImporter importer(project);
         importer.moveToThread(import_thread);

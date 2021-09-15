@@ -868,7 +868,7 @@ bool LabelProject::addClass(QString className)
     bool res = false;
 
     if(classInDB(className)){
-        qWarning() << "Class exists!";
+        qWarning() << "Class " << className << "exists!";
         return true;
     }
 

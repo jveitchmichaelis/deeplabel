@@ -104,7 +104,7 @@ QList<BoundingBox> MOTImporter::findBoxes(QVector<QStringList> labels, int id){
 
         BoundingBox bbox;
 
-        bbox.classid = label.at(1).toInt() + 1; // Since in the database they're 1-indexed
+        bbox.classid = label.at(7).toInt() + 1; // Since in the database they're 1-indexed
         bbox.classname = project->getClassName(bbox.classid);
 
         if(bbox.classname == ""){

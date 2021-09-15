@@ -1,6 +1,6 @@
 #include "cocoimporter.h"
 
-void CocoImporter::import(QString annotation_file){
+void CocoImporter::import(QString annotation_file, QString image_folder){
     // Load Json
     qDebug() << "Loading COCO JSON";
     QFile loadFile(annotation_file);
@@ -16,6 +16,7 @@ void CocoImporter::import(QString annotation_file){
     }
 
     QMap<int, QString> classes;
+    QSet<QString> class_set;
     QJsonValue item;
     foreach(item, categories.toArray()){
 
@@ -30,8 +31,11 @@ void CocoImporter::import(QString annotation_file){
         classes.insert(item_id.toInt(), item_name.toString());
         qDebug() << "added: " << item_id.toInt() << " " << item_name.toString();
 
-        project->addClass(item_name.toString());
+        class_set.insert(item_name.toString());
+    }
 
+    for(auto &cls : class_set){
+        project->addClass(cls);
     }
 
     // Load images
@@ -56,7 +60,7 @@ void CocoImporter::import(QString annotation_file){
         if(file_id == QJsonValue::Undefined || !file_id.isDouble())
             continue;
 
-        auto abs_file_name = QFileInfo(annotation_file).absoluteDir().filePath(file_name.toString());
+        auto abs_file_name = QDir(image_folder).absoluteFilePath(file_name.toString());
         image_map.insert(file_id.toInt(), abs_file_name);
 
         image_list.append(abs_file_name);
@@ -96,17 +100,29 @@ void CocoImporter::import(QString annotation_file){
         if(bbox_array.size() != 4)
             continue;
 
-        int x = bbox_array[0].toInt();
-        int y = bbox_array[1].toInt();
-        int w = bbox_array[2].toInt();
-        int h = bbox_array[3].toInt();
+        int x = static_cast<int>(bbox_array.at(0).toDouble());
+        int y = static_cast<int>(bbox_array.at(1).toDouble());
+        int w = static_cast<int>(bbox_array.at(2).toDouble());
+        int h = static_cast<int>(bbox_array.at(3).toDouble());
+
+        if(w == 0){
+            qWarning() << "Bounding box for" << image_filename << "has zero width";
+            continue;
+        }
+
+        if(h == 0){
+            qWarning() << "Bounding box for" << image_filename << "has zero height";
+            continue;
+        }
 
         BoundingBox new_bbox;
         new_bbox.rect.setX(x);
         new_bbox.rect.setY(y);
         new_bbox.rect.setWidth(w);
         new_bbox.rect.setHeight(h);
-        new_bbox.classname = classes[category_id.toInt()];
+        int cat_id = static_cast<int>(category_id.toDouble());
+        new_bbox.classname = classes[cat_id];
+        new_bbox.classid = project->getClassId(new_bbox.classname);
 
         label_list[image_index[image_id.toInt()]].push_back(new_bbox);
     }

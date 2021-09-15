@@ -113,7 +113,7 @@ bool CliParser::handleImport(){
         CocoImporter importer(&project);
         importer.moveToThread(import_thread);
         importer.setImportUnlabelled(import_unlabelled);
-        importer.import(parser.value("annotations"));
+        importer.import(parser.value("annotations"), parser.value("images"));
     }else if(parser.value("format") == "mot"){
 
         if(parser.value("annotations") == ""){

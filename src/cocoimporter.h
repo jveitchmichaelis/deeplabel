@@ -15,7 +15,7 @@ public:
         this->project = project;
     }
 
-    void import(QString annotations_file);
+    void import(QString annotations_file, QString image_folder);
 };
 
 #endif // COCOIMPORTER_H

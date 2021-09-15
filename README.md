@@ -4,7 +4,7 @@
 
 **If you use DeepLabel for research or commercial purposes, please cite here!** [![DOI](https://zenodo.org/badge/105791274.svg)](https://zenodo.org/badge/latestdoi/105791274)
 
-Download the [latest release](https://github.com/jveitchmichaelis/deeplabel/releases/latest)!
+Download the [latest release](https://github.com/jveitchmichaelis/deeplabel/releases/latest)! If you are an OS X user, check the `Actions` tab to download an automated and self-contained DMG build.
 
 DeepLabel is a cross-platform tool for annotating images with labelled bounding boxes. A typical use-case for the program is labelling ground truth data for object-detection machine learning applications. DeepLabel runs as a standalone app and compiles on Windows, Linux and Mac.
 
@@ -12,19 +12,75 @@ Deeplabel also supports running inference using state-of-the-art object detectio
 
 **Note: Deeplabel for Windows now packages CUDA and CUDNN for inference. This results an enormous distributable size as the cudnn inference libraries are 600MB+ alone. The CUDA runtime adds another 300MB. I'm looking into uploading simultaneous non-CUDA releases to save space. The alternative is to ask you to install CUDA and CUDNN yourself, but you'd need the correct version which is a pain.**
 
-Ready made binaries for Windows and OS X are on the release page. It is recommended that you build for Linux yourself.
+Ready made binaries for Windows and OS X are on the release page. It is recommended that you build for Linux yourself, but it's not difficult.
 
 ![Deeplabel Interface](gui_example.png)
+
+## Workflow
 
 DeepLabel was built with convenience in mind. Image locations, classes and labels are stored in a local sqlite database (called a _project_, in the application). When a label is added or removed, this is immediately reflected in the database.
 
 A typical workflow for DeepLabel is:
 
 1. Create a new project database
-2. Add a folder of images, or manually select images to add
+2. Add images, or import an existing project in a variety of common ML formats
 3. Load in a class list, or manually add classes
-4. Label the images
+4. Label/inspect the images
 5. Export data in the desired format
+
+## Command Line Interface
+
+Deeplabel now has a convenient command line interface to facilitate import and export of data:
+
+```
+(base) PS C:\Users\Josh> deeplabel.exe -h
+Usage: deeplabel.exe [options] mode
+
+Options:
+  -?, -h, --help                                     Displays help on
+                                                     commandline options.
+  --help-all                                         Displays help including Qt
+                                                     specific options.
+  -v, --version                                      Displays version
+                                                     information.
+  -f, --format <[kitti, darknet, gcp, voc, coco, mot export format
+  , birdsai, tfrecord]>
+  -o, --output <folder path>                         output folder
+  -i, --input <file path>                            label database
+  -s, --split <percentage>                           validation split
+                                                     percentage
+  --no-subfolders                                    export directly to
+                                                     specified folder
+  --prefix <prefix>                                  filename prefix
+  -n, --names <file path>                            names file
+  --bucket                                           GCP bucket
+  --local                                            use local paths for GCP
+                                                     export
+  --export-map                                       export label.pbtxt file
+  --shuffle                                          shuffle images when
+                                                     splitting
+  --append-labels                                    append to label files
+  --export-unlabelled                                export images without
+                                                     labels
+  --images <images>                                  import image path/folder
+  --annotations <annotations>                        import annotation
+                                                     path/folder
+  --import-unlabelled                                import images without
+                                                     labels
+  --overwrite                                        overwrite existing
+                                                     databases
+  --records <images>                                 mask for TF Records (*
+                                                     wildcard)
+
+Arguments:
+  mode                                               [export, import]
+```
+
+For example, if you want to export a dataset to TFRecord:
+
+```
+deeplabel.exe -i labels.lbdlb -f TFRecord -n project.names -o ./output/
+```
 
 ## Data import
 
@@ -32,6 +88,8 @@ Currently you can import data in the following formats:
 
 * Darknet (provide image list and names)
 * COCO (provide an annotation .json file)
+* MOT
+* TFRecord (parsing works, but fully import is not possible yet)
 
 ## Data export
 
@@ -42,6 +100,8 @@ Currently you can export in:
 * Pascal
 * COCO (experimental)
 * Google Cloud Platform (e.g. for AutoML)
+* TFRecord (for the Tensorflow Object Detection library)
+  * Note this uses protobuf directly and there is _no_ dependency on Tensorflow. I believe this is one of the few implementations of TFRecord writing in c++.
 
 Deeplabel treats your data as "golden" and does not make any attempt to modify it directly. This is a safe approach to avoid accidental corruption of a dataset that you spent months collating. As such, when you export labels, a copy of your data will be created with associated label files. For example, KITTI requires frames to be numerically labelled. In the future, augmentation may also be added, which is another reason to **not** modify your existing images.
 
@@ -56,7 +116,7 @@ item {
 }
 ```
 
-DeepLabel will split your data into train and validation sets, you can choose what fraction to use (you can set 0% or 100% if you just want a test or validation set).
+DeepLabel can automatically split your data into train and validation sets, you can choose what fraction to use (you can set 0% or 100% if you just want a test or validation set).
 
 Since the labelling metadata is in the sqlite database, it should be fairly easy to write a Python script (or whatever) to convert the output to your preferred system. Many frameworks will accept Pascal VOC formatted data, so that's a good start.
 
@@ -114,7 +174,26 @@ DeepLabel currently supports videos by a brute force route. You can load in a vi
 
 Any video format that OpenCV (and its backends) can open should work.
 
-Installation
+Usage
+--
+
+Using the software should be fairly straightforward. Once you've created a project database and added images to it, you can get on with the fun part of adding bounding boxes.
+
+First, add the classes that you want.
+
+DeepLabel operates in two modes: draw and select. In **draw** mode, you can click to define the corners of a bounding box rectangle. If you're happy with the box, hit space to confirm. The rectangle will be added to the image with a class label.
+
+If you need to delete a label, switch to **select** mode. Click on a rectangle, it will highlight green, the hit delete or backspace to remove it.
+
+All changes are immediately reflected in the database.
+
+**Navigate** through images using the left/right or a/d keys. You can use ctrl+left/right to quickly advance through your dataset.
+
+You should find a/d to be quite a natural way of navigating without moving your left hand. There is a progress bar to indicate how far through the dataset you've labelled.
+
+Once you're done labelling, open the export menu to copy and rename your images and generate label files. When you export, you need to tell Deeplabel what classes you wish to export (typically via a `.names` file). This means that you can consistently export multiple label files (e.g. one per video sequence) and have the class/class IDs match up.
+
+Building from source
 --
 
 It's recommended that you use Qt5, but Qt4 will probably work. You need to have Qt's SQL extensions installed.
@@ -144,6 +223,10 @@ On Mac, Homebrew automatically include pkg-config support and the contrib packag
 
 Build opencv using your preferred method (e.g. above). You need Qt5 installed - not just Qt Creator.
 
+```
+sudo apt install git build-essential qt protobuf
+```
+
 Clone the repository, then:
 
 ```bash
@@ -154,8 +237,9 @@ make -j4
 
 **Mac**
 Install dependencies using Homebrew:
+
 ``` bash
-brew install qt opencv
+brew install qt opencv protobuf
 ```
 
 Note that qt is not linked by default, so either force link it (`brew link -f qt`) or follow the post-install instructions to see where qmake is installed.
@@ -170,28 +254,17 @@ make -j4
 
 `madeployqt` is automatically run after compilation, and on OS X will build a `.dmg` file. This does have the irritating side effect of linking and copying every `dylib` OpenCV has to offer so feel free to dig into the package and delete some of the dylibs that you don't need. This is a tradeoff between output file size and convenience.
 
+An extra script is provided to fix paths to certain libraries on OS X.
+
 **Windows**
 
 Unfortunately you need to install OpenCV from source, because the official binary releases don't include the contrib modules (which include tracking algorithms and DNN support). Or just download a DeepLabel release from [here](https://github.com/jveitchmichaelis/deeplabel/releases).
 
+You will also need protobuf installed - make sure you compile with DLLs enabled, not static libraries.
+
 Once you've installed OpenCV...(!)
 
 Clone the repo, update the submodules to fetch QtAwesome, open the pro file in Qt Creator and modify the paths to your opencv install. Build as normal. Make sure you copy all the OpenCV DLLs after install.
-
-Usage
---
-
-Using the software should be fairly straightforward. Once you've created a project database and added images to it, you can get on with the fun part of adding bounding boxes.
-
-DeepLabel operates in two modes: draw and select. In **draw** mode, you can click to define the corners of a bounding box rectangle. If you're happy with the box, hit space to confirm. The rectangle will be added to the image with a class label.
-
-If you need to delete a label, switch to **select** mode. Click on a rectangle, it will highlight green, the hit delete or backspace to remove it.
-
-All changes are immediately relected in the database.
-
-Navigate through images using the left/right or a/d keys. You should find a/d to be quite a natural way of navigating without moving your left hand. There is a progress bar to indicate how far through the dataset you've labelled.
-
-Once you're done labelling, open the export menu to copy and rename your images and generate label files.
 
 Notes
 --
@@ -220,4 +293,4 @@ These fields are the bare minimum and more may be added later (see note on descr
 
 #### License
 
-This code is MIT licensed - feel free to fork and use without restriction, commercially or privately, but please do cite. Copyright Josh Veitch-Michaelis 2017.
+This code is MIT licensed - feel free to fork and use without restriction, commercially or privately, but please do cite. Copyright Josh Veitch-Michaelis 2017 - present.

@@ -201,7 +201,7 @@ void ImageLabel::mouseMoveEvent(QMouseEvent *ev){
 
 void ImageLabel::drawBoundingBox(BoundingBox bbox){
     auto colour_list = QColor::colorNames();
-    QColor colour = QColor( colour_list.at(std::min(0, bbox.classid) % colour_list.size()) );
+    QColor colour = QColor( colour_list.at(std::max(0, bbox.classid) % colour_list.size()) );
     drawBoundingBox(bbox, colour);
 }
 

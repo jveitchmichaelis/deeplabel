@@ -45,12 +45,18 @@
        <property name="text">
         <string/>
        </property>
+       <property name="placeholderText">
+        <string/>
+       </property>
       </widget>
      </item>
      <item row="3" column="1">
       <widget class="QLineEdit" name="namesFileLineEdit">
        <property name="enabled">
         <bool>true</bool>
+       </property>
+       <property name="placeholderText">
+        <string>Darknet format</string>
        </property>
       </widget>
      </item>
