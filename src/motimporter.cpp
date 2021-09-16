@@ -158,6 +158,8 @@ void MOTImporter::loadClasses(QString names_file){
 
             if(!class_list.contains(new_class)){
                 project->addClass(new_class);
+            }else{
+                qDebug() << "Added: " << new_class;
             }
         }
     }

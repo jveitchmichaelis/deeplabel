@@ -94,8 +94,13 @@ bool CliParser::handleImport(){
 
     if(parser.value("format") == "darknet"){
 
-        if(parser.value("images") == ""){
+        if(!QFileInfo(parser.value("images")).exists()){
             qCritical() << "Image list doesn't exist";
+            return false;
+        }
+
+        if(!QFileInfo(parser.value("names")).exists()){
+            qCritical() << "Names file doesn't exist";
             return false;
         }
 
@@ -105,8 +110,8 @@ bool CliParser::handleImport(){
         importer.import(parser.value("images"), parser.value("names"));
     }else if(parser.value("format") == "coco"){
 
-        if(parser.value("annotations") == ""){
-            qCritical() << "Annotations file doesn't exist";
+        if(!QFileInfo(parser.value("annotations")).exists()){
+            qCritical() << "Image sequence folder doesn't exist";
             return false;
         }
 
@@ -116,13 +121,13 @@ bool CliParser::handleImport(){
         importer.import(parser.value("annotations"), parser.value("images"));
     }else if(parser.value("format") == "mot"){
 
-        if(parser.value("annotations") == ""){
-            qCritical() << "Annotations file doesn't exist";
+        if(!QDir(parser.value("images")).exists()){
+            qCritical() << "Image sequence folder doesn't exist";
             return false;
         }
 
-        if(parser.value("images") == ""){
-            qCritical() << "Image folder doesn't exist";
+        if(!QFileInfo(parser.value("names")).exists()){
+            qCritical() << "Names file doesn't exist";
             return false;
         }
 
@@ -133,13 +138,13 @@ bool CliParser::handleImport(){
         importer.import(parser.value("images"));
     }else if(parser.value("format") == "birdsai"){
 
-        if(parser.value("annotations") == ""){
-            qCritical() << "Annotations file doesn't exist";
+        if(!QDir(parser.value("annotations")).exists()){
+            qCritical() << "Annotations folder doesn't exist";
             return false;
         }
 
-        if(parser.value("images") == ""){
-            qCritical() << "Image folder doesn't exist";
+        if(!QDir(parser.value("images")).exists()){
+            qCritical() << "Image sequence folder doesn't exist";
             return false;
         }
 
