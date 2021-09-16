@@ -10,16 +10,16 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install Qt 5 + OpenCV + protobuf
+      - name: Install Qt 5 + protobuf
         run: sudo apt-get install -qq -y libprotobuf-dev qt5-default git build-essential
 
       - name: Get OpenCV dependencies
         run: sudo apt-get install -qq -y cmake pkg-config libjpeg-dev libtiff5-dev libpng-dev
 
-      - name: Install opencv
+      - name: Clone OpenCV
         run: git clone https://github.com/opencv/opencv && git clone https://github.com/opencv/opencv_contrib
 
-      - name: Compile opencv
+      - name: Compile OpenCV
         run: |
             cd opencv \
             && mkdir build \
