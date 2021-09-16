@@ -1,11 +1,74 @@
 #include "motimporter.h"
 
-void MOTImporter::import(QString sequence_folder, QString annotation_folder, QString names_file){
+void MOTImporter::importSequence(QString folder){
+
+    auto ini_filename = QDir(folder).absoluteFilePath("seqinfo.ini");
+    auto sequence_name = QFileInfo(folder).baseName();
+
+    // Load image folder path from ini file
+    QSettings seq_ini(ini_filename, QSettings::IniFormat);
+    seq_ini.setIniCodec(QTextCodec::codecForName("UTF-8"));
+    seq_ini.beginGroup("Sequence");
+
+    if(!seq_ini.contains("imDir")){
+        qCritical() << ini_filename << " doesn't contain image directory";
+        return;
+    }
+
+    auto image_foldername = seq_ini.value("imDir").toString();
+
+    if(image_foldername == ""){
+        qCritical() << "Image folder value in INI file is empty";
+        return;
+    }
+
+    qDebug() << "Image folder:" << image_foldername;
+    auto image_folder = QDir(folder).absoluteFilePath(image_foldername);
+    qDebug() << "Adding images from " << image_folder;
+
+    QList<QList<BoundingBox>> label_list;
+    QList<QString> image_list;
+
+    // Find and load gt.txt file:
+    auto annotation_dir = QDir(QDir(folder).absoluteFilePath("gt"));
+
+    QString annotation_file = annotation_dir
+                                .absoluteFilePath(QString("gt.txt"));
+    qDebug() << "Looking for: " << annotation_file;
+
+    // Find images:
+    auto labels = getLabels(annotation_file);
+
+    qDebug() << "Adding annotations from: " << annotation_file;
+
+    for(auto & image : QDir(image_folder).entryList(QDir::Files)){
+        qDebug() << "Adding labels for" << image;
+
+        // Extract image ID, ignoring leading zeros
+        auto split_file = QFileInfo(image).baseName().split("_");
+        int image_id = split_file.back().toInt();
+
+        // Get boxes for this ID and add to DB
+        auto boxes = findBoxes(labels, image_id);
+
+        QString abs_image_path = QDir(image_folder).absoluteFilePath(image);
+        if(boxes.empty() && !import_unlabelled){
+            continue;
+        }
+
+        label_list.append(boxes);
+        image_list.append(abs_image_path);
+    }
+
+    project->addLabelledAssets(image_list, label_list);
+
+}
+
+void MOTImporter::import(QString sequence_folder){
     QDir seq_dir(sequence_folder);
-    loadClasses(names_file);
 
     // Find all sequence folders
-    QDirIterator it(sequence_folder, QDir::Dirs);
+    QDirIterator it(sequence_folder, QDir::Dirs | QDir::NoDotAndDotDot);
     QList<QString> subfolders;
 
     while (it.hasNext()) {
@@ -23,53 +86,9 @@ void MOTImporter::import(QString sequence_folder, QString annotation_folder, QSt
 
     for(auto &subfolder : subfolders){
 
-        qInfo() << "Checking: " << subfolder;
+        qInfo() << "Processing: " << subfolder;
+        importSequence(subfolder);
 
-        auto sequence_name = QFileInfo(subfolder).baseName();
-
-        qInfo() << "Adding images";
-        project->addImageFolder(subfolder);
-
-        auto annotation_dir = QDir(annotation_folder);
-        QString annotation_file = annotation_dir
-                                    .absoluteFilePath(QString("%1.csv")
-                                    .arg(sequence_name));
-        qDebug() << "Looking for: " << annotation_file;
-
-        if(annotation_dir.exists(annotation_file)){
-            // Find images:
-            auto image_list = QDir(subfolder).entryList(QDir::Files);
-            auto labels = getLabels(annotation_file);
-
-            qInfo() << "Adding annotations from: " << annotation_file;
-
-            for(auto & image : image_list){
-                qDebug() << "Adding labels for" << image;
-
-                // Extract image ID, ignoring leading zeros
-                auto split_file = QFileInfo(image).baseName().split("_");
-                int image_id = split_file.back().toInt();
-
-                // Get boxes for this ID and add to DB
-
-                auto boxes = findBoxes(labels, image_id);
-
-                for(auto &box : boxes){
-                    bool res = project->addLabel(QDir(subfolder).absoluteFilePath(image), box);
-                    if(!res){
-                        qWarning() << "Failed to add labels for image: " << image;
-                    }
-                }
-
-                if(!import_unlabelled && boxes.size() == 0){
-                    project->removeImage(image);
-                    qDebug() << "Removing unlabelled image: " << image;
-                }
-
-            }
-        }else{
-            qWarning() << "Failed to find annotation file: " << annotation_file;
-        }
     }
 }
 
@@ -80,8 +99,9 @@ QVector<QStringList> MOTImporter::getLabels(QString annotation_file){
     for(auto &line : lines){
         auto label = line.simplified().split(",");
 
-        if(label.size() != 10){
-            qWarning() << "Label size is incorrect, found :" <<  label.size() << " elements, not 10.";
+        // Note - MOT docs say 10, this is wrong!
+        if(label.size() != 9){
+            qWarning() << "Label size is incorrect, found :" <<  label.size() << " elements, not 9.";
             continue;
         }else{
             labels.push_back(label);
@@ -104,7 +124,7 @@ QList<BoundingBox> MOTImporter::findBoxes(QVector<QStringList> labels, int id){
 
         BoundingBox bbox;
 
-        bbox.classid = label.at(7).toInt() + 1; // Since in the database they're 1-indexed
+        bbox.classid = label.at(7).toInt();
         bbox.classname = project->getClassName(bbox.classid);
 
         if(bbox.classname == ""){
@@ -121,9 +141,10 @@ QList<BoundingBox> MOTImporter::findBoxes(QVector<QStringList> labels, int id){
     return boxes;
 }
 
-
 void MOTImporter::loadClasses(QString names_file){
     QFile fh(names_file);
+    QList<QString> class_list;
+    project->getClassList(class_list);
 
     if (fh.open(QIODevice::ReadOnly)) {
 
@@ -133,8 +154,11 @@ void MOTImporter::loadClasses(QString names_file){
 
             if(QString(line) == "") continue;
 
-            project->addClass(line.simplified());
-            qInfo() << line.simplified();
+            auto new_class = line.simplified();
+
+            if(!class_list.contains(new_class)){
+                project->addClass(new_class);
+            }
         }
     }
 

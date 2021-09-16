@@ -129,9 +129,8 @@ bool CliParser::handleImport(){
         MOTImporter importer(&project);
         importer.moveToThread(import_thread);
         importer.setImportUnlabelled(import_unlabelled);
-        importer.import(parser.value("images"),
-                        parser.value("annotations"),
-                        parser.value("names"));
+        importer.loadClasses(parser.value("names"));
+        importer.import(parser.value("images"));
     }else if(parser.value("format") == "birdsai"){
 
         if(parser.value("annotations") == ""){
@@ -147,9 +146,9 @@ bool CliParser::handleImport(){
         BirdsAIImporter importer(&project);
         importer.moveToThread(import_thread);
         importer.setImportUnlabelled(import_unlabelled);
+        importer.loadClasses(parser.value("names"));
         importer.import(parser.value("images"),
-                        parser.value("annotations"),
-                        parser.value("names"));
+                        parser.value("annotations"));
     }else if(parser.value("format") == "tfrecord"){
 
         TFRecordImporter importer(&project);
