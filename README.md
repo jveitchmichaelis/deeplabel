@@ -79,7 +79,7 @@ Arguments:
 For example, if you want to export a dataset to TFRecord:
 
 ```
-deeplabel.exe -i labels.lbdlb -f TFRecord -n project.names -o ./output/
+deeplabel.exe export -i labels.lbdlb -f TFRecord -n project.names -o ./output/
 ```
 
 ## Data import
@@ -89,7 +89,7 @@ Currently you can import data in the following formats:
 * Darknet (provide image list and names)
 * COCO (provide an annotation .json file)
 * MOT
-* TFRecord (parsing works, but fully import is not possible yet)
+* TFRecord (parsing works, but full import is not possible yet)
 
 ## Data export
 
@@ -224,7 +224,7 @@ On Mac, Homebrew automatically include pkg-config support and the contrib packag
 Build opencv using your preferred method (e.g. above). You need Qt5 installed - not just Qt Creator.
 
 ```
-sudo apt install git build-essential qt protobuf
+sudo apt install git build-essential qt5-default libprotobuf-dev
 ```
 
 Clone the repository, then:
@@ -233,6 +233,12 @@ Clone the repository, then:
 git submodule update --init --recursive
 qmake -makefile -o Makefile DeepLabel.pro
 make -j4
+```
+
+Proto files are already compiled within the `src/proto` folder, but if you need to, you can compile with:
+
+```
+protoc --proto_path ./src/proto --cpp_out ./src/proto feature.proto example.proto 
 ```
 
 **Mac**
