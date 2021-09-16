@@ -20,7 +20,8 @@ jobs:
         run: git clone https://github.com/opencv/opencv && git clone https://github.com/opencv/contrib
 
       - name: Compile opencv
-        run: cd opencv \
+        run: |
+            cd opencv \
             && mkdir build \
             && cd build \
             && cmake .. -DOPENCV_EXTRA_MODULES_PATH=../../contrib/modules -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF .. \
