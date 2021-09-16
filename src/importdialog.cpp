@@ -6,10 +6,9 @@ ImportDialog::ImportDialog(QWidget *parent) :
     ui(new Ui::ImportDialog)
 {
     ui->setupUi(this);
-    toggleImporter();
+
     connect(ui->importSelectComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(toggleImporter()));
     connect(ui->importLabelledCheckbox, SIGNAL(clicked(bool)), this, SLOT(setImportUnlabelled(bool)));
-
     connect(ui->namesFileLineEdit, SIGNAL(textEdited(QString)), SLOT(setNamesFile(QString)));
     connect(ui->namesFilePushButton, SIGNAL(clicked()), this, SLOT(setNamesFile()));
     connect(ui->inputListLineEdit, SIGNAL(textEdited(QString)), SLOT(setInputFile(QString)));
@@ -21,6 +20,15 @@ ImportDialog::ImportDialog(QWidget *parent) :
 
     setImportUnlabelled(settings->value("import_unlabelled", false).toBool());
     ui->importLabelledCheckbox->setChecked(import_unlabelled);
+
+    if(settings->contains("import_format")){
+        auto format = settings->value("import_format").toString();
+        if(format != ""){
+            setImporter(format);
+        }
+    }else{
+        setImporter("Darknet");
+    }
 
     if(settings->contains("input_file")){
         auto path = settings->value("input_file").toString();
@@ -69,11 +77,11 @@ void ImportDialog::setInputFile(QString path){
              openDir = QDir(input_file).path();
         }
 
-        if(ui->importSelectComboBox->currentText() == "MOT"
-           || ui->importSelectComboBox->currentText() == "BirdsAI"){
+        if(current_importer == "MOT"
+           || current_importer == "BirdsAI"){
             path = QFileDialog::getExistingDirectory(this, tr("Select sequence folder"),
                                                             openDir);
-        }else if(ui->importSelectComboBox->currentText() == "Coco"){
+        }else if(current_importer == "Coco"){
                   path = QFileDialog::getExistingDirectory(this, tr("Select image folder"),
                                                                   openDir);
         }else{
@@ -126,8 +134,7 @@ void ImportDialog::setAnnotationFile(QString path){
              openDir = QFileInfo(annotation_file).absoluteDir().absolutePath();
         }
 
-        if(ui->importSelectComboBox->currentText() == "MOT"
-           || ui->importSelectComboBox->currentText() == "BirdsAI"){
+        if(ui->importSelectComboBox->currentText() == "BirdsAI"){
             path = QFileDialog::getExistingDirectory(this, tr("Select annotation folder"),
                                                             openDir);
         }else{
@@ -147,15 +154,11 @@ void ImportDialog::setAnnotationFile(QString path){
 
 bool ImportDialog::checkOK(){
 
+    ui->namesFileLineEdit->setEnabled(current_importer != "Coco");
+
     ui->buttonBox->button(QDialogButtonBox::Ok)->setDisabled(true);
 
-    // If input file exists
-    if(!QFile(input_file).exists() || input_file == ""){
-        //qCritical() << "Import file/folder doesn't exist";
-        return false;
-    }
-
-    if(ui->importSelectComboBox->currentText() == "Coco"){
+    if(current_importer == "Coco"){
         ui->namesFileLineEdit->setDisabled(true);
         ui->namesFilePushButton->setDisabled(true);
         ui->inputListLineEdit->setEnabled(true);
@@ -171,16 +174,18 @@ bool ImportDialog::checkOK(){
         }
     }
 
-    if(ui->importSelectComboBox->currentText() == "MOT" ||
+    if(current_importer == "MOT" ||
         ui->importSelectComboBox->currentText() == "BirdsAI"){
         ui->namesFileLineEdit->setEnabled(true);
         ui->namesFilePushButton->setEnabled(true);
         ui->inputListLineEdit->setEnabled(true);
         ui->inputListPushButton->setEnabled(true);
-        ui->annotationLineEdit->setEnabled(true);
-        ui->annotationPushButton->setEnabled(true);
 
-        if(!QDir(annotation_file).exists()){
+        bool is_mot = (current_importer == "MOT");
+        ui->annotationLineEdit->setDisabled(is_mot);
+        ui->annotationPushButton->setDisabled(is_mot);
+
+        if(!QDir(annotation_file).exists() and !is_mot){
             //qCritical() << "Annotation folder doesn't exist";
             return false;
         }
@@ -192,7 +197,7 @@ bool ImportDialog::checkOK(){
 
     }
 
-    if(ui->importSelectComboBox->currentText() == "Darknet"){
+    if(current_importer == "Darknet"){
         ui->namesFileLineEdit->setEnabled(true);
         ui->namesFilePushButton->setEnabled(true);
         ui->inputListLineEdit->setEnabled(true);
@@ -204,6 +209,12 @@ bool ImportDialog::checkOK(){
 
         if(!checkNamesFile(names_file))
             return false;
+    }
+
+    // If input file exists
+    if(!QFile(input_file).exists() || input_file == ""){
+        //qCritical() << "Import file/folder doesn't exist";
+        return false;
     }
 
     ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
@@ -238,13 +249,19 @@ bool ImportDialog::checkNamesFile(QString names_file){
     return true;
 }
 
-
-void ImportDialog::toggleImporter(){
-
-    current_importer = ui->importSelectComboBox->currentText();
-
-    ui->namesFileLineEdit->setEnabled(current_importer != "Coco");
+void ImportDialog::setImporter(QString format){
+    if(format == ""){
+        current_importer = ui->importSelectComboBox->currentText();
+        settings->setValue("import_format", current_importer);
+    }else{
+        ui->importSelectComboBox->setCurrentText(format);
+        current_importer = format;
+    }
 
     checkOK();
+}
+
+void ImportDialog::toggleImporter(QString format){
+    setImporter(format);
 }
 

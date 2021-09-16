@@ -30,7 +30,7 @@ public:
     void setNamesFile(QString path="");
     void setInputFile(QString path="");
     void setAnnotationFile(QString path="");
-    void toggleImporter();
+    void toggleImporter(QString format="");
     void setImportUnlabelled(bool res);
 
 private:
@@ -44,6 +44,7 @@ private:
     QString current_importer = "Darknet";
     bool import_unlabelled;
     bool checkNamesFile(QString names_file);
+    void setImporter(QString format);
 };
 
 #endif // IMPORTDIALOG_H
