@@ -43,6 +43,7 @@ public:
     bool imageInDB(QString fileName);
 
     bool addLabel(QString fileName, BoundingBox bbox);
+    bool addLabel(QString fileName, QList<BoundingBox> bbox);
     bool getLabels(QString fileName, QList<BoundingBox> &bboxes);
     bool getLabels(int imageId, QList<BoundingBox> &bboxes);
     bool removeLabel(QString fileName, BoundingBox bbox);

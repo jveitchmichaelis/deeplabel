@@ -777,6 +777,60 @@ bool LabelProject::addLabel(QString fileName, BoundingBox bbox)
     return res;
 }
 
+bool LabelProject::addLabel(QString fileName, QList<BoundingBox> bboxes)
+{
+    /*!
+     * Add a label given an absolute path (\a fileName) and the bounding box (\a bbox). Returns false
+     * if the query failed.
+     */
+
+    QMutexLocker locker(&mutex);
+
+    bool res = false;
+
+    int image_id = getImageId(fileName);
+    int class_id = -1;
+
+    {
+        auto db = getDatabase();
+        db.transaction();
+
+        for(auto bbox : bboxes){
+
+            if(bbox.classname != ""){
+                class_id = getClassId(bbox.classname);
+            }else if(bbox.classid > 0){
+                class_id = bbox.classid;
+            }
+
+            if(image_id > 0 && class_id > 0 && bbox.rect.width()*bbox.rect.height() > 0){
+
+                QSqlQuery query(db);
+
+                query.prepare("INSERT INTO labels (image_id, class_id, x, y, width, height)"
+                              "VALUES (:image_id, :class_id, :x, :y, :width, :height)");
+                query.bindValue(":image_id", image_id);
+                query.bindValue(":class_id", class_id);
+                query.bindValue(":x", bbox.rect.x());
+                query.bindValue(":y", bbox.rect.y());
+                query.bindValue(":width", bbox.rect.width());
+                query.bindValue(":height", bbox.rect.height());
+                res = query.exec();
+
+                if(!res){
+                    qCritical() << "Error: " << query.lastError();
+                }
+            }
+        }
+
+        db.commit();
+
+    }
+
+
+    return res;
+}
+
 
 int LabelProject::addImageFolder(QString path){
     /*!
@@ -834,8 +888,6 @@ bool LabelProject::addLabelledAssets(QList<QString> images, QList<QList<Bounding
     if(images.size() != bboxes.size())
         return false;
 
-    QSqlDatabase::database().transaction();
-
     QProgressDialog progress("...", "Abort", 0, images.size(), static_cast<QWidget*>(parent()));
     progress.setWindowModality(Qt::WindowModal);
     progress.setWindowTitle("Loading into database");
@@ -847,16 +899,14 @@ bool LabelProject::addLabelledAssets(QList<QString> images, QList<QList<Bounding
 
         auto image = images[i];
         if(addAsset(image)){
-            for(auto &bbox : bboxes[i]){
-                addLabel(image, bbox);
-            }
+            addLabel(image, bboxes[i]);
         }
 
         progress.setValue(i);
         progress.setLabelText(QString("%1/%2: %3").arg(i).arg(images.size()).arg(image));
     }
 
-    return QSqlDatabase::database().commit();
+    return true;
 }
 
 bool LabelProject::addClass(QString className)
