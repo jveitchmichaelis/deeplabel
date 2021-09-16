@@ -99,9 +99,9 @@ QVector<QStringList> MOTImporter::getLabels(QString annotation_file){
     for(auto &line : lines){
         auto label = line.simplified().split(",");
 
-        // Note - MOT docs say 10, this is wrong!
-        if(label.size() != 9){
-            qWarning() << "Label size is incorrect, found :" <<  label.size() << " elements, not 9.";
+        // Note - MOT docs say 10, but MOTDet only contains 9 elements
+        if(label.size() < 8){
+            qWarning() << "Found :" <<  label.size() << " elements - need at least 9.";
             continue;
         }else{
             labels.push_back(label);

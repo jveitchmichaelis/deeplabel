@@ -1205,6 +1205,7 @@ void MainWindow::handleImportDialog(){
         BirdsAIImporter importer(project);
         importer.moveToThread(import_thread);
         importer.setImportUnlabelled(import_dialog->getImportUnlabelled());
+        importer.loadClasses(import_dialog->getNamesFile());
         importer.import(import_dialog->getInputFile(),
                         import_dialog->getAnnotationFile());
     }
