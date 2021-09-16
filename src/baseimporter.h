@@ -6,6 +6,7 @@
 #include <QRegularExpression>
 #include <labelproject.h>
 #include <boundingbox.h>
+#include <cliprogressbar.h>
 
 class BaseImporter : public QObject
 {

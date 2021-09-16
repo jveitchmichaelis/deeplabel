@@ -37,11 +37,17 @@ void MOTImporter::importSequence(QString folder){
     qDebug() << "Looking for: " << annotation_file;
 
     // Find images:
+    qInfo() << "Loading annotations";
     auto labels = getLabels(annotation_file);
 
-    qDebug() << "Adding annotations from: " << annotation_file;
+    qInfo() << "Checking images";
 
-    for(auto & image : QDir(image_folder).entryList(QDir::Files)){
+    auto pbar = cliProgressBar();
+    double progress = 0;
+    int i = 0;
+
+    auto images = QDir(image_folder).entryList(QDir::Files);
+    for(auto & image : images){
         qDebug() << "Adding labels for" << image;
 
         // Extract image ID, ignoring leading zeros
@@ -51,6 +57,10 @@ void MOTImporter::importSequence(QString folder){
         // Get boxes for this ID and add to DB
         auto boxes = findBoxes(labels, image_id);
 
+        progress = 100*static_cast<double>(i++)/images.size();
+        pbar.update(progress);
+        pbar.print();
+
         QString abs_image_path = QDir(image_folder).absoluteFilePath(image);
         if(boxes.empty() && !import_unlabelled){
             continue;
@@ -58,8 +68,9 @@ void MOTImporter::importSequence(QString folder){
 
         label_list.append(boxes);
         image_list.append(abs_image_path);
-    }
 
+    }
+    qInfo() << "\nInserting into database";
     project->addLabelledAssets(image_list, label_list);
 
 }
@@ -96,6 +107,10 @@ QVector<QStringList> MOTImporter::getLabels(QString annotation_file){
     auto lines = readLines(annotation_file);
     QVector<QStringList> labels;
 
+    auto pbar = cliProgressBar();
+    double progress = 0;
+    int i = 0;
+
     for(auto &line : lines){
         auto label = line.simplified().split(",");
 
@@ -106,7 +121,13 @@ QVector<QStringList> MOTImporter::getLabels(QString annotation_file){
         }else{
             labels.push_back(label);
         }
+
+        progress = 100*static_cast<double>(i++)/lines.size();
+        pbar.update(progress);
+        pbar.print();
     }
+
+    qInfo() << "";
 
     return labels;
 }

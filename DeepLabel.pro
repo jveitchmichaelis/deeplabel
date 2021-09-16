@@ -110,6 +110,7 @@ SOURCES += \
     src/tfrecordimporter.cpp
 
 HEADERS += \
+    src/cliprogressbar.h \
     src/crc32.h \
         src/mainwindow.h \
         src/labelproject.h \
