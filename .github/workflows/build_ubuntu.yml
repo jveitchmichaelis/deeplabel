@@ -17,14 +17,14 @@ jobs:
         run: sudo apt-get install -qq -y cmake pkg-config libjpeg-dev libtiff5-dev libpng-dev
 
       - name: Install opencv
-        run: git clone https://github.com/opencv/opencv && git clone https://github.com/opencv/contrib
+        run: git clone https://github.com/opencv/opencv && git clone https://github.com/opencv/opencv_contrib
 
       - name: Compile opencv
         run: |
             cd opencv \
             && mkdir build \
             && cd build \
-            && cmake .. -DOPENCV_EXTRA_MODULES_PATH=../../contrib/modules -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF .. \
+            && cmake .. -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF .. \
             && make -j4 \
             && sudo make install
       
