@@ -14,7 +14,7 @@ jobs:
         run: sudo apt-get install -qq -y libprotobuf-dev qt5-default git build-essential
 
       - name: Get OpenCV dependencies
-        run: sudo apt-get install -qq -y cmake pkg-config libjpeg-dev libtiff5-dev libjasper-dev libpng-dev
+        run: sudo apt-get install -qq -y cmake pkg-config libjpeg-dev libtiff5-dev libpng-dev
 
       - name: Install opencv
         run: git clone https://github.com/opencv/opencv && git clone https://github.com/opencv/contrib
