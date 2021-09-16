@@ -127,7 +127,7 @@ bool TFRecordExporter::create_example(tensorflow::Example &example, QString imag
     add_int64_feature(features, "image/width", {im.cols});
     add_int64_feature(features, "image/height", {im.rows});
     add_bytes_feature(features, "image/filename", {image_path.toStdString()});
-    add_bytes_feature(features, "image/source_id", {"0"});
+    add_bytes_feature(features, "image/source_id", {QString("%1").arg(qHash(image_path)).toStdString()});
     add_bytes_feature(features, "image/format", {image_ext.toStdString()});
 
     add_bytes_feature(features, "image/encoded", {buffer.data()},
