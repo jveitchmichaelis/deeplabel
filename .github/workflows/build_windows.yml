@@ -36,25 +36,25 @@ jobs:
 
       - name: Clone OpenCV
         run: >
-          git clone https://github.com/opencv/opencv;
-          cd opencv; git checkout 4.5.3; cd ..; 
-          git clone https://github.com/opencv/opencv_contrib;
-          cd opencv_contrib; git checkout 4.5.3
+          git clone --branch 4.5.3 --depth 1 https://github.com/opencv/opencv;
+          git clone --branch 4.5.3 --depth 1 https://github.com/opencv/opencv_contrib;
 
       - name: Compile OpenCV
         run: >
             cd opencv; 
             mkdir build; 
-            cd build; 
+            cd build;
+            $extra_path=Resolve-Path ../../opencv_contrib/modules;
+            $install_path=Resolve-Path .;
             cmake .. 
-            -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules 
+            -DOPENCV_EXTRA_MODULES_PATH="$extra_path"
             -DBUILD_TESTS=OFF 
             -DBUILD_PERF_TESTS=OFF .. 
             -DCMAKE_BUILD_TYPE=RELEASE 
             -DBUILD_EXAMPLES=OFF 
             -DBUILD_DOCS=OFF 
             -DBUILD_opencv_apps=OFF
-            -DCMAKE_INSTALL_PREFIX=.;
+            -DCMAKE_INSTALL_PREFIX="$install_path";
             cmake --build .  --target install
       
       - name: Run QMake

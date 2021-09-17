@@ -17,11 +17,9 @@ jobs:
         run: sudo apt-get install -qq -y cmake pkg-config libjpeg-dev libtiff5-dev libpng-dev
 
       - name: Clone OpenCV
-        run: |
-          git clone https://github.com/opencv/opencv && \
-          cd opencv && git checkout 4.5.3 && cd .. && \
-          git clone https://github.com/opencv/opencv_contrib && \
-          cd opencv_contrib && git checkout 4.5.3
+        run: >
+          git clone --branch 4.5.3 --depth 1 https://github.com/opencv/opencv;
+          git clone --branch 4.5.3 --depth 1 https://github.com/opencv/opencv_contrib;
 
       - name: Compile OpenCV
         run: |
