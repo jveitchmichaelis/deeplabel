@@ -31,14 +31,14 @@ jobs:
             cd opencv; 
             mkdir build; 
             cd build; 
-            cmake ..;
+            cmake .. 
             -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules 
             -DBUILD_TESTS=OFF 
             -DBUILD_PERF_TESTS=OFF .. 
             -DCMAKE_BUILD_TYPE=RELEASE 
             -DBUILD_EXAMPLES=OFF 
             -DBUILD_DOCS=OFF 
-            -D BUILD_opencv_apps=OFF;
+            -DBUILD_opencv_apps=OFF;
             cmake --build .  --target install
       
       - name: Run QMake
