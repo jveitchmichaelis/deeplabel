@@ -10,8 +10,8 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install Qt 5 + protobuf
-        run: choco install qt5-default protoc --confirm -r
+      - name: Install Qt 5 + protoc
+        run: choco install qt5-default protoc --confirm -r --no-progress
 
       - name: Install protobuf libraries
         run: vcpkg install protobuf:x64-windows
@@ -20,26 +20,26 @@ jobs:
         run: protoc --proto_path ./src/proto --cpp_out ./src/proto feature.proto example.proto
 
       - name: Clone OpenCV
-        run: |
-          git clone https://github.com/opencv/opencv && \
-          cd opencv && git checkout 4.5.3 && cd .. && \
-          git clone https://github.com/opencv/opencv_contrib &&\
-          cd opencv_contrib && git checkout 4.5.3
+        run: >
+          git clone https://github.com/opencv/opencv;
+          cd opencv; git checkout 4.5.3; cd ..; 
+          git clone https://github.com/opencv/opencv_contrib;
+          cd opencv_contrib; git checkout 4.5.3
 
       - name: Compile OpenCV
-        run: |
-            cd opencv \
-            && mkdir build \
-            && cd build \
-            && cmake .. \
-            -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules \
-            -DBUILD_TESTS=OFF \
-            -DBUILD_PERF_TESTS=OFF .. \
-            -DCMAKE_BUILD_TYPE=RELEASE \
-            -DBUILD_EXAMPLES=OFF \
-            -DBUILD_DOCS=OFF \
-            -D BUILD_opencv_apps=OFF \
-            && cmake --build .  --target install
+        run: >
+            cd opencv; 
+            mkdir build; 
+            cd build; 
+            cmake ..;
+            -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules 
+            -DBUILD_TESTS=OFF 
+            -DBUILD_PERF_TESTS=OFF .. 
+            -DCMAKE_BUILD_TYPE=RELEASE 
+            -DBUILD_EXAMPLES=OFF 
+            -DBUILD_DOCS=OFF 
+            -D BUILD_opencv_apps=OFF;
+            cmake --build .  --target install
       
       - name: Run QMake
         run: qmake -makefile -o Makefile DeepLabel.pro
