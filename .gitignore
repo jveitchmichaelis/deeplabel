@@ -5,3 +5,5 @@ ui_*
 .moc
 .obj
 *.stash
+opencv
+protobuf
