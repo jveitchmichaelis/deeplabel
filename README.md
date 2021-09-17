@@ -1,8 +1,6 @@
 # DeepLabel
 
-[![Build OS X](https://github.com/jveitchmichaelis/deeplabel/actions/workflows/build_osx.yml/badge.svg)](https://github.com/jveitchmichaelis/deeplabel/actions/workflows/build_osx.yml)
-
-[![Build Ubuntu](https://github.com/jveitchmichaelis/deeplabel/actions/workflows/build_ubuntu.yml/badge.svg)](https://github.com/jveitchmichaelis/deeplabel/actions/workflows/build_ubuntu.yml)
+[![Build OS X](https://github.com/jveitchmichaelis/deeplabel/actions/workflows/build_osx.yml/badge.svg)](https://github.com/jveitchmichaelis/deeplabel/actions/workflows/build_osx.yml) [![Build Ubuntu](https://github.com/jveitchmichaelis/deeplabel/actions/workflows/build_ubuntu.yml/badge.svg)](https://github.com/jveitchmichaelis/deeplabel/actions/workflows/build_ubuntu.yml)[![Build Windows](https://github.com/jveitchmichaelis/deeplabel/actions/workflows/build_windows.yml/badge.svg)](https://github.com/jveitchmichaelis/deeplabel/actions/workflows/build_windows.yml)
 
 **If you use DeepLabel for research or commercial purposes, please cite here!** [![DOI](https://zenodo.org/badge/105791274.svg)](https://zenodo.org/badge/latestdoi/105791274)
 
