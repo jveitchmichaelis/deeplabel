@@ -20,7 +20,7 @@ jobs:
         run: |
           git clone https://github.com/opencv/opencv && \
           cd opencv && git checkout 4.5.3 && cd .. && \
-          git clone https://github.com/opencv/opencv_contrib \
+          git clone https://github.com/opencv/opencv_contrib && \
           cd opencv_contrib && git checkout 4.5.3
 
       - name: Compile OpenCV
