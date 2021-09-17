@@ -4,17 +4,17 @@ on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
 
       - name: Install Qt 5 + protobuf
-        run: sudo apt-get install -qq -y libprotobuf-dev qt5-default git build-essential protobuf-compiler
+        run: choco install qt5-default protobuf
 
-      - name: Get OpenCV dependencies
-        run: sudo apt-get install -qq -y cmake pkg-config libjpeg-dev libtiff5-dev libpng-dev
+      - name: Compile protobuf messages
+        run: protoc --proto_path ./src/proto --cpp_out ./src/proto feature.proto example.proto
 
       - name: Clone OpenCV
         run: |
@@ -35,13 +35,9 @@ jobs:
             -DCMAKE_BUILD_TYPE=RELEASE \
             -DBUILD_EXAMPLES=OFF \
             -DBUILD_DOCS=OFF \
-            -DBUILD_opencv_apps=OFF \
-            && make -j4 \
-            && sudo make install
+            -D BUILD_opencv_apps=OFF \
+            && cmake --build .  --target install
       
-      - name: Compile protobuf messages
-        run: protoc --proto_path ./src/proto --cpp_out ./src/proto feature.proto example.proto
-
       - name: Run QMake
         run: qmake -makefile -o Makefile DeepLabel.pro
 
