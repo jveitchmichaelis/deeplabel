@@ -10,14 +10,28 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install Qt 5 + protoc
-        run: choco install qt5-default protoc --confirm -r --no-progress
+      - name: Install Qt 5
+        run: choco install qt5-default --confirm -r --no-progress
 
-      - name: Install protobuf libraries
-        run: vcpkg install protobuf:x64-windows
+      - name: Clone protobuf
+        run: git clone https://github.com/protocolbuffers/protobuf
+
+      - name: Install protobuf
+        run: >
+          cd protobuf/cmake;
+          mkdir build;
+          cd build;
+          cmake ..
+          -Dprotofbuf_BUILD_SHARED_LIBS=ON
+          -Dprotobuf_BUILD_EXAMPLES=OFF
+          -Dprotobuf_BUILD_TESTS=OFF
+          -Dprotobuf_WITH_ZLIB=ON
+          -Dprotobuf_BUILD_PROTOC_BINARIES=ON
+          -DCMAKE_INSTALL_PREFIX= ../..;
+          cmake --build . --target installgit
 
       - name: Compile protobuf messages
-        run: protoc --proto_path ./src/proto --cpp_out ./src/proto feature.proto example.proto
+        run: ./protobuf/bin/protoc.exe --proto_path ./src/proto --cpp_out ./src/proto feature.proto example.proto
 
       - name: Clone OpenCV
         run: >
@@ -38,7 +52,8 @@ jobs:
             -DCMAKE_BUILD_TYPE=RELEASE 
             -DBUILD_EXAMPLES=OFF 
             -DBUILD_DOCS=OFF 
-            -DBUILD_opencv_apps=OFF;
+            -DBUILD_opencv_apps=OFF
+            -DCMAKE_INSTALL_PREFIX=.;
             cmake --build .  --target install
       
       - name: Run QMake

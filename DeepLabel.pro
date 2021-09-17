@@ -50,11 +50,11 @@ win32{
 message("Windows")
 DEFINES += PROTOBUF_USE_DLLS
 
-INCLUDEPATH += "C:/Users/Josh/Code/opencv/build/install/include"
-LIBS += -L"C:/Users/Josh/Code/opencv/build/install/x64/vc15/lib"
+INCLUDEPATH += "$$_PRO_FILE_PWD_/opencv/build/install/include"
+LIBS += -L"$$_PRO_FILE_PWD_/opencv/build/install/x64/vc15/lib"
 
-INCLUDEPATH += "C:/Program Files (x86)/protobuf/include"
-LIBS += -L"C:/Program Files (x86)/protobuf/lib"
+INCLUDEPATH += "$$_PRO_FILE_PWD_/protobuf/include"
+LIBS += -L"$$_PRO_FILE_PWD_/protobuf/lib"
 
 QMAKE_CXXFLAGS += "/std:c++17 /permissive-"
 CONFIG(debug, debug|release) {
