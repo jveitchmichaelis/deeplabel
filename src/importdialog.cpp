@@ -81,7 +81,8 @@ void ImportDialog::setInputFile(QString path){
            || current_importer == "BirdsAI"){
             path = QFileDialog::getExistingDirectory(this, tr("Select sequence folder"),
                                                             openDir);
-        }else if(current_importer == "Coco"){
+        }else if(current_importer == "Coco"
+                 || current_importer == "PascalVOC"){
                   path = QFileDialog::getExistingDirectory(this, tr("Select image folder"),
                                                                   openDir);
         }else{
@@ -134,7 +135,7 @@ void ImportDialog::setAnnotationFile(QString path){
              openDir = QFileInfo(annotation_file).absoluteDir().absolutePath();
         }
 
-        if(ui->importSelectComboBox->currentText() == "BirdsAI"){
+        if(current_importer == "BirdsAI" || current_importer == "PascalVOC"){
             path = QFileDialog::getExistingDirectory(this, tr("Select annotation folder"),
                                                             openDir);
         }else{
@@ -159,6 +160,22 @@ bool ImportDialog::checkOK(){
     ui->buttonBox->button(QDialogButtonBox::Ok)->setDisabled(true);
 
     if(current_importer == "Coco"){
+        ui->namesFileLineEdit->setDisabled(true);
+        ui->namesFilePushButton->setDisabled(true);
+        ui->inputListLineEdit->setEnabled(true);
+        ui->inputListPushButton->setEnabled(true);
+        ui->annotationLineEdit->setEnabled(true);
+        ui->annotationPushButton->setEnabled(true);
+
+        ui->ImagesLabel->setText("Image folder");
+
+        if(!QFile::exists(annotation_file)){
+            //qCritical() << "Annotation file doesn't exist";
+            return false;
+        }
+    }
+
+    if(current_importer == "PascalVOC"){
         ui->namesFileLineEdit->setDisabled(true);
         ui->namesFilePushButton->setDisabled(true);
         ui->inputListLineEdit->setEnabled(true);

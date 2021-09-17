@@ -67,12 +67,17 @@
       <widget class="QComboBox" name="importSelectComboBox">
        <item>
         <property name="text">
-         <string>Darknet</string>
+         <string>BirdsAI</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>BirdsAI</string>
+         <string>Coco</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Darknet</string>
         </property>
        </item>
        <item>
@@ -82,7 +87,7 @@
        </item>
        <item>
         <property name="text">
-         <string>Coco</string>
+         <string>PascalVOC</string>
         </property>
        </item>
       </widget>

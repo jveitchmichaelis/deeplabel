@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql testlib concurrent
+QT       += core gui sql testlib concurrent xml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -95,6 +95,7 @@ SOURCES += \
     src/cliparser.cpp \
     src/cocoexporter.cpp \
     src/darknetimporter.cpp \
+    src/pascalvocimporter.cpp \
     src/proto/example.pb.cc \
     src/proto/feature.pb.cc \
     src/gcpexporter.cpp \
@@ -112,6 +113,7 @@ SOURCES += \
 HEADERS += \
     src/cliprogressbar.h \
     src/crc32.h \
+    src/importer.h \
         src/mainwindow.h \
         src/labelproject.h \
         src/imagelabel.h \
@@ -134,6 +136,7 @@ HEADERS += \
     src/pascalvocexporter.h \
     src/detection/detectoropencv.h \
     src/detection/detectorsetupdialog.h \
+    src/pascalvocimporter.h \
     src/proto/example.pb.h \
     src/proto/feature.pb.h \
     src/refinerangedialog.h \

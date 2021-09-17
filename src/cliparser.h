@@ -4,12 +4,7 @@
 #include <QObject>
 #include <QCommandLineParser>
 #include <exporter.h>
-#include <baseimporter.h>
-#include <darknetimporter.h>
-#include <motimporter.h>
-#include <birdsaiimporter.h>
-#include <cocoimporter.h>
-#include <tfrecordimporter.h>
+#include <importer.h>
 
 class CliParser : public QObject
 {

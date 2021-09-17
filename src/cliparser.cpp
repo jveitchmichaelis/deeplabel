@@ -161,6 +161,12 @@ bool CliParser::handleImport(){
         importer.setImportUnlabelled(import_unlabelled);
 
         importer.import_records(parser.value("records"));
+    }else if(parser.value("format") == "pascalvoc"){
+
+        PascalVOCImporter importer(&project);
+        importer.moveToThread(import_thread);
+        importer.setImportUnlabelled(import_unlabelled);
+        importer.import(parser.value("images"), parser.value("annotations"));
     }
 
     return true;
