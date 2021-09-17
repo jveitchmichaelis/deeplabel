@@ -21,13 +21,14 @@ jobs:
           cd protobuf/cmake;
           mkdir build;
           cd build;
+          $install_path=Resolve-Path ../../;
           cmake ..
           -Dprotobuf_BUILD_SHARED_LIBS=ON
           -Dprotobuf_BUILD_EXAMPLES=OFF
           -Dprotobuf_BUILD_TESTS=OFF
           -Dprotobuf_WITH_ZLIB=ON
           -Dprotobuf_BUILD_PROTOC_BINARIES=ON
-          -DCMAKE_INSTALL_PREFIX= ../..;
+          -DCMAKE_INSTALL_PREFIX="$install_path";
           cmake --build . --target install
 
       - name: Compile protobuf messages
