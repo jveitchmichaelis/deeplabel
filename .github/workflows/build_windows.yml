@@ -22,13 +22,13 @@ jobs:
           mkdir build;
           cd build;
           cmake ..
-          -Dprotofbuf_BUILD_SHARED_LIBS=ON
+          -Dprotobuf_BUILD_SHARED_LIBS=ON
           -Dprotobuf_BUILD_EXAMPLES=OFF
           -Dprotobuf_BUILD_TESTS=OFF
           -Dprotobuf_WITH_ZLIB=ON
           -Dprotobuf_BUILD_PROTOC_BINARIES=ON
           -DCMAKE_INSTALL_PREFIX= ../..;
-          cmake --build . --target installgit
+          cmake --build . --target install
 
       - name: Compile protobuf messages
         run: ./protobuf/bin/protoc.exe --proto_path ./src/proto --cpp_out ./src/proto feature.proto example.proto
