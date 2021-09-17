@@ -50,10 +50,12 @@ jobs:
             -DOPENCV_EXTRA_MODULES_PATH="$extra_path"
             -DBUILD_TESTS=OFF 
             -DBUILD_PERF_TESTS=OFF .. 
+            -DCMAKE_CONFIGURATION_TYPES=Release
             -DCMAKE_BUILD_TYPE=RELEASE 
             -DWITH_FREETYPE=OFF
             -DBUILD_opencv_highgui=OFF
             -DBUILD_opencv_superres=OFF
+            -DBUILD_opencv_freetype=OFF
             -DBUILD_opencv_structured_light=OFF
             -DBUILD_opencv_stereo=OFF
             -DBUILD_opencv_wechat_qrcore=OFF
