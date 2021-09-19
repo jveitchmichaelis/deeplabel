@@ -56,7 +56,7 @@ LIBS += -L"$$_PRO_FILE_PWD_/opencv/build/install/x64/vc15/lib"
 INCLUDEPATH += "$$_PRO_FILE_PWD_/protobuf/include"
 LIBS += -L"$$_PRO_FILE_PWD_/protobuf/lib"
 
-QMAKE_CXXFLAGS += "/std:c++17 /permissive-"
+#QMAKE_CXXFLAGS += "/std:c++17 /permissive-"
 CONFIG(debug, debug|release) {
 LIBS += -lopencv_world453d -llibprotobufd
 }else{
