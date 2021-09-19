@@ -11,7 +11,12 @@ jobs:
           submodules: recursive
 
       - name: Install Qt 5
-        run: choco install qt5-default opencv --confirm -r --no-progress
+        run: choco install qt5-default --confirm -r --no-progress
+
+      - name: Install OpenCV
+        run: >
+           $install_path=Resolve-Path ./;
+           choco install opencv --confirm -r --no-progress --params="'/InstallationPath:$install_path'"
 
       - name: Clone protobuf
         run: git clone https://github.com/protocolbuffers/protobuf
