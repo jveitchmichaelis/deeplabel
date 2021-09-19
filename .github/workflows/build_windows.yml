@@ -70,10 +70,10 @@ jobs:
             cmake --build . --parallel 4 --config Release --target install
       
       - name: Run QMake
-        run: qmake -makefile -o Makefile DeepLabel.pro
+        run: C:/Qt/5.15.2/mingw81_64/bin/qmake.exe -makefile -o Makefile DeepLabel.pro
 
       - name: Run Make
-        run: make -j4
+        run: nmake -j4
 
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
