@@ -67,7 +67,7 @@ jobs:
             -DBUILD_DOCS=OFF 
             -DBUILD_opencv_apps=OFF
             -DCMAKE_INSTALL_PREFIX="$install_path";
-            cmake --build . --parallel 4  --target install
+            cmake --build . --parallel 4 --config Release --target install
       
       - name: Run QMake
         run: qmake -makefile -o Makefile DeepLabel.pro
