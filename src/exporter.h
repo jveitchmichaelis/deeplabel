@@ -7,5 +7,6 @@
 #include <cocoexporter.h>
 #include <gcpexporter.h>
 #include <tfrecordexporter.h>
+#include <videoexporter.h>
 
 #endif // EXPORTER_H

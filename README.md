@@ -2,13 +2,15 @@
 
 [![Build OS X](https://github.com/jveitchmichaelis/deeplabel/actions/workflows/build_osx.yml/badge.svg)](https://github.com/jveitchmichaelis/deeplabel/actions/workflows/build_osx.yml) [![Build Ubuntu](https://github.com/jveitchmichaelis/deeplabel/actions/workflows/build_ubuntu.yml/badge.svg)](https://github.com/jveitchmichaelis/deeplabel/actions/workflows/build_ubuntu.yml)[![Build Windows](https://github.com/jveitchmichaelis/deeplabel/actions/workflows/build_windows.yml/badge.svg)](https://github.com/jveitchmichaelis/deeplabel/actions/workflows/build_windows.yml)
 
-**If you use DeepLabel for research or commercial purposes, please cite here!** [![DOI](https://zenodo.org/badge/105791274.svg)](https://zenodo.org/badge/latestdoi/105791274)
-
-Download the [latest release](https://github.com/jveitchmichaelis/deeplabel/releases/latest)! If you are an OS X user, check the `Actions` tab to download an automated and self-contained DMG build.
-
 DeepLabel is a cross-platform tool for annotating images with labelled bounding boxes. A typical use-case for the program is labelling ground truth data for object-detection machine learning applications. DeepLabel runs as a standalone app and compiles on Windows, Linux and Mac.
 
+DeepLabel is written in C++ and is resource-efficient, typically using less than 100MB RAM to run. There is a GUI or you can run on the command line for batch/automated processing. 
+
 Deeplabel also supports running inference using state-of-the-art object detection models like Faster-RCNN and YOLOv4. With support out-of-the-box for CUDA, you can quickly label an entire dataset using an existing model.
+
+**If you use DeepLabel for research or commercial purposes, please cite here!** [![DOI](https://zenodo.org/badge/105791274.svg)](https://zenodo.org/badge/latestdoi/105791274)
+
+Download the [latest release](https://github.com/jveitchmichaelis/deeplabel/releases/latest)! If you are an OS X user, check the `Actions` tab to download an automated and self-contained DMG build. The Github CI runs on every push and attempts to build DeepLabel for Windows, Mac and Linux. You can check the action workflows for hints on how to compile everything if you're having trouble.
 
 **Note: Deeplabel for Windows now packages CUDA and CUDNN for inference. This results an enormous distributable size as the cudnn inference libraries are 600MB+ alone. The CUDA runtime adds another 300MB. I'm looking into uploading simultaneous non-CUDA releases to save space. The alternative is to ask you to install CUDA and CUDNN yourself, but you'd need the correct version which is a pain.**
 
@@ -87,10 +89,10 @@ deeplabel.exe export -i labels.lbdlb -f TFRecord -n project.names -o ./output/
 Currently you can import data in the following formats:
 
 * Darknet (provide image list and names)
-* COCO (provide an annotation .json file)
+* COCO (provide an annotation .json file and image folder)
 * MOT
 * TFRecord (parsing works, but full import is not possible yet)
-* Pascal VOC Coming soon!
+* Pascal VOC
 
 ## Data export
 
@@ -98,11 +100,12 @@ Currently you can export in:
 
 * KITTI (e.g. for Nvidia DIGITS)
 * Darknet for YOLO
-* Pascal
+* Pascal VOC
 * COCO (experimental)
 * Google Cloud Platform (e.g. for AutoML)
 * TFRecord (for the Tensorflow Object Detection library)
   * Note this uses protobuf directly and there is _no_ dependency on Tensorflow. I believe this is one of the few implementations of TFRecord writing in c++.
+* Video (experimental, command line only)
 
 Deeplabel treats your data as "golden" and does not make any attempt to modify it directly. This is a safe approach to avoid accidental corruption of a dataset that you spent months collating. As such, when you export labels, a copy of your data will be created with associated label files. For example, KITTI requires frames to be numerically labelled. In the future, augmentation may also be added, which is another reason to **not** modify your existing images.
 

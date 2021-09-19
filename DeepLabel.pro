@@ -108,7 +108,8 @@ SOURCES += \
     src/refinerangedialog.cpp \
     src/cocoimporter.cpp \
     src/tfrecordexporter.cpp \
-    src/tfrecordimporter.cpp
+    src/tfrecordimporter.cpp \
+    src/videoexporter.cpp
 
 HEADERS += \
     src/cliprogressbar.h \
@@ -142,7 +143,8 @@ HEADERS += \
     src/refinerangedialog.h \
     src/cocoimporter.h \
     src/tfrecordexporter.h \
-    src/tfrecordimporter.h
+    src/tfrecordimporter.h \
+    src/videoexporter.h
 
 FORMS += \
     src/importdialog.ui \

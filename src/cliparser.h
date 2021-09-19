@@ -34,12 +34,21 @@ private:
     QCommandLineOption *exportAppendLabels;
     QCommandLineOption *exportUnlabelledImages;
 
+    QCommandLineOption *exportVideoFilename;
+    QCommandLineOption *exportVideoFourcc;
+    QCommandLineOption *exportVideoFps;
+    QCommandLineOption *exportVideoColourmap;
+    QCommandLineOption *exportVideoSize;
+    QCommandLineOption *exportVideoDisplayNames;
+    QCommandLineOption *exportVideoDisplayBoxes;
+
     QCommandLineOption *importImages;
     QCommandLineOption *importAnnotations;
     QCommandLineOption *importUnlabelledImages;
     QCommandLineOption *importOverwrite;
     QCommandLineOption *importTFRecordMask;
 
+    QCommandLineOption *configSilence;
 signals:
 
 };

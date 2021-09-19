@@ -9,6 +9,7 @@
 #include <opencv2/opencv.hpp>
 #include <random>
 
+#include <cliprogressbar.h>
 #include <labelproject.h>
 #include <boundingbox.h>
 
