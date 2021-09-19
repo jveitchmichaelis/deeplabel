@@ -175,7 +175,43 @@ bool LabelProject::getImageList(QList<QString> &images, bool relative)
                 QString path = query.value(0).toString();
                 // Push absolute file path
                 if(!relative){
-                    images.push_back(QDir::cleanPath(QDir(db.databaseName()).path() + QDir::separator() + path));
+                    auto abs_path = QDir::cleanPath(QDir(db.databaseName()).absolutePath() + QDir::separator() + path);
+                    images.push_back(abs_path);
+                }else{
+                    images.push_back(QDir(db.databaseName()).relativeFilePath(path));
+                }
+            }
+        }
+    }
+
+    return res;
+}
+
+bool LabelProject::getLabelledImageList(QList<QString> &images, bool relative)
+{
+    /*!
+     * Get a list of all labelled images in the database with absolute paths, which is cleared prior to retrieval. Returns false if the database query failed.
+     */
+    bool res = false;
+    {
+        auto db = getDatabase();
+        QSqlQuery query(db);
+        res = query.exec("SELECT path FROM images, labels"
+                         " WHERE images.image_id = labels.image_id"
+                         " GROUP BY images.image_id");
+
+        if(!res){
+            qCritical() << "Error: " << query.lastError();
+        }else{
+
+            images.clear();
+
+            while (query.next()) {
+                QString path = query.value(0).toString();
+                // Push absolute file path
+                if(!relative){
+                    auto abs_path = QDir::cleanPath(QDir(db.databaseName()).absolutePath() + QDir::separator() + path);
+                    images.push_back(abs_path);
                 }else{
                     images.push_back(QDir(db.databaseName()).relativeFilePath(path));
                 }
@@ -466,7 +502,7 @@ bool LabelProject::getClassCounts(QMap<int, int> &counts){
 
 bool LabelProject::getLabels(int image_id, QList<BoundingBox> &bboxes){
     /*!
-     * Get the labels for a given image  (at absolute path \a fileName) and puts them in the provided list: \a bboxes. Note \a bboxes will be emptied.
+     * Get the labels for a given image with ID \a image_id and puts them in the provided list: \a bboxes. Note \a bboxes will be emptied.
      * Returns false if the query failed.
      */
     bool res = false;

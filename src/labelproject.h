@@ -39,6 +39,7 @@ public:
     bool addLabelledAssets(QList<QString> images, QList<QList<BoundingBox>> bboxes);
     void addVideo(QString fileName, QString outputFolder, int frame_skip=1);
     bool getImageList(QList<QString> &images, bool relative=false);
+    bool getLabelledImageList(QList<QString> &images, bool relative=false);
     bool removeImage(QString fileName);
     bool imageInDB(QString fileName);
 
