@@ -42,8 +42,14 @@ jobs:
       - name: Run QMake
         run: C:/Qt/5.15.2/mingw81_64/bin/qmake.exe -makefile -o Makefile DeepLabel.pro
 
+      - name: Check what we have
+        run: >
+          ls "C:/Qt/5.15.2/mingw81_64/bin";
+          ls "C:/Qt/5.15.2/mingw81_64/";
+          ls "C:/Qt/5.15.2/mingw81_64/tools";
+
       - name: Run Make
-        run: nmake -j4
+        run: C:/Qt/5.15.2/mingw81_64/bin/mingw32-make.exe -f Makefile.Release
 
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
