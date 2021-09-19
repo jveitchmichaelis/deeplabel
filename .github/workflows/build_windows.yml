@@ -11,7 +11,7 @@ jobs:
           submodules: recursive
 
       - name: Install Qt 5
-        run: choco install qt5-default --confirm -r --no-progress
+        run: choco install qt5-default mingw --confirm -r --no-progress
 
       - name: Install OpenCV
         run: >
@@ -42,14 +42,8 @@ jobs:
       - name: Run QMake
         run: C:/Qt/5.15.2/mingw81_64/bin/qmake.exe -makefile -o Makefile DeepLabel.pro
 
-      - name: Check what we have
-        run: >
-          ls "C:/Qt/5.15.2/mingw81_64/bin";
-          ls "C:/Qt/5.15.2/mingw81_64/";
-          ls "C:/Qt/5.15.2/mingw81_64/tools";
-
       - name: Run Make
-        run: C:/Qt/5.15.2/mingw81_64/bin/mingw32-make.exe -f Makefile.Release
+        run: mingw32-make -f Makefile.Release
 
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
