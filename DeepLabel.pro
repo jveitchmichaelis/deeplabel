@@ -50,8 +50,8 @@ win32{
 message("Windows")
 DEFINES += PROTOBUF_USE_DLLS
 
-INCLUDEPATH += "$$_PRO_FILE_PWD_/opencv/build/install/include"
-LIBS += -L"$$_PRO_FILE_PWD_/opencv/build/install/x64/vc15/lib"
+INCLUDEPATH += "$$_PRO_FILE_PWD_/opencv/build/include"
+LIBS += -L"$$_PRO_FILE_PWD_/opencv/build/x64/vc15/lib"
 
 INCLUDEPATH += "$$_PRO_FILE_PWD_/protobuf/include"
 LIBS += -L"$$_PRO_FILE_PWD_/protobuf/lib"
