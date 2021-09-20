@@ -202,7 +202,7 @@ bool ImportDialog::checkOK(){
         ui->annotationLineEdit->setDisabled(is_mot);
         ui->annotationPushButton->setDisabled(is_mot);
 
-        if(!QDir(annotation_file).exists() and !is_mot){
+        if(!QDir(annotation_file).exists() && !is_mot){
             //qCritical() << "Annotation folder doesn't exist";
             return false;
         }

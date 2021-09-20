@@ -85,7 +85,6 @@ void VideoExporter::drawBoundingBox(cv::Mat &source, BoundingBox box, double x_s
 
     int top_x = box.rect.x()/x_scale;
     int top_y = box.rect.y()/y_scale;
-    double font_scale = 0.8;
 
     auto rect = cv::Rect2i(top_x,
                            top_y,
@@ -102,12 +101,12 @@ void VideoExporter::drawBoundingBox(cv::Mat &source, BoundingBox box, double x_s
         auto label_string = QString("%1").arg(box.classname).toStdString();
 
         int baseline;
-        auto text_size = cv::getTextSize(label_string, cv::FONT_HERSHEY_DUPLEX, font_scale, thickness, &baseline);
+        auto text_size = cv::getTextSize(label_string, cv::FONT_HERSHEY_COMPLEX_SMALL, this->font_scale, thickness, &baseline);
 
         cv::Rect2i label_background(top_x,
-                                    top_y,
-                                    text_size.width,
-                                    text_size.height);
+                                    top_y-text_size.height-5,
+                                    std::max(static_cast<int>(box.rect.width()/x_scale), text_size.width),
+                                    text_size.height+5);
         cv::rectangle(source, label_background, color, -1);
 
         auto text_colour = cv::Scalar(0,0,0);
@@ -119,8 +118,8 @@ void VideoExporter::drawBoundingBox(cv::Mat &source, BoundingBox box, double x_s
 
         cv::putText(source,
                     label_string,
-                    {top_x, top_y + text_size.height},
-                    cv::FONT_HERSHEY_DUPLEX,
+                    {top_x, top_y-1},
+                    cv::FONT_HERSHEY_COMPLEX_SMALL,
                     this->font_scale,
                     text_colour,
                     thickness);

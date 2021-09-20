@@ -10,7 +10,7 @@ public:
     explicit VideoExporter(LabelProject *project, QObject *parent = nullptr) : BaseExporter(project, parent){}
     void videoConfig(QString filename, QString fourcc_string = "h264", double fps = 10, cv::Size frame_size = {1280,720}, QString colormap="Inferno");
     void process();
-    void labelConfig(bool display_names=true, bool label_boxes=true, int box_thickness=1, double font_size=0.8);
+    void labelConfig(bool display_names=true, bool label_boxes=true, int box_thickness=1, double font_scale=1);
 private:
     QString filename;
     int fourcc;

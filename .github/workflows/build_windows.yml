@@ -10,7 +10,7 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install Qt 5
+      - name: Install Qt 5 and mingw
         run: choco install qt5-default mingw --confirm -r --no-progress
 
       - name: Install OpenCV

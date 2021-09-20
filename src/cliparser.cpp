@@ -65,6 +65,7 @@ void CliParser::SetupOptions(){
     parser.addOption(*importUnlabelledImages);
     parser.addOption(*importOverwrite);
     parser.addOption(*importTFRecordMask);
+    parser.addOption(*configSilence);
 
 }
 
@@ -293,7 +294,7 @@ bool CliParser::handleExport(){
             qCritical() << "Please specify an output folder";
             return false;
         }else{
-            exporter->setOutputFolder(parser.value(*exportOutputFolder), parser.isSet(*exportNoSubfolders));
+            exporter->setOutputFolder(parser.value(*exportOutputFolder), true);
         }
 
         exporter->process();
