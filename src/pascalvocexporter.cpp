@@ -172,6 +172,7 @@ bool PascalVocExporter::processImages(const QString folder, const QList<QString>
             continue;
         }
 
+        QString abs_image_path = project->getDbFolder().absoluteFilePath(image_path);
         QString extension = QFileInfo(image_path).suffix();
         QString filename_noext = QFileInfo(image_path).completeBaseName();
         QString image_filename = QString("%1/%2%3.%4").arg(folder).arg(filename_prefix).arg(filename_noext).arg(extension);
@@ -182,11 +183,11 @@ bool PascalVocExporter::processImages(const QString folder, const QList<QString>
             image_filename = QString("%1/%2%3_%4.%5").arg(folder).arg(filename_prefix).arg(filename_noext).arg(dupe_file++).arg(extension);
         }
 
-        cv::Mat image = cv::imread(image_path.toStdString());
+        cv::Mat image = cv::imread(abs_image_path.toStdString());
 
         // Copy the image to the new folder
         //saveImage(image, image_filename);
-        QFile::copy(image_path, image_filename);
+        QFile::copy(abs_image_path, image_filename);
 
         QString label_filename = QString("%1/%2.xml").arg(folder).arg(filename_noext);
         writeLabels(image, image_filename, label_filename, labels);

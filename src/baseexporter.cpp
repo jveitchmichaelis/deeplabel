@@ -1,11 +1,15 @@
 #include "baseexporter.h"
 
-BaseExporter::BaseExporter(LabelProject *project, QObject *parent) : QObject(parent)
+BaseExporter::BaseExporter(LabelProject *project, bool export_unlabelled, QObject *parent) : QObject(parent)
 {
 
     this->project = project;
     bool relative_path = true;
-    project->getImageList(images, relative_path);
+
+    if(export_unlabelled)
+        project->getImageList(images, relative_path);
+    else
+        project->getLabelledImageList(images, relative_path);
 }
 
 void BaseExporter::disableProgress(bool disable){
@@ -42,6 +46,16 @@ void BaseExporter::splitData(float split, bool shuffle, int seed){
         qInfo() << train_set.size() << " images selected for output.";
     }
 
+}
+
+void BaseExporter::setExportUnlabelled(bool res){
+    export_unlabelled = res;
+
+    bool relative_path = true;
+    if(export_unlabelled)
+        project->getImageList(images, relative_path);
+    else
+        project->getLabelledImageList(images, relative_path);
 }
 
 bool BaseExporter::setOutputFolder(const QString folder, bool no_subfolders){

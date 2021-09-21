@@ -24,7 +24,7 @@ class BaseExporter : public QObject
 {
     Q_OBJECT
 public:
-    explicit BaseExporter(LabelProject *project, QObject *parent = nullptr);
+    explicit BaseExporter(LabelProject *project, bool export_unlabelled = false, QObject *parent = nullptr);
     void disableProgress(bool disable);
 signals:
     void export_progress(int);
@@ -32,7 +32,7 @@ signals:
 public slots:
     void splitData(float split=1, bool shuffle=false, int seed=42);
     bool setOutputFolder(QString folder, bool no_subfolders=false);
-    void setExportUnlabelled(bool res){export_unlabelled = res;}
+    void setExportUnlabelled(bool res);
     void setAppendLabels(bool res){append_labels = res;}
     void setValidationSplit(bool split);
     void setFilenamePrefix(QString prefix);

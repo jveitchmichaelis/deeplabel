@@ -61,6 +61,7 @@ bool CocoExporter::processImages(const QString folder, const QString label_filen
             continue;
         }
 
+        QString abs_image_path = project->getDbFolder().absoluteFilePath(image_path);
         QString extension = QFileInfo(image_path).suffix();
         QString filename_noext = QFileInfo(image_path).completeBaseName();
 
@@ -81,12 +82,15 @@ bool CocoExporter::processImages(const QString folder, const QString label_filen
                                     .arg(extension);
         }
 
-        cv::Mat image = cv::imread(image_path.toStdString());
+        cv::Mat image = cv::imread(abs_image_path.toStdString());
         //saveImage(image, image_filename);
 
-        if(image.empty()) continue;
+        if(image.empty()){
+            qWarning() << "Failed top open image" << abs_image_path;
+            continue;
+        }
 
-        auto copied = QFile::copy(image_path, image_filename);
+        auto copied = QFile::copy(abs_image_path, image_filename);
         if(!copied){
             qWarning() << "Failed to copy image" << image_filename;
         }
