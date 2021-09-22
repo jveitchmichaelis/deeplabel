@@ -21,7 +21,8 @@ void DetectorOpenCV::readNamesFile(std::string class_file){
     std::string line;
     int i=0;
     while (std::getline(ifs, line)){
-        class_names.push_back(line);
+        QString cleaned = QString::fromStdString(line).simplified().toLower();
+        class_names.push_back(cleaned.toStdString());
         std::cout << "Added detection class: " << i++ << " " << class_names.back() << std::endl;
     }
 }
@@ -72,7 +73,7 @@ void DetectorOpenCV::loadNetwork(std::string names_file, std::string cfg_file, s
     // Should default to DNN_BACKEND_OPENCV (otherwise Intel inference engine)
     if(preferable_target == cv::dnn::DNN_TARGET_CUDA || preferable_target == cv::dnn::DNN_TARGET_CUDA_FP16){
         net.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
-        qDebug() << "Set backend and target to CUDA";
+        qDebug() << "Set preferable backend and target to CUDA";
     }else{
         net.setPreferableBackend(cv::dnn::DNN_BACKEND_OPENCV);
     }
