@@ -5,6 +5,8 @@
 #include <QCommandLineParser>
 #include <exporter.h>
 #include <importer.h>
+#include <detection/detectoropencv.h>
+
 
 class CliParser : public QObject
 {
@@ -17,6 +19,10 @@ private:
     void SetupOptions();
     bool handleExport();
     bool handleImport();
+    bool handleMerge();
+    bool handleDetect();
+
+    LabelProject getProject(bool &ok);
 
     QCommandLineParser parser;
 
@@ -48,7 +54,19 @@ private:
     QCommandLineOption *importOverwrite;
     QCommandLineOption *importTFRecordMask;
 
+    QCommandLineOption *detectChannels;
+    QCommandLineOption *detectTarget;
+    QCommandLineOption *detectFramework;
+    QCommandLineOption *detectConvertDepth;
+    QCommandLineOption *detectGrayToRGB;
+    QCommandLineOption *detectNMSThresh;
+    QCommandLineOption *detectConfThresh;
+    QCommandLineOption *detectConfig;
+    QCommandLineOption *detectWeights;
+
     QCommandLineOption *configSilence;
+
+
 signals:
 
 };

@@ -238,6 +238,7 @@ void MainWindow::detectObjects(cv::Mat &image, QString image_path){
         }
 
         if(!exists){
+            qDebug() << "Adding label";
             project->addLabel(image_path, box);
         }
 

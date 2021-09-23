@@ -27,11 +27,22 @@ void CliParser::SetupOptions(){
     exportVideoSize = new QCommandLineOption("videosize", "video size: width, height", "w,h", "1280,720");
     exportVideoDisplayBoxes = new QCommandLineOption("display-boxes", "display boxes in output", "on, off", "on");
     exportVideoDisplayNames = new QCommandLineOption("display-names", "display class names", "on, off", "on");
+
     importImages = new QCommandLineOption("images", "import image path/folder", "images");
     importTFRecordMask = new QCommandLineOption("records", "mask for TF Records (* wildcard)", "images");
     importAnnotations = new QCommandLineOption("annotations", "import annotation path/folder", "annotations");
     importUnlabelledImages = new QCommandLineOption("import-unlabelled", "import images without labels");
     importOverwrite = new QCommandLineOption("overwrite", "overwrite existing databases");
+
+    detectChannels = new QCommandLineOption("detect-channels", "number of channels", "detect-channels", "3");
+    detectTarget = new QCommandLineOption("detect-target", "Detection target", "CPU, CUDA", "CPU");
+    detectFramework = new QCommandLineOption("detect-framework", "Detection framework", "detect-framework", "Darknet");
+    detectConvertDepth = new QCommandLineOption("convert-depth", "Convert 16-bit to 8-bit");
+    detectGrayToRGB = new QCommandLineOption("convert-gray", "Convert RGB to grayscale");
+    detectNMSThresh = new QCommandLineOption("nms-thresh", "NMS Threshold", "threshold", "0.7");
+    detectConfThresh = new QCommandLineOption("conf-thresh", "Confidence Threshold", "threshold", "0.5");
+    detectConfig = new QCommandLineOption("config", "Path to model config file", "path");
+    detectWeights = new QCommandLineOption("weights", "Path to model weights file", "path");
 
     configSilence = new QCommandLineOption({"q","quiet"}, "no log messages");
 
@@ -65,6 +76,17 @@ void CliParser::SetupOptions(){
     parser.addOption(*importUnlabelledImages);
     parser.addOption(*importOverwrite);
     parser.addOption(*importTFRecordMask);
+
+    parser.addOption(*detectChannels);
+    parser.addOption(*detectTarget);
+    parser.addOption(*detectFramework);
+    parser.addOption(*detectConvertDepth);
+    parser.addOption(*detectGrayToRGB);
+    parser.addOption(*detectNMSThresh);
+    parser.addOption(*detectConfThresh);
+    parser.addOption(*detectConfig);
+    parser.addOption(*detectWeights);
+
     parser.addOption(*configSilence);
 
 }
@@ -88,9 +110,44 @@ bool CliParser::Run(){
         res = handleExport();
     }else if(mode == "import"){
         res = handleImport();
+    }else if(mode == "merge"){
+        res = handleMerge();
+    }else if(mode == "detect"){
+        res = handleDetect();
     }
 
     return res;
+}
+
+bool CliParser::handleDetect(){
+
+    DetectorOpenCV detector;
+
+    qInfo() << "Using weights: " << parser.value("weights");
+    qInfo() << "Using config: " << parser.value("config");
+
+    detector.setChannels(parser.value("detect-channels").toInt());
+    detector.setTarget(parser.value("detect-target"));
+    detector.setFramework(parser.value("detect-framework"));
+    detector.setConvertGrayscale(parser.isSet("convert-gray"));
+    detector.setConvertDepth(parser.isSet("convert-depth"));
+    detector.setNMSThreshold(parser.value("nms-thresh").toDouble());
+    detector.setConfidenceThreshold(parser.value("conf-thresh").toDouble());
+    detector.loadNetwork(parser.value("names").toStdString(),
+                         parser.value("config").toStdString(),
+                         parser.value("weights").toStdString());
+
+    LabelProject project;
+    project.loadDatabase(parser.value("input"));
+
+    detector.runOnProject(&project);
+
+    return true;
+}
+
+bool CliParser::handleMerge(){
+    qCritical() << "Not implemented yet";
+    return false;
 }
 
 bool CliParser::handleImport(){

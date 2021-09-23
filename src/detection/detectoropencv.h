@@ -15,6 +15,7 @@
 
 #include<boundingbox.h>
 #include<imagedisplay.h>
+#include<labelproject.h>
 
 typedef enum {
     FRAMEWORK_TENSORFLOW,
@@ -41,6 +42,7 @@ public:
     std::vector<BoundingBox> inferTensorflow(cv::Mat image);
 
     void setFramework(model_framework framework){this->framework = framework;}
+    void setFramework(QString framework);
     void setConfidenceThreshold(double thresh){confThreshold = std::max(0.0, thresh);}
     void setNMSThreshold(double thresh){nmsThreshold = std::max(0.0, thresh);}
     void setConvertGrayscale(bool convert){convert_grayscale = convert;}
@@ -48,9 +50,14 @@ public:
     double getConfidenceThreshold(void){ return confThreshold;}
     double getNMSThreshold(void){ return nmsThreshold;}
     void setTarget(int target);
+    void setTarget(QString target);
     void setChannels(int channels);
     int getChannels(void){return input_channels;}
 
+    static model_framework frameworkFromString(QString framework_string);
+    static int targetFromString(QString target_string);
+
+    void runOnProject(LabelProject *project);
 private:
 
     void postProcess(cv::Mat& frame, const std::vector<cv::Mat>& outs, std::vector<BoundingBox> &filtered_outputs);

@@ -256,32 +256,20 @@ void DetectorSetupDialog::setWeightsFile(void){
 }
 
 void DetectorSetupDialog::setFramework(void){
-    if(ui->frameworkComboBox->currentText().startsWith("Darknet")){
-        framework = FRAMEWORK_DARKNET;
-        settings->setValue("model_framework", framework);
-    }else if(ui->frameworkComboBox->currentText().startsWith("Tensorflow")){
-        framework = FRAMEWORK_TENSORFLOW;
-        settings->setValue("model_framework", framework);
-    }
+
+    qDebug() << "Attempting to set framework to " << ui->frameworkComboBox->currentText();
+    auto framework = DetectorOpenCV::frameworkFromString(ui->frameworkComboBox->currentText());
+    settings->setValue("model_framework", framework);
+
 }
 
 void DetectorSetupDialog::setTarget(void){
-    if(ui->targetComboBox->currentText() == "CPU"){
-        target = cv::dnn::DNN_TARGET_CPU;
-        settings->setValue("model_target", target);
-    }else if(ui->targetComboBox->currentText() == "OpenCL"){
-        target = cv::dnn::DNN_TARGET_OPENCL;
-        settings->setValue("model_target", target);
-    }else if(ui->targetComboBox->currentText() == "OpenCL FP16"){
-        target = cv::dnn::DNN_TARGET_OPENCL_FP16;
-        settings->setValue("model_target", target);
-    }else if(ui->targetComboBox->currentText() == "CUDA"){
-        target = cv::dnn::DNN_TARGET_CUDA;
-        settings->setValue("model_target", target);
-    }else if(ui->targetComboBox->currentText() == "CUDA FP16"){
-        target = cv::dnn::DNN_TARGET_CUDA_FP16;
-        settings->setValue("model_target", target);
-    }
+
+    qInfo() << "Attempting to set target to " << ui->targetComboBox->currentText();
+    auto target = DetectorOpenCV::targetFromString(ui->targetComboBox->currentText());
+    settings->setValue("model_target", target);
+
+
 
 }
 

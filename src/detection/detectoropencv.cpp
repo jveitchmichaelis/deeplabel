@@ -5,6 +5,48 @@ DetectorOpenCV::DetectorOpenCV()
 
 }
 
+model_framework DetectorOpenCV::frameworkFromString(QString framework_string){
+    model_framework framework = FRAMEWORK_DARKNET;
+
+    if(framework_string.toLower().startsWith("darknet")){
+        framework = FRAMEWORK_DARKNET;
+        qInfo() << "Detector framework: Darknet";
+    }else if(framework_string.toLower().startsWith("tensorflow")){
+        framework = FRAMEWORK_TENSORFLOW;
+        qInfo() << "Detector framework: Tensorflow";
+    }
+
+    return framework;
+}
+
+int DetectorOpenCV::targetFromString(QString target_string){
+
+    int target = cv::dnn::DNN_TARGET_CPU;
+
+    if(target_string == "CPU"){
+        target = cv::dnn::DNN_TARGET_CPU;
+    }else if(target_string == "OpenCL"){
+        target = cv::dnn::DNN_TARGET_OPENCL;
+    }else if(target_string == "OpenCL FP16"){
+        target = cv::dnn::DNN_TARGET_OPENCL_FP16;
+    }else if(target_string == "CUDA"){
+        target = cv::dnn::DNN_TARGET_CUDA;
+    }else if(target_string == "CUDA FP16"){
+        target = cv::dnn::DNN_TARGET_CUDA_FP16;
+    }
+
+    return target;
+
+}
+
+void DetectorOpenCV::setTarget(QString target){
+    setTarget(targetFromString(target));
+}
+
+void DetectorOpenCV::setFramework(QString framework){
+    setFramework(frameworkFromString(framework));
+}
+
 void DetectorOpenCV::setImageSize(int width, int height){
     if(width > 0 && height > 0){
         input_width = width;
@@ -52,12 +94,17 @@ void DetectorOpenCV::setTarget(int target){
 #ifdef WITH_CUDA
     else if(preferable_target == cv::dnn::DNN_TARGET_CUDA || preferable_target == cv::dnn::DNN_TARGET_CUDA_FP16){
         // Check for GPU
-        auto devinfo = cv::cuda::DeviceInfo();
-        if (!devinfo.isCompatible()){
-            qDebug() << "OpenCL is not available. Falling back to CPU";
+        try{
+            auto devinfo = cv::cuda::DeviceInfo();
+            if (!devinfo.isCompatible()){
+                qWarning() << "Device is not CUDA compatible. Falling back to CPU";
+                preferable_target = cv::dnn::DNN_TARGET_CPU;
+            }else{
+                qInfo() << "NVIDIA GPU detected: " << devinfo.name();
+            }
+        }catch(...){
+            qCritical() << "Problem checking for GPU, defaulting to CPU inference mode. Check that OpenCV was compiled with CUDA?";
             preferable_target = cv::dnn::DNN_TARGET_CPU;
-        }else{
-            qDebug() << "NVIDIA GPU detected.";
         }
     }
 #endif
@@ -396,5 +443,45 @@ void DetectorOpenCV::annotateImage(cv::Mat &frame, std::vector<BoundingBox> boxe
         int baseLine;
         cv::Size labelSize = getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
         cv::putText(frame, label, top_left, cv::FONT_HERSHEY_SIMPLEX, 0.5, font_colour);
+    }
+}
+
+void DetectorOpenCV::runOnProject(LabelProject *project){
+    QList<QString> images;
+    project->getImageList(images);
+
+    for(auto& image_path : images){
+        auto image = cv::imread(image_path.toStdString(), cv::IMREAD_UNCHANGED|cv::IMREAD_ANYDEPTH);
+
+        // Assume we have an alpha image if 4 channels
+        if(image.channels() == 4){
+            cv::cvtColor(image, image, cv::COLOR_BGRA2BGR);
+        }
+
+        auto boxes = infer(image);
+
+        QList<BoundingBox> existing_boxes;
+        project->getLabels(image_path, existing_boxes);
+
+        for(auto &box : boxes){
+            if(!project->classInDB(box.classname)){
+                project->addClass(box.classname);
+            }
+
+            // Strip out boxes which are already in the image
+            // assume detector is deterministic
+            bool exists = false;
+            for(auto &existing : existing_boxes){
+                if(existing.rect == box.rect && existing.classname == box.classname){
+                    exists = true;
+                }
+            }
+
+            if(!exists){
+                qDebug() << "Adding label";
+                project->addLabel(image_path, box);
+            }
+
+        }
     }
 }
