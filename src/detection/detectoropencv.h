@@ -52,12 +52,14 @@ public:
     void setTarget(int target);
     void setTarget(QString target);
     void setChannels(int channels);
+    void setNormalisation(double scale_factor, cv::Scalar mean);
     int getChannels(void){return input_channels;}
 
     static model_framework frameworkFromString(QString framework_string);
     static int targetFromString(QString target_string);
 
     void runOnProject(LabelProject *project);
+
 private:
 
     void postProcess(cv::Mat& frame, const std::vector<cv::Mat>& outs, std::vector<BoundingBox> &filtered_outputs);
@@ -74,6 +76,8 @@ private:
     int input_channels = 3;
     int preferable_target = cv::dnn::DNN_TARGET_OPENCL;
     model_framework framework = FRAMEWORK_DARKNET;
+    cv::Scalar mean = {0,0,0};
+    double scale_factor = 1/255.;
 
     std::vector<std::string> class_names;
     std::vector<std::string> output_names;

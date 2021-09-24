@@ -23,7 +23,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 CONFIG += WITH_CUDA
-DEFINES += WITH_CUDA
 
 macx{
 message("Mac")
@@ -53,13 +52,15 @@ win32{
 message("Windows")
 DEFINES += PROTOBUF_USE_DLLS
 
-defined(WITH_CUDA){
+CONFIG(WITH_CUDA){
+DEFINES += WITH_CUDA
 INCLUDEPATH += "$$_PRO_FILE_PWD_/opencv/build_cuda/include"
 LIBS += -L"$$_PRO_FILE_PWD_/opencv/build_cuda/x64/vc15/lib"
 }else{
 INCLUDEPATH += "$$_PRO_FILE_PWD_/opencv/build/include"
 LIBS += -L"$$_PRO_FILE_PWD_/opencv/build/x64/vc15/lib"
 }
+
 INCLUDEPATH += "$$_PRO_FILE_PWD_/protobuf/include"
 LIBS += -L"$$_PRO_FILE_PWD_/protobuf/lib"
 

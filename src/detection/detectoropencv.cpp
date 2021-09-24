@@ -93,8 +93,16 @@ void DetectorOpenCV::setTarget(int target){
     }
 #ifdef WITH_CUDA
     else if(preferable_target == cv::dnn::DNN_TARGET_CUDA || preferable_target == cv::dnn::DNN_TARGET_CUDA_FP16){
-        // Check for GPU
         try{
+            // Check for GPU
+            if(cv::cuda::getCudaEnabledDeviceCount() == 0){
+                qCritical() << "No CUDA enabled devices found";
+                preferable_target = cv::dnn::DNN_TARGET_CPU;
+                return;
+            }else{
+                cv::cuda::setDevice(0);
+            }
+
             auto devinfo = cv::cuda::DeviceInfo();
             if (!devinfo.isCompatible()){
                 qWarning() << "Device is not CUDA compatible. Falling back to CPU";
@@ -103,7 +111,8 @@ void DetectorOpenCV::setTarget(int target){
                 qInfo() << "NVIDIA GPU detected: " << devinfo.name();
             }
         }catch(...){
-            qCritical() << "Problem checking for GPU, defaulting to CPU inference mode. Check that OpenCV was compiled with CUDA?";
+            qCritical() << "Problem calling GPU functions, defaulting to CPU inference mode.";
+            qCritical() << "Check that OpenCV was compiled with CUDA or try rebooting.";
             preferable_target = cv::dnn::DNN_TARGET_CPU;
         }
     }
@@ -306,6 +315,7 @@ std::vector<BoundingBox> DetectorOpenCV::infer(cv::Mat image){
         cv::cvtColor(image, image, cv::COLOR_BGRA2BGR);
     }
 
+    // 16-bit conversion, min-max scaling
     if(convert_depth && image.elemSize() == 2){
         double minval, maxval;
         cv::minMaxIdx(image, &minval, &maxval);
@@ -384,6 +394,11 @@ std::vector<BoundingBox> DetectorOpenCV::inferTensorflow(cv::Mat image){
         return results;
 }
 
+void DetectorOpenCV::setNormalisation(double scale_factor, cv::Scalar mean){
+    this->scale_factor = scale_factor;
+    this->mean = mean;
+}
+
 std::vector<BoundingBox> DetectorOpenCV::inferDarknet(cv::Mat image){
 
         std::vector<BoundingBox> results;
@@ -393,10 +408,12 @@ std::vector<BoundingBox> DetectorOpenCV::inferDarknet(cv::Mat image){
             mean = cv::Scalar(0);
         }
 
-        // Check for 16-bit
-        double scale_factor = 1/255.0;
+        // Normalisation, check for 16-bit
+        // TODO: have this as a user option
         if(image.elemSize() == 2){
             scale_factor = 1/65535.0;
+        }else{
+            scale_factor= 1/255.0;
         }
 
         auto input_size = cv::Size(input_width, input_height);
