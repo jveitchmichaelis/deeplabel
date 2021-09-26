@@ -29,7 +29,7 @@ jobs:
           -Dprotobuf_WITH_ZLIB=ON
           -Dprotobuf_BUILD_PROTOC_BINARIES=ON
           -DCMAKE_INSTALL_PREFIX="$install_path";
-          cmake --build . --parallel 4 --target install
+          cmake --build . --parallel 4 --target install --config Release
 
       - name: Compile protobuf messages
         run: ./protobuf/bin/protoc.exe --proto_path ./src/proto --cpp_out ./src/proto feature.proto example.proto
@@ -91,6 +91,7 @@ jobs:
             -DBUILD_opencv_superres=OFF
             -DBUILD_opencv_surface_matching=OFF
             -DBUILD_opencv_text=OFF
+            -DBUILD_opencv_ts=OFF
             -DBUILD_opencv_videostab=OFF
             -DBUILD_opencv_viz=OFF
             -DBUILD_opencv_wechat_qrcode=OFF
