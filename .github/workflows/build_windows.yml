@@ -13,11 +13,6 @@ jobs:
       - name: Install Qt 5 and mingw
         run: choco install qt5-default mingw --confirm -r --no-progress
 
-      - name: Install OpenCV
-        run: >
-           $install_path=Resolve-Path ./;
-           choco install opencv --confirm -r --no-progress --params="'/InstallationPath:$install_path'"
-
       - name: Clone protobuf
         run: git clone https://github.com/protocolbuffers/protobuf
 
@@ -38,6 +33,41 @@ jobs:
 
       - name: Compile protobuf messages
         run: ./protobuf/bin/protoc.exe --proto_path ./src/proto --cpp_out ./src/proto feature.proto example.proto
+
+      - name: Clone OpenCV
+        run: >
+          git clone --branch 4.5.3 --depth 1 https://github.com/opencv/opencv;
+          git clone --branch 4.5.3 --depth 1 https://github.com/opencv/opencv_contrib
+
+      - name: Compile OpenCV
+        run: >
+            cd opencv; 
+            mkdir build; 
+            cd build;
+            $extra_path=Resolve-Path ../../opencv_contrib/modules;
+            $install_path=Resolve-Path .;
+            cmake .. 
+            -DOPENCV_EXTRA_MODULES_PATH="$extra_path"
+            -DBUILD_TESTS=OFF 
+            -DBUILD_PERF_TESTS=OFF .. 
+            -DCMAKE_CONFIGURATION_TYPES=Release
+            -DCMAKE_BUILD_TYPE=RELEASE 
+            -DWITH_FREETYPE=OFF
+            -DBUILD_opencv_highgui=OFF
+            -DBUILD_opencv_superres=OFF
+            -DBUILD_opencv_freetype=OFF
+            -DBUILD_opencv_structured_light=OFF
+            -DBUILD_opencv_stereo=OFF
+            -DBUILD_opencv_wechat_qrcore=OFF
+            -DBUILD_opencv_ximgproc=OFF
+            -DBUILD_opencv_xfeatures2d=OFF
+            -DBUILD_opencv_surface_matching=OFF
+            -DBUILD_opencv_world=ON
+            -DBUILD_EXAMPLES=OFF 
+            -DBUILD_DOCS=OFF 
+            -DBUILD_opencv_apps=OFF
+            -DCMAKE_INSTALL_PREFIX="$install_path";
+            cmake --build . --parallel 4 --config Release --target install
 
       - name: Run QMake
         run: C:/Qt/5.15.2/mingw81_64/bin/qmake.exe -makefile -o Makefile DeepLabel.pro
