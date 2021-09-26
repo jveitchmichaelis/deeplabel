@@ -367,6 +367,7 @@ bool CliParser::handleExport(){
 
         // No progress bar
         exporter->disableProgress(true);
+        exporter->setExportUnlabelled(parser.isSet(*exportUnlabelledImages));
 
         if(parser.isSet(*exportFilePrefix)){
             exporter->setFilenamePrefix(parser.value(*exportFilePrefix));
@@ -381,8 +382,6 @@ bool CliParser::handleExport(){
             exporter->setValidationSplit(false);
             exporter->splitData(0, parser.isSet(*exportShuffleImages));
         }
-
-        exporter->setExportUnlabelled(parser.isSet(*exportUnlabelledImages));
 
         if(!parser.isSet(*exportOutputFolder) || parser.value(*exportOutputFolder) == ""){
             qCritical() << "Please specify an output folder";

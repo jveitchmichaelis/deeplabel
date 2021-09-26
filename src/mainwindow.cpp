@@ -1054,6 +1054,7 @@ void MainWindow::handleExportDialog(){
 
     if(exporter != nullptr){
         exporter->moveToThread(export_thread);
+        exporter->setExportUnlabelled(export_dialog->getExportUnlablled());
         exporter->setFilenamePrefix(export_dialog->getFilePrefix());
         exporter->setAppendLabels(export_dialog->getAppendLabels());
 
@@ -1065,7 +1066,7 @@ void MainWindow::handleExportDialog(){
             exporter->splitData(0, export_dialog->getShuffle());
         }
 
-        exporter->setExportUnlabelled(export_dialog->getExportUnlablled());
+
         exporter->setOutputFolder(export_dialog->getOutputFolder());
         exporter->process();
     }else{

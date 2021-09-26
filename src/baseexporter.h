@@ -24,7 +24,7 @@ class BaseExporter : public QObject
 {
     Q_OBJECT
 public:
-    explicit BaseExporter(LabelProject *project, bool export_unlabelled = false, QObject *parent = nullptr);
+    explicit BaseExporter(LabelProject *project, QObject *parent = nullptr);
     void disableProgress(bool disable);
 signals:
     void export_progress(int);
