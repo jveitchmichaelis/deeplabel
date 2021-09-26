@@ -78,6 +78,8 @@ jobs:
             -DBUILD_opencv_optflow=OFF
             -DBUILD_opencv_phase_unwrapping=OFF
             -DBUILD_opencv_photo=OFF
+            -DBUILD_opencv_quality=OFF
+            -DBUILD_opencv_reg=OFF
             -DBUILD_opencv_rgbd=OFF
             -DBUILD_opencv_saliency=OFF
             -DBUILD_opencv_shape=OFF
@@ -91,7 +93,7 @@ jobs:
             -DBUILD_opencv_text=OFF
             -DBUILD_opencv_videostab=OFF
             -DBUILD_opencv_viz=OFF
-            -DBUILD_opencv_wechat_qrcore=OFF
+            -DBUILD_opencv_wechat_qrcode=OFF
             -DBUILD_opencv_ximgproc=OFF
             -DBUILD_opencv_xobjdetect=OFF
             -DBUILD_opencv_xphoto=OFF
