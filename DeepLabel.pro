@@ -51,13 +51,13 @@ message("Windows")
 DEFINES += PROTOBUF_USE_DLLS
 
 defined(WITH_CUDA){
-  message("Building with CUDA")
-  CONFIG += WITH_CUDA
-  INCLUDEPATH += "$$_PRO_FILE_PWD_/opencv/build_cuda/include"
-  LIBS += -L"$$_PRO_FILE_PWD_/opencv/build_cuda/x64/vc15/lib"
+    message("Building with CUDA")
+    CONFIG += WITH_CUDA
+    INCLUDEPATH += "$$_PRO_FILE_PWD_/opencv/build_cuda/include"
+    LIBS += -L"$$_PRO_FILE_PWD_/opencv/build_cuda/x64/vc16/lib"
 }else{
-  INCLUDEPATH += "$$_PRO_FILE_PWD_/opencv/build/include"
-  LIBS += -L"$$_PRO_FILE_PWD_/opencv/build/x64/vc15/lib"
+    INCLUDEPATH += "$$_PRO_FILE_PWD_/opencv/build/include"
+    LIBS += -L"$$_PRO_FILE_PWD_/opencv/build/x64/vc16/lib"
 }
 
 INCLUDEPATH += "$$_PRO_FILE_PWD_/protobuf/include"
