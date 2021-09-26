@@ -22,8 +22,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-CONFIG += WITH_CUDA
-
 macx{
 message("Mac")
 #PKG_CONFIG = /usr/local/bin/pkg-config
@@ -52,13 +50,14 @@ win32{
 message("Windows")
 DEFINES += PROTOBUF_USE_DLLS
 
-CONFIG(WITH_CUDA){
-DEFINES += WITH_CUDA
-INCLUDEPATH += "$$_PRO_FILE_PWD_/opencv/build_cuda/include"
-LIBS += -L"$$_PRO_FILE_PWD_/opencv/build_cuda/x64/vc15/lib"
+defined(WITH_CUDA){
+  message("Building with CUDA")
+  CONFIG += WITH_CUDA
+  INCLUDEPATH += "$$_PRO_FILE_PWD_/opencv/build_cuda/include"
+  LIBS += -L"$$_PRO_FILE_PWD_/opencv/build_cuda/x64/vc15/lib"
 }else{
-INCLUDEPATH += "$$_PRO_FILE_PWD_/opencv/build/include"
-LIBS += -L"$$_PRO_FILE_PWD_/opencv/build/x64/vc15/lib"
+  INCLUDEPATH += "$$_PRO_FILE_PWD_/opencv/build/include"
+  LIBS += -L"$$_PRO_FILE_PWD_/opencv/build/x64/vc15/lib"
 }
 
 INCLUDEPATH += "$$_PRO_FILE_PWD_/protobuf/include"
@@ -75,7 +74,6 @@ LIBS += -lopencv_world453 -llibprotobuf
 # For building in a single folder
 CONFIG(debug, debug|release) {
     CONFIG(WITH_CUDA){
-        message("Building with CUDA")
         DESTDIR = debug_cuda
     }else{
         DESTDIR = debug

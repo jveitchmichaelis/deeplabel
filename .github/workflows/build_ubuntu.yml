@@ -19,19 +19,29 @@ jobs:
           git clone --branch 4.5.3 --depth 1 https://github.com/opencv/opencv_contrib;
 
       - name: Compile OpenCV
-        run: |
-            cd opencv \
-            && mkdir build \
-            && cd build \
-            && cmake .. \
-            -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules \
-            -DBUILD_TESTS=OFF \
-            -DBUILD_PERF_TESTS=OFF .. \
-            -DCMAKE_BUILD_TYPE=RELEASE \
-            -DBUILD_EXAMPLES=OFF \
-            -DBUILD_DOCS=OFF \
-            -DBUILD_opencv_apps=OFF \
-            && make -j4 \
+        run: >
+            cd opencv
+            && mkdir build
+            && cd build
+            && cmake ..
+            -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules
+            -DBUILD_TESTS=OFF
+            -DBUILD_PERF_TESTS=OFF ..
+            -DCMAKE_BUILD_TYPE=RELEASE
+            -DBUILD_EXAMPLES=OFF
+            -DBUILD_DOCS=OFF
+            -DBUILD_opencv_apps=OFF
+            -DBUILD_opencv_highgui=OFF
+            -DBUILD_opencv_superres=OFF
+            -DBUILD_opencv_freetype=OFF
+            -DBUILD_opencv_structured_light=OFF
+            -DBUILD_opencv_stereo=OFF
+            -DBUILD_opencv_wechat_qrcore=OFF
+            -DBUILD_opencv_ximgproc=OFF
+            -DBUILD_opencv_xfeatures2d=OFF
+            -DBUILD_opencv_surface_matching=OFF
+            -DBUILD_opencv_world=ON
+            && make -j4
             && sudo make install
       
       - name: Compile protobuf messages
