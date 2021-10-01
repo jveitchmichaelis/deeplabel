@@ -7,12 +7,23 @@ ImportDialog::ImportDialog(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->importSelectComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(toggleImporter()));
-    connect(ui->importLabelledCheckbox, SIGNAL(clicked(bool)), this, SLOT(setImportUnlabelled(bool)));
+    connect(ui->importSelectComboBox,
+            SIGNAL(currentIndexChanged(QString)),
+            this,
+            SLOT(toggleImporter()));
+    connect(ui->importLabelledCheckbox,
+            SIGNAL(clicked(bool)),
+            this,
+            SLOT(setImportUnlabelled(bool)));
+    connect(ui->relativeImageCheckbox, SIGNAL(clicked(bool)), this, SLOT(setRelativePaths(bool)));
     connect(ui->namesFileLineEdit, SIGNAL(textEdited(QString)), SLOT(setNamesFile(QString)));
     connect(ui->namesFilePushButton, SIGNAL(clicked()), this, SLOT(setNamesFile()));
     connect(ui->inputListLineEdit, SIGNAL(textEdited(QString)), SLOT(setInputFile(QString)));
     connect(ui->inputListPushButton, SIGNAL(clicked()), this, SLOT(setInputFile()));
+    connect(ui->relativeImageRootLineEdit,
+            SIGNAL(textEdited(QString)),
+            SLOT(setRelativeImagePath(QString)));
+    connect(ui->relativeImageRootPushButton, SIGNAL(clicked()), this, SLOT(setRelativeImagePath()));
     connect(ui->annotationLineEdit, SIGNAL(textEdited(QString)), SLOT(setAnnotationFile(QString)));
     connect(ui->annotationPushButton, SIGNAL(clicked()), this, SLOT(setAnnotationFile()));
 
@@ -20,6 +31,9 @@ ImportDialog::ImportDialog(QWidget *parent) :
 
     setImportUnlabelled(settings->value("import_unlabelled", false).toBool());
     ui->importLabelledCheckbox->setChecked(import_unlabelled);
+
+    setRelativePaths(settings->value("relative_image_paths", false).toBool());
+    ui->relativeImageCheckbox->setChecked(relative_image_paths);
 
     if(settings->contains("import_format")){
         auto format = settings->value("import_format").toString();
@@ -51,6 +65,12 @@ ImportDialog::ImportDialog(QWidget *parent) :
          }
     }
 
+    if (settings->contains("relative_root")) {
+        auto path = settings->value("relative_root").toString();
+        if (path != "") {
+            setRelativeImagePath(path);
+        }
+    }
 }
 
 ImportDialog::~ImportDialog()
@@ -65,6 +85,34 @@ bool ImportDialog::getImportUnlabelled(void){
 void ImportDialog::setImportUnlabelled(bool res){
     import_unlabelled = res;
     settings->setValue("import_unlabelled", import_unlabelled);
+}
+
+void ImportDialog::setRelativePaths(bool res)
+{
+    relative_image_paths = res;
+    settings->setValue("relative_image_paths", relative_image_paths);
+}
+
+void ImportDialog::setRelativeImagePath(QString path)
+{
+    if (path == "") {
+        QString openDir;
+        if (relative_root == "") {
+            openDir = QDir::homePath();
+        } else {
+            openDir = QDir(relative_root).path();
+        }
+
+        path = QFileDialog::getExistingDirectory(this, tr("Select relative root folder"), openDir);
+    }
+
+    if (path != "") {
+        relative_root = path;
+        ui->relativeImageRootLineEdit->setText(relative_root);
+        settings->setValue("relative_root", relative_root);
+    }
+
+    checkOK();
 }
 
 void ImportDialog::setInputFile(QString path){
@@ -164,6 +212,9 @@ bool ImportDialog::checkOK(){
         ui->namesFilePushButton->setDisabled(true);
         ui->inputListLineEdit->setEnabled(true);
         ui->inputListPushButton->setEnabled(true);
+        ui->relativeImageRootLineEdit->setEnabled(false);
+        ui->relativeImageCheckbox->setEnabled(false);
+        ui->relativeImageRootPushButton->setEnabled(false);
         ui->annotationLineEdit->setEnabled(true);
         ui->annotationPushButton->setEnabled(true);
 
@@ -180,6 +231,9 @@ bool ImportDialog::checkOK(){
         ui->namesFilePushButton->setDisabled(true);
         ui->inputListLineEdit->setEnabled(true);
         ui->inputListPushButton->setEnabled(true);
+        ui->relativeImageRootLineEdit->setEnabled(false);
+        ui->relativeImageCheckbox->setEnabled(false);
+        ui->relativeImageRootPushButton->setEnabled(false);
         ui->annotationLineEdit->setEnabled(true);
         ui->annotationPushButton->setEnabled(true);
 
@@ -197,6 +251,9 @@ bool ImportDialog::checkOK(){
         ui->namesFilePushButton->setEnabled(true);
         ui->inputListLineEdit->setEnabled(true);
         ui->inputListPushButton->setEnabled(true);
+        ui->relativeImageRootLineEdit->setEnabled(false);
+        ui->relativeImageCheckbox->setEnabled(false);
+        ui->relativeImageRootPushButton->setEnabled(false);
 
         bool is_mot = (current_importer == "MOT");
         ui->annotationLineEdit->setDisabled(is_mot);
@@ -219,6 +276,9 @@ bool ImportDialog::checkOK(){
         ui->namesFilePushButton->setEnabled(true);
         ui->inputListLineEdit->setEnabled(true);
         ui->inputListPushButton->setEnabled(true);
+        ui->relativeImageRootLineEdit->setEnabled(true);
+        ui->relativeImageCheckbox->setEnabled(true);
+        ui->relativeImageRootPushButton->setEnabled(true);
         ui->annotationLineEdit->setDisabled(true);
         ui->annotationPushButton->setDisabled(true);
 

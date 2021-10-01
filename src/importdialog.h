@@ -19,19 +19,23 @@ class ImportDialog : public QDialog
 
 public:
     explicit ImportDialog(QWidget *parent = nullptr);
-    QString getImporter(){return current_importer; }
-    QString getInputFile(){return input_file; }
-    QString getNamesFile(){return names_file; }
-    QString getAnnotationFile(){return annotation_file; }
+    QString getImporter() { return current_importer; }
+    QString getInputFile() { return input_file; }
+    QString getNamesFile() { return names_file; }
+    QString getRelativePath() { return relative_root; }
+    QString getAnnotationFile() { return annotation_file; }
     bool getImportUnlabelled();
+    bool getUseRelativePaths() { return relative_image_paths; }
     ~ImportDialog();
 
- private slots:
-    void setNamesFile(QString path="");
-    void setInputFile(QString path="");
-    void setAnnotationFile(QString path="");
-    void toggleImporter(QString format="");
+private slots:
+    void setNamesFile(QString path = "");
+    void setInputFile(QString path = "");
+    void setAnnotationFile(QString path = "");
+    void toggleImporter(QString format = "");
     void setImportUnlabelled(bool res);
+    void setRelativePaths(bool res);
+    void setRelativeImagePath(QString path = "");
 
 private:
     bool checkOK();
@@ -41,8 +45,10 @@ private:
     QString input_file = "";
     QString names_file = "";
     QString annotation_file = "";
+    QString relative_root = "";
     QString current_importer = "Darknet";
     bool import_unlabelled;
+    bool relative_image_paths;
     bool checkNamesFile(QString names_file);
     void setImporter(QString format);
 };

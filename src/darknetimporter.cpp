@@ -1,7 +1,7 @@
 #include "darknetimporter.h"
 
-void DarknetImporter::import(QString image_list, QString names_file){
-
+void DarknetImporter::import(QString image_list, QString names_file, QString root_folder)
+{
     loadClasses(names_file);
 
     // Get image filenames
@@ -19,6 +19,11 @@ void DarknetImporter::import(QString image_list, QString names_file){
 
         if(progress.wasCanceled())
             break;
+
+        if (root_folder != "") {
+            image_path = QFileInfo(QDir(root_folder).absoluteFilePath(image_path))
+                             .canonicalFilePath();
+        }
 
         bboxes.append(loadLabels(image_path));
 

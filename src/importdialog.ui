@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>337</width>
-    <height>234</height>
+    <width>522</width>
+    <height>274</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,20 +16,24 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="4" column="0" colspan="2">
-      <widget class="QCheckBox" name="importLabelledCheckbox">
+     <item row="2" column="0">
+      <widget class="QLabel" name="ImagesLabel">
        <property name="text">
-        <string>Import unlabelled images</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
+        <string>Images</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="AnnotationsLabel">
+     <item row="2" column="2">
+      <widget class="QToolButton" name="inputListPushButton">
        <property name="text">
-        <string>Annotations</string>
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Relative Root</string>
        </property>
       </widget>
      </item>
@@ -50,6 +54,30 @@
        </property>
       </widget>
      </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="annotationLineEdit"/>
+     </item>
+     <item row="3" column="2">
+      <widget class="QToolButton" name="namesFilePushButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Names file</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Project Type:</string>
+       </property>
+      </widget>
+     </item>
      <item row="3" column="1">
       <widget class="QLineEdit" name="namesFileLineEdit">
        <property name="enabled">
@@ -59,9 +87,6 @@
         <string>Darknet format</string>
        </property>
       </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="annotationLineEdit"/>
      </item>
      <item row="0" column="1" colspan="2">
       <widget class="QComboBox" name="importSelectComboBox">
@@ -92,38 +117,41 @@
        </item>
       </widget>
      </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="ImagesLabel">
+     <item row="1" column="0">
+      <widget class="QLabel" name="AnnotationsLabel">
        <property name="text">
-        <string>Images</string>
+        <string>Annotations</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="2">
-      <widget class="QToolButton" name="namesFilePushButton">
+     <item row="5" column="1">
+      <widget class="QLineEdit" name="relativeImageRootLineEdit">
+       <property name="placeholderText">
+        <string>Images are relative to this path</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="0" colspan="2">
+      <widget class="QCheckBox" name="importLabelledCheckbox">
+       <property name="text">
+        <string>Import unlabelled images</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0" colspan="2">
+      <widget class="QCheckBox" name="relativeImageCheckbox">
+       <property name="text">
+        <string>Use relative image paths</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="2">
+      <widget class="QToolButton" name="relativeImageRootPushButton">
        <property name="text">
         <string>...</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>Names file</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="2">
-      <widget class="QToolButton" name="inputListPushButton">
-       <property name="text">
-        <string>...</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Project Type:</string>
        </property>
       </widget>
      </item>

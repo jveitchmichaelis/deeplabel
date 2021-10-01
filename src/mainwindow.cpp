@@ -1183,39 +1183,46 @@ void MainWindow::computeStatistics(void){
 void MainWindow::handleImportDialog(){
 
     // If we hit OK and not cancel
-    if(import_dialog->result() != QDialog::Accepted ) return;
+    if (import_dialog->result() != QDialog::Accepted)
+        return;
 
     QThread* import_thread = new QThread;
 
-    if(import_dialog->getImporter() == "Darknet"){
+    if (import_dialog->getImporter() == "Darknet") {
         DarknetImporter importer(project);
         importer.moveToThread(import_thread);
         importer.setImportUnlabelled(import_dialog->getImportUnlabelled());
-        importer.import(import_dialog->getInputFile(), import_dialog->getNamesFile());
-    }else if(import_dialog->getImporter() == "Coco"){
+
+        if (import_dialog->getUseRelativePaths()) {
+            importer.import(import_dialog->getInputFile(),
+                            import_dialog->getNamesFile(),
+                            import_dialog->getRelativePath());
+        } else {
+            importer.import(import_dialog->getInputFile(), import_dialog->getNamesFile());
+        }
+
+    } else if (import_dialog->getImporter() == "Coco") {
         CocoImporter importer(project);
         importer.moveToThread(import_thread);
         importer.setImportUnlabelled(import_dialog->getImportUnlabelled());
         importer.import(import_dialog->getAnnotationFile(), import_dialog->getInputFile());
-    }else if(import_dialog->getImporter() == "MOT"){
+    } else if (import_dialog->getImporter() == "MOT") {
         MOTImporter importer(project);
         importer.moveToThread(import_thread);
         importer.setImportUnlabelled(import_dialog->getImportUnlabelled());
         importer.loadClasses(import_dialog->getNamesFile());
         importer.import(import_dialog->getInputFile());
-    }else if(import_dialog->getImporter() == "BirdsAI"){
+    } else if (import_dialog->getImporter() == "BirdsAI") {
         BirdsAIImporter importer(project);
         importer.moveToThread(import_thread);
         importer.setImportUnlabelled(import_dialog->getImportUnlabelled());
         importer.loadClasses(import_dialog->getNamesFile());
-        importer.import(import_dialog->getInputFile(),
-                        import_dialog->getAnnotationFile());
-    }else if(import_dialog->getImporter() == "PascalVOC"){
+        importer.import(import_dialog->getInputFile(), import_dialog->getAnnotationFile());
+    } else if (import_dialog->getImporter() == "PascalVOC") {
         PascalVOCImporter importer(project);
         importer.moveToThread(import_thread);
         importer.setImportUnlabelled(import_dialog->getImportUnlabelled());
-        importer.import(import_dialog->getInputFile(),
-                        import_dialog->getAnnotationFile());
+        importer.import(import_dialog->getInputFile(), import_dialog->getAnnotationFile());
     }
 
     initDisplay();

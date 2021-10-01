@@ -11,7 +11,8 @@ public:
     explicit DarknetImporter(LabelProject *project, QObject *parent = nullptr) : BaseImporter(parent){
         this->project = project;
     }
-    void import(QString image_list, QString names_file);
+    void import(QString image_list, QString names_file, QString root_folder = "");
+
 private:
     void loadClasses(QString names_file);
     QList<BoundingBox> loadLabels(QString image);
