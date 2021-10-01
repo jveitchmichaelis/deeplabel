@@ -29,12 +29,18 @@ void CliParser::SetupOptions(){
     exportVideoDisplayNames = new QCommandLineOption("display-names", "display class names", "on, off", "on");
 
     importImages = new QCommandLineOption("images", "import image path/folder", "images");
+    importRelativePath = new QCommandLineOption("relative-path",
+                                                "relative file path (for darknet)",
+                                                "relative");
     importTFRecordMask = new QCommandLineOption("records", "mask for TF Records (* wildcard)", "images");
     importAnnotations = new QCommandLineOption("annotations", "import annotation path/folder", "annotations");
     importUnlabelledImages = new QCommandLineOption("import-unlabelled", "import images without labels");
     importOverwrite = new QCommandLineOption("overwrite", "overwrite existing databases");
 
-    detectChannels = new QCommandLineOption("detect-channels", "number of channels", "detect-channels", "3");
+    detectChannels = new QCommandLineOption("detect-channels",
+                                            "number of channels",
+                                            "detect-channels",
+                                            "3");
     detectTarget = new QCommandLineOption("detect-target", "Detection target", "CPU, CUDA", "CPU");
     detectFramework = new QCommandLineOption("detect-framework", "Detection framework", "detect-framework", "Darknet");
     detectConvertDepth = new QCommandLineOption("convert-depth", "Convert 16-bit to 8-bit");
@@ -44,7 +50,7 @@ void CliParser::SetupOptions(){
     detectConfig = new QCommandLineOption("config", "Path to model config file", "path");
     detectWeights = new QCommandLineOption("weights", "Path to model weights file", "path");
 
-    configSilence = new QCommandLineOption({"q","quiet"}, "no log messages");
+    configSilence = new QCommandLineOption({"q", "quiet"}, "no log messages");
 
     parser.addHelpOption();
     parser.addVersionOption();
@@ -73,6 +79,7 @@ void CliParser::SetupOptions(){
     parser.addOption(*exportUnlabelledImages);
     parser.addOption(*importImages);
     parser.addOption(*importAnnotations);
+    parser.addOption(*importRelativePath);
     parser.addOption(*importUnlabelledImages);
     parser.addOption(*importOverwrite);
     parser.addOption(*importTFRecordMask);
@@ -185,7 +192,13 @@ bool CliParser::handleImport(){
         DarknetImporter importer(&project);
         importer.moveToThread(import_thread);
         importer.setImportUnlabelled(import_unlabelled);
-        importer.import(parser.value("images"), parser.value("names"));
+        if (parser.isSet("relative-path")) {
+            importer.import(parser.value("images"),
+                            parser.value("names"),
+                            parser.value("relative-path"));
+        } else {
+            importer.import(parser.value("images"), parser.value("names"));
+        }
     }else if(parser.value("format") == "coco"){
 
         if(!QFileInfo(parser.value("annotations")).exists()){

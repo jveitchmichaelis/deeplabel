@@ -53,6 +53,7 @@ private:
     QCommandLineOption *importUnlabelledImages;
     QCommandLineOption *importOverwrite;
     QCommandLineOption *importTFRecordMask;
+    QCommandLineOption *importRelativePath;
 
     QCommandLineOption *detectChannels;
     QCommandLineOption *detectTarget;
