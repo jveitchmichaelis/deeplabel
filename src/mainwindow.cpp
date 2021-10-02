@@ -200,6 +200,7 @@ void MainWindow::setupDetector(void){
     detector.setFramework(detection_dialog.getFramework());
     detector.setConvertGrayscale(detection_dialog.getConvertGrayscale());
     detector.setConvertDepth(detection_dialog.getConvertDepth());
+    detector.setImageSize(detection_dialog.getWidth(), detection_dialog.getHeight());
     detector.loadNetwork(names_file, cfg_file, weight_file);
 
     ui->actionDetect_Objects->setEnabled(true);
