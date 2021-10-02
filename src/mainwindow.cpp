@@ -556,8 +556,12 @@ void MainWindow::removeImage(){
     if (QMessageBox::Yes == QMessageBox::question(this,
                                                   tr("Remove Image"),
                                                   tr("Really delete image and associated labels?"))){
+        auto previousProgressValue = ui->imageProgressBar->value();
+        auto previousSpinboxValue = ui->imageNumberSpinbox->value();
         project->removeImage(current_imagepath);
         updateImageList();
+        ui->imageProgressBar->setValue(MIN(previousProgressValue, ui->imageProgressBar->maximum()));
+        ui->imageNumberSpinbox->setValue(MIN(previousSpinboxValue, ui->imageNumberSpinbox->maximum()));
         updateDisplay();
     }
 }
