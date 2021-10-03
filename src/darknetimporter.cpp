@@ -15,14 +15,29 @@ void DarknetImporter::import(QString image_list, QString names_file, QString roo
 
     QList<QList<BoundingBox>> bboxes;
 
+    if (root_folder != "")
+        qInfo() << "Using relative pathnames, relative to: " << root_folder;
+
     for(auto &image_path : filenames){
 
         if(progress.wasCanceled())
             break;
 
         if (root_folder != "") {
-            image_path = QFileInfo(QDir(root_folder).absoluteFilePath(image_path))
-                             .canonicalFilePath();
+            auto abs_path = QDir(root_folder).absoluteFilePath(image_path);
+
+            if (!QFileInfo(abs_path).exists()) {
+                qWarning() << "Image: " << abs_path << " doesn't exist. Check your root folder.";
+                continue;
+            } else {
+                image_path = QFileInfo(abs_path).canonicalFilePath();
+            }
+        } else {
+            if (QFileInfo(image_path).isRelative()) {
+                qWarning() << "Relative image path: " << image_path
+                           << " provided, but no root folder specified";
+                continue;
+            }
         }
 
         bboxes.append(loadLabels(image_path));
