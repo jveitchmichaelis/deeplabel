@@ -47,9 +47,9 @@ public:
     bool addLabel(QString fileName, QList<BoundingBox> bbox);
     bool getLabels(QString fileName, QList<BoundingBox> &bboxes);
     bool getLabels(int imageId, QList<BoundingBox> &bboxes);
-    bool removeLabel(QString fileName, BoundingBox bbox);
+    bool removeLabel(QString fileName, int labelID);
     bool removeLabels(QString fileName);
-    bool updateLabel(QString fileName, BoundingBox bbox);
+    bool updateLabel(QString fileName, int labelID, BoundingBox new_bbox);
 
     bool setOccluded(QString fileName, BoundingBox bbox, int occluded);
 
@@ -68,7 +68,7 @@ public:
 
 signals:
     void finished();
-
+    bool labelUpdated(BoundingBox selected_bbox, BoundingBox new_bbox);
     void video_split_finished(QString);
     void load_finished();
     void load_progress(int);

@@ -501,7 +501,7 @@ void MainWindow::addLabel(BoundingBox bbox){
 }
 
 void MainWindow::removeLabel(BoundingBox bbox){
-    project->removeLabel(current_imagepath, bbox);
+    project->removeLabel(current_imagepath, bbox.label_id);
     updateLabels();
 }
 
@@ -546,10 +546,9 @@ void MainWindow::removeImageLabelsForward(){
     }
 }
 
-void MainWindow::updateLabel(BoundingBox old_bbox, BoundingBox new_bbox){
-
-    project->removeLabel(current_imagepath, old_bbox);
-    project->addLabel(current_imagepath, new_bbox);
+void MainWindow::updateLabel(BoundingBox old_bbox, BoundingBox new_bbox)
+{
+    project->updateLabel(current_imagepath, old_bbox.label_id, new_bbox);
     updateLabels();
 }
 

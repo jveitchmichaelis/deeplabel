@@ -1,8 +1,24 @@
 #ifndef BOUNDINGBOX_H
 #define BOUNDINGBOX_H
 
-#include<QString>
-#include<QRect>
+#include <QRect>
+#include <QString>
+
+enum SelectedEdge {
+    EDGE_LEFT,
+    EDGE_TOP,
+    EDGE_RIGHT,
+    EDGE_BOTTOM,
+    EDGE_NONE,
+};
+
+enum SelectedCorner {
+    CORNER_TOPLEFT,
+    CORNER_TOPRIGHT,
+    CORNER_BOTTOMLEFT,
+    CORNER_BOTTOMRIGHT,
+    CORNER_NONE,
+};
 
 struct BoundingBox{
     QRect rect = QRect(0,0,0,0);
@@ -11,6 +27,14 @@ struct BoundingBox{
     bool truncated = false;
     int classid = 0;
     double confidence = 0;
+
+    // Drawing helpers
+    bool is_selected = false;
+    SelectedEdge selected_edge = EDGE_NONE;
+    SelectedCorner selected_corner = CORNER_NONE;
+
+    // ID
+    int label_id = -1;
 };
 
 inline QString printBoundingBox(BoundingBox box){

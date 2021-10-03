@@ -512,7 +512,7 @@ bool LabelProject::getLabels(int image_id, QList<BoundingBox> &bboxes){
             auto db = getDatabase();
             QSqlQuery query(db);
 
-            query.prepare("SELECT name, x, y, width, height FROM labels"
+            query.prepare("SELECT label_id, name, x, y, width, height FROM labels"
                           " INNER JOIN classes ON labels.class_id = classes.class_id"
                           " WHERE image_id = ?");
             query.addBindValue(image_id);
@@ -526,6 +526,7 @@ bool LabelProject::getLabels(int image_id, QList<BoundingBox> &bboxes){
                 BoundingBox new_bbox;
                 auto rec = query.record();
 
+                new_bbox.label_id = rec.value(rec.indexOf("label_id")).toInt();
                 new_bbox.classname = rec.value(rec.indexOf("name")).toString();
                 new_bbox.classid = getClassId(new_bbox.classname);
 
@@ -534,7 +535,8 @@ bool LabelProject::getLabels(int image_id, QList<BoundingBox> &bboxes){
                 new_bbox.rect.setWidth(rec.value(rec.indexOf("width")).toInt());
                 new_bbox.rect.setHeight(rec.value(rec.indexOf("height")).toInt());
 
-                if(new_bbox.rect.width()*new_bbox.rect.height() <= 0){
+                if (new_bbox.rect.width() * new_bbox.rect.height() <= 0) {
+                    qWarning() << "Zero size bounding box found in database";
                     continue;
                 }
 
@@ -574,29 +576,25 @@ bool LabelProject::removeLabels(QString fileName){
     return res;
 }
 
-bool LabelProject::removeLabel(QString fileName, BoundingBox bbox){
+bool LabelProject::removeLabel(QString fileName, int label_id)
+{
     /*!
      * Remove a label given an absolute path  (\a fileName) and the bounding box  (\a bbox). Returns false
      * if the query failed.
      */
     int image_id = getImageId(fileName);
-    int class_id = getClassId(bbox.classname);
 
     bool res = false;
 
-    if(image_id > 0 && class_id > 0){
+    if (image_id > 0) {
         {
             auto db = getDatabase();
             QSqlQuery query(db);
 
-            query.prepare("DELETE FROM labels WHERE (image_id = :image_id AND class_id = :class_id"
-                          " AND x = :x AND y = :y AND width = :width AND height = :height)");
+            query.prepare(
+                "DELETE FROM labels WHERE (image_id = :image_id AND label_id = :label_id)");
             query.bindValue(":image_id", image_id);
-            query.bindValue(":class_id", class_id);
-            query.bindValue(":x", bbox.rect.x());
-            query.bindValue(":y", bbox.rect.y());
-            query.bindValue(":width", bbox.rect.width());
-            query.bindValue(":height", bbox.rect.height());
+            query.bindValue(":label_id", label_id);
 
             res = query.exec();
 
@@ -604,7 +602,6 @@ bool LabelProject::removeLabel(QString fileName, BoundingBox bbox){
                 qCritical() << "Error: " << query.lastError();
             }
         }
-
     }
 
     return res;
@@ -769,6 +766,54 @@ bool LabelProject::removeImage(QString fileName){
     return res;
 }
 
+bool LabelProject::updateLabel(QString fileName, int labelID, BoundingBox new_bbox)
+{
+    /*!
+     * Update a label given an absolute path (\a fileName), the old label ID (\a labelID) 
+     * and a new bounding box (\a new_bbox). Returns false if the query failed.
+     */
+
+    QMutexLocker locker(&mutex);
+
+    bool res = false;
+
+    int image_id = getImageId(fileName);
+
+    {
+        auto db = getDatabase();
+        db.transaction();
+
+        if (labelID > 0 && image_id > 0 && new_bbox.label_id > 0
+            && new_bbox.rect.width() * new_bbox.rect.height() > 0) {
+            QSqlQuery query(db);
+
+            query.prepare("UPDATE labels SET  width = (:width),"
+                          " height = (:height), "
+                          " class_id = (:class_id), "
+                          " x = (:x), "
+                          " y = (:y) "
+                          " WHERE labels.label_id = (:label_id)");
+
+            query.bindValue(":class_id", new_bbox.classid);
+            query.bindValue(":x", new_bbox.rect.x());
+            query.bindValue(":y", new_bbox.rect.y());
+            query.bindValue(":width", new_bbox.rect.width());
+            query.bindValue(":height", new_bbox.rect.height());
+            query.bindValue(":label_id", labelID);
+
+            res = query.exec();
+
+            if (!res) {
+                qCritical() << "Error updating label: " << query.lastError();
+            }
+        }
+
+        db.commit();
+
+        return res;
+    }
+}
+
 bool LabelProject::addLabel(QString fileName, BoundingBox bbox)
 {
     /*!
@@ -783,13 +828,13 @@ bool LabelProject::addLabel(QString fileName, BoundingBox bbox)
     int image_id = getImageId(fileName);
     int class_id = -1;
 
-    if(bbox.classname != ""){
+    if (bbox.classname != "") {
         class_id = getClassId(bbox.classname);
-    }else if(bbox.classid > 0){
+    } else if (bbox.classid > 0) {
         class_id = bbox.classid;
     }
 
-    if(image_id > 0 && class_id > 0 && bbox.rect.width()*bbox.rect.height() > 0){
+    if (image_id > 0 && class_id > 0 && bbox.rect.width() * bbox.rect.height() > 0) {
         {
             auto db = getDatabase();
             QSqlQuery query(db);
@@ -804,7 +849,7 @@ bool LabelProject::addLabel(QString fileName, BoundingBox bbox)
             query.bindValue(":height", bbox.rect.height());
             res = query.exec();
 
-            if(!res){
+            if (!res) {
                 qCritical() << "Error: " << query.lastError();
             }
         }
@@ -831,16 +876,14 @@ bool LabelProject::addLabel(QString fileName, QList<BoundingBox> bboxes)
         auto db = getDatabase();
         db.transaction();
 
-        for(auto bbox : bboxes){
-
-            if(bbox.classname != ""){
+        for (auto bbox : bboxes) {
+            if (bbox.classname != "") {
                 class_id = getClassId(bbox.classname);
-            }else if(bbox.classid > 0){
+            } else if (bbox.classid > 0) {
                 class_id = bbox.classid;
             }
 
-            if(image_id > 0 && class_id > 0 && bbox.rect.width()*bbox.rect.height() > 0){
-
+            if (image_id > 0 && class_id > 0 && bbox.rect.width() * bbox.rect.height() > 0) {
                 QSqlQuery query(db);
 
                 query.prepare("INSERT INTO labels (image_id, class_id, x, y, width, height)"
@@ -853,45 +896,50 @@ bool LabelProject::addLabel(QString fileName, QList<BoundingBox> bboxes)
                 query.bindValue(":height", bbox.rect.height());
                 res = query.exec();
 
-                if(!res){
+                if (!res) {
                     qCritical() << "Error: " << query.lastError();
                 }
             }
         }
 
         db.commit();
-
     }
-
 
     return res;
 }
 
-
-int LabelProject::addImageFolder(QString path){
+int LabelProject::addImageFolder(QString path)
+{
     /*!
      * Add all images in a folder given an absolute \a path to the directory. Returns the number of images successfully added.
      */
     QDir dir(path);
     int number_added = 0;
 
-    if(dir.exists()){
+    if (dir.exists()) {
         QStringList filters;
-        filters << "*.png" << "*.jpg" << "*.jpeg" << "*.bmp" << "*.tiff";
-        auto image_list = dir.entryInfoList(filters, QDir::Files|QDir::NoDotAndDotDot);
+        filters << "*.png"
+                << "*.jpg"
+                << "*.jpeg"
+                << "*.bmp"
+                << "*.tiff";
+        auto image_list = dir.entryInfoList(filters, QDir::Files | QDir::NoDotAndDotDot);
 
         QFileInfo image_info;
 
         QSqlDatabase::database().transaction();
 
-        QProgressDialog progress("...", "Abort", 0, image_list.size(), static_cast<QWidget*>(parent()));
+        QProgressDialog progress("...",
+                                 "Abort",
+                                 0,
+                                 image_list.size(),
+                                 static_cast<QWidget *>(parent()));
         progress.setWindowModality(Qt::WindowModal);
         progress.setWindowTitle("Loading images");
-        int i=0;
+        int i = 0;
 
-        foreach(image_info, image_list){
-
-            if(progress.wasCanceled()){
+        foreach (image_info, image_list) {
+            if (progress.wasCanceled()) {
                 break;
             }
 
@@ -899,17 +947,16 @@ int LabelProject::addImageFolder(QString path){
 
             bool res = addAsset(image_path);
 
-            if(res){
+            if (res) {
                 number_added++;
                 qDebug() << "Added image: " << image_path;
-            }else{
+            } else {
                 qCritical() << "Failed to add image: " << image_path;
             }
 
             progress.setValue(i++);
             progress.setLabelText(image_path);
             QApplication::processEvents();
-
         }
         QSqlDatabase::database().commit();
     }
@@ -917,24 +964,23 @@ int LabelProject::addImageFolder(QString path){
     emit load_finished();
 
     return number_added;
-
 }
 
-bool LabelProject::addLabelledAssets(QList<QString> images, QList<QList<BoundingBox>> bboxes){
-    if(images.size() != bboxes.size())
+bool LabelProject::addLabelledAssets(QList<QString> images, QList<QList<BoundingBox>> bboxes)
+{
+    if (images.size() != bboxes.size())
         return false;
 
-    QProgressDialog progress("...", "Abort", 0, images.size(), static_cast<QWidget*>(parent()));
+    QProgressDialog progress("...", "Abort", 0, images.size(), static_cast<QWidget *>(parent()));
     progress.setWindowModality(Qt::WindowModal);
     progress.setWindowTitle("Loading into database");
 
-    for(int i=0; i < images.size(); ++i){
-
-        if(progress.wasCanceled())
+    for (int i = 0; i < images.size(); ++i) {
+        if (progress.wasCanceled())
             break;
 
         auto image = images[i];
-        if(addAsset(image)){
+        if (addAsset(image)) {
             addLabel(image, bboxes[i]);
         }
 
@@ -956,7 +1002,7 @@ bool LabelProject::addClass(QString className)
     // Make sure we strip any extraneous characters
     className = className.simplified();
 
-    if(classInDB(className)){
+    if (classInDB(className)) {
         qWarning() << "Class " << className << "exists!";
         return true;
     }
@@ -969,8 +1015,7 @@ bool LabelProject::addClass(QString className)
         query.bindValue(":name", className);
         res = query.exec();
 
-
-        if(!res){
+        if (!res) {
             qCritical() << "Error: " << query.lastError();
         }
     }
@@ -978,7 +1023,8 @@ bool LabelProject::addClass(QString className)
     return res;
 }
 
-QSqlDatabase LabelProject::getDatabase(){
+QSqlDatabase LabelProject::getDatabase()
+{
     return QSqlDatabase::database(connection_name);
 }
 
