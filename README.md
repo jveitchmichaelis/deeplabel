@@ -225,10 +225,18 @@ On Mac, Homebrew automatically include pkg-config support and the contrib packag
 
 **Linux**
 
+[See Github Action for representative build instructions.](https://github.com/jveitchmichaelis/deeplabel/blob/master/.github/workflows/build_ubuntu.yml)
+
 Build opencv using your preferred method (e.g. above). You need Qt5 installed - not just Qt Creator.
 
 ```
-sudo apt install git build-essential qt5-default libprotobuf-dev
+sudo apt install git build-essential qt5-default libprotobuf-dev protobuf-compiler
+```
+
+Proto files are already compiled within the `src/proto` folder, but if you need to, you can compile with:
+
+```
+protoc --proto_path ./src/proto --cpp_out ./src/proto feature.proto example.proto 
 ```
 
 Clone the repository, then:
@@ -237,12 +245,6 @@ Clone the repository, then:
 git submodule update --init --recursive
 qmake -makefile -o Makefile DeepLabel.pro
 make -j4
-```
-
-Proto files are already compiled within the `src/proto` folder, but if you need to, you can compile with:
-
-```
-protoc --proto_path ./src/proto --cpp_out ./src/proto feature.proto example.proto 
 ```
 
 **Mac**
